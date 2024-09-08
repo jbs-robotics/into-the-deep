@@ -21,10 +21,12 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 public class Claw {
-    private Servo claw;
+    private Servo leftCaw, rightClaw; // declare the claw servos
 
     public Claw(HardwareMap hardwareMap){
-        claw = hardwareMap.get(Servo.class, "claw");
+        // instantiate the servos from the hardwareMap
+        leftCaw = hardwareMap.get(Servo.class, "claw");
+        rightClaw = hardwareMap.get(Servo.class, "claw");
     }
 
     public Action closeClaw(){
@@ -35,7 +37,8 @@ public class Claw {
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
             if(!initialized) {
-                claw.setPosition(0.0);
+                leftCaw.setPosition(0.0);
+                rightClaw.setPosition(0.0);
                 initialized = true;
             }
             return false;
@@ -50,7 +53,8 @@ public class Claw {
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
             if(!initialized) {
-                claw.setPosition(1.0);
+                leftCaw.setPosition(1.0);
+                rightClaw.setPosition(1.0);
                 initialized = true;
             }
             return false;

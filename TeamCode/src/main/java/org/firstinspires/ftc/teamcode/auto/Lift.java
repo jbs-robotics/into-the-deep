@@ -27,6 +27,30 @@ public class Lift {
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lift.setDirection(DcMotorSimple.Direction.FORWARD);
     }
+
+    public Action liftDown() {
+        return new LiftDown();
+    }
+    public class LiftDown implements Action {
+        private boolean initialized = false;
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if(!initialized) {
+                lift.setPower(-0.8);
+                initialized = true;
+            }
+            if(lift.getCurrentPosition() < 0.0){
+                return true; // returning true causes the action to rerunning
+            }
+            else{
+                lift.setPower(0);
+                return false; // returning false stops the action from rerunning
+            }
+
+            // this will set the lift motor power to -0.8 until it reaches a position of 0, then it will turn off.
+        }
+    }
+
     public Action liftUp() {
         return new LiftUp();
     }

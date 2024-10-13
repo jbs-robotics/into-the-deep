@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.robotcontroller.external.samples;
+package org.firstinspires.ftc.teamcode.auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -65,7 +65,6 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  */
 @TeleOp(name = "Concept: AprilTag Localization", group = "Concept")
-@Disabled
 public class ConceptAprilTagLocalization extends LinearOpMode {
 
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
@@ -120,7 +119,7 @@ public class ConceptAprilTagLocalization extends LinearOpMode {
         telemetry.update();
         waitForStart();
 
-        visionPortal.resumeStreaming();
+//        visionPortal.resumeStreaming();
         while (opModeIsActive()) {
 
             telemetryAprilTag();
@@ -129,11 +128,11 @@ public class ConceptAprilTagLocalization extends LinearOpMode {
             telemetry.update();
 
             // Save CPU resources; can resume streaming when needed.
-//            if (gamepad1.dpad_down) {
-//                visionPortal.stopStreaming();
-//            } else if (gamepad1.dpad_up) {
-//                visionPortal.resumeStreaming();
-//            }
+            if (gamepad1.dpad_down) {
+                visionPortal.stopStreaming();
+            } else if (gamepad1.dpad_up) {
+                visionPortal.resumeStreaming();
+            }
 
             // Share the CPU.
             sleep(20);

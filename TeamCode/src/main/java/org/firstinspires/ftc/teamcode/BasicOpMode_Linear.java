@@ -35,7 +35,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.ftc.Actions;
 
 /*
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
@@ -112,8 +117,8 @@ public class BasicOpMode_Linear extends LinearOpMode {
             else if (driveSnipeOff) driveSensitivity = 1;
 
             // Show the elapsed game time and wheel power.
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Motors", "lf (%.2f), rf (%.2f), lb (%.2f), rb(%.2f)", leftFront, rightFront, leftBack, rightBack);
+//            telemetry.addData("Status", "Run Time: " + runtime.toString());
+//            telemetry.addData("Motors", "lf (%.2f), rf (%.2f), lb (%.2f), rb(%.2f)", leftFront, rightFront, leftBack, rightBack);
             telemetry.update();
         }
     }

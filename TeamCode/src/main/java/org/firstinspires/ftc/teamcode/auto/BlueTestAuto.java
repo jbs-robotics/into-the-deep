@@ -22,7 +22,7 @@ public class BlueTestAuto extends LinearOpMode {
     private OpenCvWebcam webcam;
     @Override
     public void runOpMode() throws InterruptedException {
-//       f
+
 
         // instantiate MecanumDrive at starting position
         MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(38, 60.0, Math.toRadians(180)));
@@ -36,6 +36,7 @@ public class BlueTestAuto extends LinearOpMode {
         Action trajectory1;
         // actionBuilder builds from the drive steps passed to it,
         // and .build(); is needed to build the trajectory
+
         trajectory1 = drive.actionBuilder(drive.pose)
                 .lineToYSplineHeading(33, Math.toRadians(0))
                 .waitSeconds(2)
@@ -48,6 +49,7 @@ public class BlueTestAuto extends LinearOpMode {
                 .lineToX(47.5)
                 .waitSeconds(3)
                 .build();
+
 
         Action trajectory2 = drive.actionBuilder(drive.pose)
                 .build();

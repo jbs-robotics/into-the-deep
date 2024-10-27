@@ -114,6 +114,8 @@ public class MeepMeepTesting {
                                 .splineToSplineHeading(new Pose2d(36, 25, Math.toRadians(0)), Math.toRadians(-90))
 
                                 //intake sample
+
+                                //this goes to the basket
                                 .setTangent(Math.toRadians(90))
                                 .splineToLinearHeading(new Pose2d(56, 56, Math.toRadians(45)), Math.toRadians(45))
 
@@ -123,6 +125,8 @@ public class MeepMeepTesting {
                                 .splineToLinearHeading(new Pose2d(50, 25, Math.toRadians(0)), Math.toRadians(0))
 
                                 //intake sample
+
+                                //this goes to the basket
                                 .setTangent(Math.toRadians(180))
                                 .splineToLinearHeading(new Pose2d(56, 56, Math.toRadians(45)), Math.toRadians(45))
 
@@ -130,13 +134,17 @@ public class MeepMeepTesting {
                                 .back(10)
                                 .setTangent(Math.toRadians(-135))
                                 .splineToLinearHeading(new Pose2d(60, 25, Math.toRadians(0)), Math.toRadians(0))
+
                                 //intake sample
 
+                                //this goes to the basket
                                 .back(10)
                                 .setTangent(Math.toRadians(180))
                                 .splineToLinearHeading(new Pose2d(56, 56, Math.toRadians(45)), Math.toRadians(45))
 
                                 //score
+
+
                                 .setTangent(Math.toRadians(180))
                                 .splineToLinearHeading(new Pose2d(-60, 60, Math.toRadians(-90)), Math.toRadians(170))
                                 .build()

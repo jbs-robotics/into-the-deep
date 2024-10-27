@@ -13,13 +13,17 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Outtake {
-    private DcMotorEx slide;
+    private DcMotorEx slideLeft, slideRight;
     private Servo claw;
     public Outtake(HardwareMap hardwareMap){
-        slide = hardwareMap.get(DcMotorEx.class, "outtakeSlide");
+        slideLeft = hardwareMap.get(DcMotorEx.class, "OSL");
+        slideRight = hardwareMap.get(DcMotorEx.class, "OSR");
 
-        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        slide.setDirection(DcMotorSimple.Direction.FORWARD);
+        slideLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        slideRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        slideLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        slideRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
         claw = hardwareMap.get(Servo.class, "outtakeClaw");
 
@@ -52,14 +56,16 @@ public class Outtake {
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
             if(!initialized){
-                slide.setPower(0.8);
+                slideLeft.setPower(0.8);
+                slideRight.setPower(0.8);
                 initialized = true;
             }
-            if(slide.getCurrentPosition() < 3000.0){
+            if(slideLeft.getCurrentPosition() < 3000.0){
                 return true;
             }
             else{
-                slide.setPower(0);
+                slideLeft.setPower(0);
+                slideRight.setPower(0);
                 return false;
             }
 
@@ -75,14 +81,16 @@ public class Outtake {
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
             if(!initialized) {
-                slide.setPower(0.8);
+                slideLeft.setPower(-0.8);
+                slideRight.setPower(-0.8);
                 initialized = true;
             }
-            if(slide.getCurrentPosition() > 0){
+            if(slideLeft.getCurrentPosition() > 0){
                 return true; // returning true causes the action to rerunning
             }
             else{
-                slide.setPower(0);
+                slideLeft.setPower(0);
+                slideRight.setPower(0);
                 return false; // returning false stops the action from rerunning
             }
 

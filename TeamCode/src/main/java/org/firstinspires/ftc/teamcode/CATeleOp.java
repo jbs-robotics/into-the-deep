@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import android.annotation.SuppressLint;
+import android.util.Size;
 
 import com.acmerobotics.roadrunner.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -48,6 +49,7 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 
 // April Tag Imports
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
@@ -90,6 +92,7 @@ public class CATeleOp extends LinearOpMode {
     private Outtake outtake;
     private Intake intake;
 
+    private VisionPortal visionPortal;
     private AprilTagProcessor aprilTag;
     private Position cameraPosition = new Position(DistanceUnit.INCH, 0, 0, 0, 0);
     private YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 0, -90, 0, 0);
@@ -162,6 +165,12 @@ public class CATeleOp extends LinearOpMode {
                 .setTagLibrary(AprilTagGameDatabase.getIntoTheDeepTagLibrary())
                 .setCameraPose(cameraPosition, cameraOrientation)
                 .build();
+        visionPortal = new VisionPortal.Builder()
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .setCameraResolution(new Size(640, 480))
+                .enableLiveView(true) // TODO: TURN OFF FOR ACTUAL COMPETITION
+                .addProcessor(aprilTag)
+                .build();
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
     }
 
@@ -180,8 +189,8 @@ public class CATeleOp extends LinearOpMode {
                 .build();
 
         Action blue1 = drive.actionBuilder(drive.pose)
-                .lineToX(48) // TODO: FIGURE OUT THE ACTUAL NUMBERS
-                .lineToY(48) // TODO: FIGURE OUT THE ACTUAL NUMBERS
+                .lineToX(48)
+                .lineToY(48)
                 .turnTo(-90)
                 .build();
         Action blue2 = drive.actionBuilder(drive.pose)
@@ -194,50 +203,69 @@ public class CATeleOp extends LinearOpMode {
         telemetry.addData("# AprilTags Detected", currentDetections.size());
 
         if(!currentDetections.isEmpty()){
-            for(AprilTagDetection detection : currentDetections){
-                if (detection.metadata != null) {
-                    x = detection.robotPose.getPosition().x;
-                    y = detection.robotPose.getPosition().y;
-//                    z = detection.robotPose.getPosition().z;
-//                    pitch = detection.robotPose.getOrientation().getPitch(AngleUnit.DEGREES);
-//                    roll = detection.robotPose.getOrientation().getRoll(AngleUnit.DEGREES);
-                    yaw = detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES);
-
-                    drive.pose = new Pose2d(x, y, yaw);
-                    if(detection.id == 16){
-                        // the red side
+            AprilTagDetection detection = currentDetections.get(0);
+//            for(AprilTagDetection detection : currentDetections){
+            if (detection.metadata != null) {
+                x = detection.robotPose.getPosition().x;
+                y = detection.robotPose.getPosition().y;
+//                   z = detection.robotPose.getPosition().z;
+//                   pitch = detection.robotPose.getOrientation().getPitch(AngleUnit.DEGREES);
+//                   roll = detection.robotPose.getOrientation().getRoll(AngleUnit.DEGREES);
+                yaw = detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES);
+                drive.pose = new Pose2d(x, y, yaw);
+                switch(detection.id){
+                    case 16:
+                        //red side basket
                         Actions.runBlocking(new SequentialAction(
                                 red1,
                                 red2,
                                 outtake.slideOut(),
                                 outtake.clawOpen()
                         ));
-                    }
-                    else if (detection.id == 13){
-                        // the blue side
+                        break;
+                    case 13:
                         Actions.runBlocking(new SequentialAction(
                                 blue1,
                                 blue2,
                                 outtake.slideOut(),
                                 outtake.clawOpen()
                         ));
-                    }
-
-
-//                    telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
-//                    telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)",
-//                            detection.robotPose.getPosition().x,
-//                            detection.robotPose.getPosition().y,
-//                            detection.robotPose.getPosition().z));
-//                    telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)",
-//                            detection.robotPose.getOrientation().getPitch(AngleUnit.DEGREES),
-//                            detection.robotPose.getOrientation().getRoll(AngleUnit.DEGREES),
-//                            detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES)));
-                } else {
-//                    telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
-//                    telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
+                        break;
+                    default:
+                        break;
                 }
+//                if(detection.id == 16){
+//                    // the red side
+//                    Actions.runBlocking(new SequentialAction(
+//                            red1,
+//                            red2,
+//                            outtake.slideOut(),
+//                            outtake.clawOpen()
+//                    ));
+//                }
+//                else if (detection.id == 13){
+//                    // the blue side
+//                    Actions.runBlocking(new SequentialAction(
+//                            blue1,
+//                            blue2,
+//                            outtake.slideOut(),
+//                            outtake.clawOpen()
+//                    ));
+//                }
+//                   telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
+//                   telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)",
+//                           detection.robotPose.getPosition().x,
+//                           detection.robotPose.getPosition().y,
+//                           detection.robotPose.getPosition().z));
+//                   telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)",
+//                           detection.robotPose.getOrientation().getPitch(AngleUnit.DEGREES),
+//                           detection.robotPose.getOrientation().getRoll(AngleUnit.DEGREES),
+//                           detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES)));
+            } else {
+//                   telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
+//                   telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
             }
+//            }
         }
     }
 

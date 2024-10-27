@@ -64,7 +64,7 @@ public class OpenCVTest extends LinearOpMode {
         VisionPortal portal = new VisionPortal.Builder()
 //                .addProcessor(colorLocator)
                 .addProcessor(aprilTag)
-                .setCameraResolution(new Size(320, 240))
+                .setCameraResolution(new Size(640, 480))
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .build();
 

@@ -25,7 +25,7 @@ public class BlueTestAuto extends LinearOpMode {
 //       f
 
         // instantiate MecanumDrive at starting position
-        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(11.8, 61.7, Math.toRadians(180)));
+        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(38, 60.0, Math.toRadians(180)));
 
         Claw claw = new Claw(hardwareMap);
 

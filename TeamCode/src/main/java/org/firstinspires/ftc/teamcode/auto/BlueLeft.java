@@ -4,8 +4,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -14,8 +12,8 @@ import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 @Config
-@Autonomous(name = "RED_LEFT", group = "Autonomous")
-public class RedLeft extends LinearOpMode {
+@Autonomous(name = "BLUE_LEFT", group = "Autonomous")
+public class BlueLeft extends LinearOpMode {
     private OpenCvWebcam webcam;
     private MecanumDrive drive;
     private Claw claw;
@@ -53,7 +51,7 @@ public class RedLeft extends LinearOpMode {
 
         
         // instantiate MecanumDrive at starting position
-        drive = new MecanumDrive(hardwareMap, new Pose2d(-24, -60.0, Math.toRadians(90)));
+        drive = new MecanumDrive(hardwareMap, new Pose2d(-24, 60.0, Math.toRadians(-90)));
 
         claw = new Claw(hardwareMap);
 
@@ -66,6 +64,8 @@ public class RedLeft extends LinearOpMode {
         // and .build(); is needed to build the trajectory
 
         trajectory1 = drive.actionBuilder(drive.pose)
+                //go to the basket
+                .setTangent(Math.toRadians(-45))
                 .splineToLinearHeading(new Pose2d(56, 56, Math.toRadians(45)), Math.toRadians(45))
 
                 //score here
@@ -74,8 +74,8 @@ public class RedLeft extends LinearOpMode {
                 .stopAndAdd(outtakeOff())
 
                 //go to the 1st sample
-                .lineToX(-47)
-                .lineToY(-47)
+                .lineToX(47)
+                .lineToY(47)
                 .splineToSplineHeading(new Pose2d(36, 25, Math.toRadians(0)), Math.toRadians(-90))
 
                 //intake sample
@@ -85,7 +85,7 @@ public class RedLeft extends LinearOpMode {
 
                 //go to the basket
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(56, 56, Math.toRadians(45)), Math.toRadians(45))
+                .splineToLinearHeading(new Pose2d(50, 25, Math.toRadians(0)), Math.toRadians(0))
 
                 //score here
                 .stopAndAdd(outtakeOn())
@@ -93,8 +93,8 @@ public class RedLeft extends LinearOpMode {
                 .stopAndAdd(outtakeOff())
 
                 //go to the 2nd sample
-                .lineToX(-47)
-                .lineToY(-47)
+                .lineToX(47)
+                .lineToY(47)
                 .setTangent(Math.toRadians(-135))
                 .splineToLinearHeading(new Pose2d(50, 25, Math.toRadians(0)), Math.toRadians(0))
 
@@ -113,8 +113,8 @@ public class RedLeft extends LinearOpMode {
                 .stopAndAdd(outtakeOff())
 
                 //go to the 3rd sample
-                .lineToX(-47)
-                .lineToY(-47)
+                .lineToX(47)
+                .lineToY(47)
                 .setTangent(Math.toRadians(-135))
                 .splineToLinearHeading(new Pose2d(60, 25, Math.toRadians(0)), Math.toRadians(0))
 
@@ -133,8 +133,8 @@ public class RedLeft extends LinearOpMode {
                 .stopAndAdd(outtakeOff())
 
                 //go to the parking zone
-                .lineToX(-47.0)
-                .lineToY(-47)
+                .lineToX(47.0)
+                .lineToY(47)
                 .setTangent(Math.toRadians(180))
                 .splineToLinearHeading(new Pose2d(-60, -60, Math.toRadians(-90)), Math.toRadians(170))
 

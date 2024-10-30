@@ -71,7 +71,8 @@ public class MeepMeepTesting {
                                 .setTangent(Math.toRadians(135))
                                 .splineToLinearHeading(new Pose2d(-56, -56, Math.toRadians(-135)), Math.toRadians(-135))
                                 //score here
-                                .back(10)
+                                .setTangent(Math.toRadians(45))
+                                .splineTo(new Vector2d(-47, -47), Math.toRadians(45))
                                 .setTangent(Math.toRadians(45))
                                 .splineToSplineHeading(new Pose2d(-35, -24, Math.toRadians(180)), Math.toRadians(90))
 
@@ -80,7 +81,8 @@ public class MeepMeepTesting {
                                 .splineToLinearHeading(new Pose2d(-56, -56, Math.toRadians(-135)), Math.toRadians(-135))
 
                                 //score
-                                .back(10)
+                                .setTangent(Math.toRadians(45))
+                                .splineTo(new Vector2d(-47, -47), Math.toRadians(45))
                                 .setTangent(Math.toRadians(45))
                                 .splineToLinearHeading(new Pose2d(-50, -24, Math.toRadians(180)), Math.toRadians(180))
 
@@ -89,7 +91,8 @@ public class MeepMeepTesting {
                                 .splineToLinearHeading(new Pose2d(-56, -56, Math.toRadians(-135)), Math.toRadians(-135))
 
                                 //score
-                                .back(10)
+                                .setTangent(Math.toRadians(45))
+                                .splineTo(new Vector2d(-47, -47), Math.toRadians(45))
                                 .setTangent(Math.toRadians(45))
                                 .splineToLinearHeading(new Pose2d(-60, -24, Math.toRadians(180)), Math.toRadians(180))
 
@@ -157,10 +160,14 @@ public class MeepMeepTesting {
                                 .setTangent(Math.toRadians(-45))
                                 .splineToLinearHeading(new Pose2d(56, 56, Math.toRadians(45)), Math.toRadians(45))
                                 //score here
+
+
                                 .back(10)
                                 .splineToSplineHeading(new Pose2d(36, 25, Math.toRadians(0)), Math.toRadians(-90))
 
                                 //intake sample
+
+
                                 .setTangent(Math.toRadians(90))
                                 .splineToLinearHeading(new Pose2d(56, 56, Math.toRadians(45)), Math.toRadians(45))
 

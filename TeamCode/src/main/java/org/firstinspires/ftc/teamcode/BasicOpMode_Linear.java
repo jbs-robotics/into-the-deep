@@ -63,7 +63,7 @@ public class BasicOpMode_Linear extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
     //Mecanum Drive Motors
-    private DcMotor leftFront, leftBack, rightFront, rightBack;
+    private DcMotor leftFront, leftBack, rightFront, rightBack, intakeSlideLeft, intakeSlideRight;
     private double driveSensitivity = 1;
 
     @Override
@@ -78,15 +78,21 @@ public class BasicOpMode_Linear extends LinearOpMode {
         leftBack  = hardwareMap.get(DcMotor.class, "leftBack");
         rightFront  = hardwareMap.get(DcMotor.class, "rightFront");
         rightBack  = hardwareMap.get(DcMotor.class, "rightBack");
+        intakeSlideLeft = hardwareMap.get(DcMotor.class, "ISL");
+        intakeSlideRight = hardwareMap.get(DcMotor.class, "ISR");
+
 
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
         leftFront.setDirection(DcMotor.Direction.REVERSE);
-        rightFront.setDirection(DcMotor.Direction.FORWARD);
+        rightFront.setDirection(DcMotor.Direction.REVERSE);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
-        rightBack.setDirection(DcMotor.Direction.FORWARD);
+        rightBack.setDirection(DcMotor.Direction.REVERSE);
+
+        intakeSlideLeft.setDirection(DcMotor.Direction.FORWARD);
+        intakeSlideRight.setDirection(DcMotor.Direction.REVERSE);
 
         // Wait for the game to start (driver presses START)
         waitForStart();
@@ -98,20 +104,24 @@ public class BasicOpMode_Linear extends LinearOpMode {
             double drive = -gamepad1.left_stick_y;
             double turn  =  gamepad1.right_stick_x;
             double strafe = gamepad1.left_stick_x;
+
+            double intakeSlidePower = gamepad2.left_stick_x;
             boolean driveSnipeOn = gamepad1.left_bumper;
             boolean driveSnipeOff = gamepad1.right_bumper;
 
             //gamepad 1(drivebase control)
             double lfPower = Range.clip(drive + turn + strafe, -driveSensitivity, driveSensitivity) ;
-            double rfPower = Range.clip(drive - turn - strafe, -driveSensitivity, driveSensitivity) ;
+            double rfPower = Range.clip(-drive + turn - strafe, -driveSensitivity, driveSensitivity) ;
             double lbPower = Range.clip(drive + turn - strafe, -driveSensitivity, driveSensitivity);
-            double rbPower = Range.clip(drive - turn + strafe, -driveSensitivity, driveSensitivity) ;
+            double rbPower = Range.clip(-drive + turn + strafe, -driveSensitivity, driveSensitivity) ;
 
             // Send calculated power to wheels
             leftFront.setPower(lfPower);
             leftBack.setPower(lbPower);
             rightFront.setPower(rfPower);
             rightBack.setPower(rbPower);
+            intakeSlideLeft.setPower(intakeSlidePower);
+            intakeSlideRight.setPower(intakeSlidePower);
 
             if (driveSnipeOn) driveSensitivity = 0.25;
             else if (driveSnipeOff) driveSensitivity = 1;

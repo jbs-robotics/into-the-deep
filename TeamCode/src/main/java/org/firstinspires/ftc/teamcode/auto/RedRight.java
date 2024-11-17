@@ -139,6 +139,8 @@ public class RedRight extends LinearOpMode {
                 .setTangent(Math.toRadians(0))
                 .splineToLinearHeading(new Pose2d(60, -60, Math.toRadians(90)), Math.toRadians(-10))
 
+
+
                 .build();
 
 

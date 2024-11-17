@@ -36,40 +36,34 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.ParallelAction;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
-import com.acmerobotics.roadrunner.Trajectory;
+import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-// Road Runner Imports
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.ftc.Actions;
-
-// April Tag Imports
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMetaAndInstance;
-import org.firstinspires.ftc.teamcode.auto.Intake;
 import org.firstinspires.ftc.teamcode.auto.Outtake;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -92,9 +86,9 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@TeleOp(name="CAT (Computer Aided TeleOp)", group="Linear OpMode")
+@TeleOp(name="CAT (Field Oriented)", group="Linear OpMode")
 //@Disabled
-public class CATeleOp extends LinearOpMode {
+public class FOCAT extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -130,7 +124,6 @@ public class CATeleOp extends LinearOpMode {
                 )
         );
         imu.initialize(imuParameters);
-
         TelemetryPacket packet = new TelemetryPacket();
         telemetry.update();
         drive = new MecanumDrive(hardwareMap, new Pose2d(0,0,0));
@@ -204,10 +197,23 @@ public class CATeleOp extends LinearOpMode {
         while (opModeIsActive()) {
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
             telemetry.addData("# AprilTags Detected", currentDetections.size());
+            Orientation robotOrientation;
+            robotOrientation = imu.getRobotOrientation(
+                AxesReference.INTRINSIC,
+                    AxesOrder.XYZ,
+                    AngleUnit.RADIANS
+            );
+
+            double yaw = robotOrientation.thirdAngle;
 
             double drivePower = -gamepad1.left_stick_y;
             double turnPower  =  gamepad1.right_stick_x;
             double strafePower = gamepad1.left_stick_x;
+
+            double tmp = drivePower * Math.cos(yaw) + strafePower * Math.sin(yaw);
+            strafePower = -drivePower * Math.sin(yaw) + strafePower * Math.cos(yaw);
+            drivePower = tmp;
+
             boolean driveSnipeOn = gamepad1.left_bumper;
             boolean driveSnipeOff = gamepad1.right_bumper;
             boolean score = gamepad1.left_trigger > 0.5;

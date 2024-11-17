@@ -29,7 +29,7 @@ public class MeepMeepTesting {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
                 .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(new Pose2d(-24, -60, Math.toRadians(90)))
+                        drive.trajectorySequenceBuilder(new Pose2d(-20, -60, Math.toRadians(180)))
                                 .splineToLinearHeading(new Pose2d(-56, -56, Math.toRadians(-135)), Math.toRadians(-135))
                                 //score here
                                 .back(10)
@@ -58,8 +58,14 @@ public class MeepMeepTesting {
                                 .splineToLinearHeading(new Pose2d(-56, -56, Math.toRadians(-135)), Math.toRadians(-135))
 
                                 //score
-                                .setTangent(0)
-                                .splineToLinearHeading(new Pose2d(60, -60, Math.toRadians(90)), Math.toRadians(-10))
+
+                                .setTangent(Math.toRadians(45))
+                                .splineToLinearHeading(new Pose2d(28, -38, Math.toRadians(0)), Math.toRadians(0))
+                                .setTangent(Math.toRadians(0))
+                                .splineToLinearHeading(new Pose2d(20, 0, Math.toRadians(0)), Math.toRadians(170))
+
+//                                .setTangent(0)
+//                                .splineToLinearHeading(new Pose2d(60, -60, Math.toRadians(90)), Math.toRadians(-10))
 
                                 .build()
                 );
@@ -200,9 +206,9 @@ public class MeepMeepTesting {
                 .setDarkMode(true)
                 .setBackgroundAlpha(0.95f)
                 .addEntity(RL)
-                .addEntity(RR)
-                .addEntity(BR)
-                .addEntity(BL)
+//                .addEntity(RR)
+//                .addEntity(BR)
+//                .addEntity(BL)
                 .start();
     }
 }

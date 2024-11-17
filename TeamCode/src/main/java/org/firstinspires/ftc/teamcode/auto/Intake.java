@@ -12,19 +12,27 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
 public class Intake {
-    private DcMotorEx slide;
-    private Servo elbow;
-    private CRServo boot;
+    private DcMotorEx slideLeft, slideRight;
+    private CRServo diffyLeft, diffyRight;
+    private TouchSensor inLimit;
+//    private Servo elbow;
+//    private CRServo boot;
     public Intake(HardwareMap hardwareMap){
-//        slide = hardwareMap.get(DcMotorEx.class, "intakeSlide");
 
-//        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//        slide.setDirection(DcMotorSimple.Direction.FORWARD);
+        slideLeft = hardwareMap.get(DcMotorEx.class, "ISL");
+        slideLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        slideLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        boot = hardwareMap.get(CRServo.class, "intakeBoot");
-        elbow = hardwareMap.get(Servo.class, "intakeElbow");
+        slideRight = hardwareMap.get(DcMotorEx.class, "ISR");
+        slideRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        slideRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        diffyLeft = hardwareMap.get(CRServo.class, "inL");
+        diffyRight = hardwareMap.get(CRServo.class, "inR");
+        inLimit = hardwareMap.get(TouchSensor.class, "inLimit");
 
     }
 
@@ -33,7 +41,8 @@ public class Intake {
         private boolean initialized = false;
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            boot.setPower(1);
+            diffyLeft.setPower(1);
+            diffyRight.setPower(1);
             return false;
         }
     }
@@ -43,7 +52,8 @@ public class Intake {
         private boolean initialized = false;
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            boot.setPower(0);
+            diffyLeft.setPower(0);
+            diffyRight.setPower(0);
             return false;
         }
     }
@@ -53,17 +63,30 @@ public class Intake {
         private boolean initialized = false;
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            elbow.setPosition(1);
-            return false;
+            if(!initialized){
+                diffyLeft.setPower(1);
+                diffyLeft.setPower(-1);
+                return false;
+            }
+            return true;
         }
     }
+
 
     public Action elbowClose() { return new ElbowClose();}
     public class ElbowClose implements Action{
         private boolean initialized = false;
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            elbow.setPosition(0);
+            if(!initialized){
+                diffyLeft.setPower(-1);
+                diffyLeft.setPower(1);
+            }
+            if(inLimit.isPressed()){
+                diffyLeft.setPower(0);
+                diffyRight.setPower(0);
+                return false;
+            }
             return false;
         }
     }

@@ -6,12 +6,14 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 @Config
+@Disabled
 @Autonomous(name = "BLUE_LEFT", group = "Autonomous")
 public class BlueRight extends LinearOpMode {
     private OpenCvWebcam webcam;
@@ -36,7 +38,7 @@ public class BlueRight extends LinearOpMode {
     private Action intakeOn(){
         return new SequentialAction(
                 intake.elbowOpen(),
-                intake.bootOn()
+                intake.bootIn()
         );
     }
     private Action intakeOff(){

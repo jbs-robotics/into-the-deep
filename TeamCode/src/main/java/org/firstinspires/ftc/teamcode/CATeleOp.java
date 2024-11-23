@@ -109,6 +109,7 @@ public class CATeleOp extends LinearOpMode {
     private MecanumDrive drive;
     private Outtake outtake;
 //    private Intake intake;
+    private boolean inReset = false, outReset = false;
 
     private IMU imu;
     private VisionPortal visionPortal;
@@ -116,20 +117,20 @@ public class CATeleOp extends LinearOpMode {
     private List<Action> runningActions = new ArrayList<>();
     private AprilTagProcessor aprilTag;
     private Position cameraPosition = new Position(DistanceUnit.INCH, -7.25, -7.25, 5, 0);
-    private YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 130, -90, 0, 0);
+    private YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 40, -90, 0, 0);
 
     @Override
     public void runOpMode() {
         initAprilTag();
 
-        IMU.Parameters imuParameters;
-        imuParameters = new IMU.Parameters(
-                new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
-                        RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
-                )
-        );
-        imu.initialize(imuParameters);
+//        IMU.Parameters imuParameters;
+//        imuParameters = new IMU.Parameters(
+//                new RevHubOrientationOnRobot(
+//                        RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+//                        RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
+//                )
+//        );
+//        imu.initialize(imuParameters);
 
         TelemetryPacket packet = new TelemetryPacket();
         telemetry.update();
@@ -199,7 +200,7 @@ public class CATeleOp extends LinearOpMode {
         // Wait for the game to start (driver presses START)
         waitForStart();
         runtime.reset();
-
+        double deltaServo = 0.004;
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
@@ -213,22 +214,24 @@ public class CATeleOp extends LinearOpMode {
             boolean score = gamepad1.left_trigger > 0.5;
 
 
-            intakePosition += (gamepad2.right_bumper? 40 : 0) - (gamepad2.left_bumper? 40 : 0);
-            intakePosition = Range.clip(intakePosition, -0, 1300);
+            intakePosition += (gamepad2.right_bumper? 85 : 0) - (gamepad2.left_bumper? 85 : 0);
+            intakePosition = Range.clip(intakePosition, -10, 1300);
 //            int upperBound = 1000, lowerBound = -1000;
-            outtakeSlidePos += 100 * gamepad2.left_stick_y;
-            outtakeSlidePos = Range.clip(outtakeSlidePos, -4000, -10);
-            OSP += (gamepad2.x)? 0.01: 0;
-            OSP += (gamepad2.b)? -0.01: 0;
+            if(gamepad2.left_stick_y < 0 || outtakeSlideLeft.getCurrentPosition() <= -50 || outtakeSlideRight.getCurrentPosition() <= -50 || !outLimit.isPressed()){
+                outtakeSlidePos += 100 * gamepad2.left_stick_y;
+                outtakeSlidePos = Range.clip(outtakeSlidePos, -3900, -10);
+            }
+            OSP += (gamepad2.x)? deltaServo: 0;
+            OSP += (gamepad2.b)? -deltaServo: 0;
 
-            if(OSP > 0.5) OSP = 0.5;
-            if(OSP < .37) OSP = 0.37;
+            if(OSP > 1) OSP = 1;
+            if(OSP < 0) OSP = 0.;
 
             //gamepad 1(drivebase control)
-            double lfPower = Range.clip(drivePower + turnPower + strafePower, -driveSensitivity, driveSensitivity) ;
-            double rfPower = Range.clip(drivePower - turnPower - strafePower, -driveSensitivity, driveSensitivity) ;
+            double lfPower = Range.clip(drivePower + turnPower + strafePower, -driveSensitivity, driveSensitivity);
+            double rfPower = Range.clip(drivePower - turnPower - strafePower, -driveSensitivity, driveSensitivity);
             double lbPower = Range.clip(drivePower + turnPower - strafePower, -driveSensitivity, driveSensitivity);
-            double rbPower = Range.clip(drivePower - turnPower + strafePower, -driveSensitivity, driveSensitivity) ;
+            double rbPower = Range.clip(drivePower - turnPower + strafePower, -driveSensitivity, driveSensitivity);
 
             // Send calculated power to wheels
             leftFront.setPower(lfPower);
@@ -240,7 +243,15 @@ public class CATeleOp extends LinearOpMode {
 
             intakeSlideLeft.setTargetPosition(intakePosition);
             intakeSlideRight.setTargetPosition(intakePosition);
-
+            if(outtakeSlidePos < -1700){
+                deltaServo = 0.8;
+            }
+            else{
+                deltaServo = 0.015;
+            }
+            if(outtakeSlidePos < -100 && OSP <= 0.33){
+                OSP = 0.35;
+            }
             outtakeSlideRight.setTargetPosition(outtakeSlidePos);
             outtakeSlideLeft.setTargetPosition(outtakeSlidePos);
 
@@ -256,7 +267,7 @@ public class CATeleOp extends LinearOpMode {
             telemetry.addData("OSlL Position", outtakeSlideLeft.getCurrentPosition());
             telemetry.addData("OSlR Position", outtakeSlideRight.getCurrentPosition());
 
-            if(intakeSlideLeft.getCurrentPosition() != 0 && outtakeSlideRight.getCurrentPosition() != 0 && inLimit.isPressed()){
+            if(!inReset && intakeSlideLeft.getCurrentPosition() != 0 && outtakeSlideRight.getCurrentPosition() != 0 && inLimit.isPressed()){
                 telemetry.addData("Intake Slides reset", inLimit.isPressed());
                 intakeSlideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 intakeSlideRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -267,17 +278,30 @@ public class CATeleOp extends LinearOpMode {
                 intakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 intakeSlideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //                intakePosition = 0;
-
+                inReset = true;
             }
-            if (driveSnipeOn) driveSensitivity = 0.25;
+            else{
+                inReset = false;
+            }
+            if (driveSnipeOn) driveSensitivity = 0.3;
             else if (driveSnipeOff) driveSensitivity = 1;
-            if(outtakeSlidePos == -10 && outtakeSlideLeft.getCurrentPosition() != 0 && outtakeSlideRight.getCurrentPosition() != 0 && outLimit.isPressed()){
+
+            if(!outReset && outLimit.isPressed()){
                 telemetry.addData("Outtake Slides reset", outLimit.isPressed());
                 outtakeSlideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 outtakeSlideRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 outtakeSlideRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 outtakeSlidePos = 0;
+                outReset = true;
+            }
+            else if(outReset && outLimit.isPressed()){
+                if(outtakeSlideLeft.getCurrentPosition() >= -9 || outtakeSlideRight.getCurrentPosition() >= -9){
+                    outReset = true;
+                }
+                else{
+                    outReset = false;
+                }
             }
             if(score){
                 score();
@@ -307,15 +331,6 @@ public class CATeleOp extends LinearOpMode {
                 .build();
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
     }
-    public class CancelCAT implements Action {
-        @Override
-        public boolean run(@NonNull TelemetryPacket packet){
-            if(gamepad1.dpad_down){
-
-            }
-            return false;
-        }
-    }
 
     @SuppressLint("DefaultLocale")
     private void score(){
@@ -329,14 +344,14 @@ public class CATeleOp extends LinearOpMode {
                 x = detection.robotPose.getPosition().x;
                 y = detection.robotPose.getPosition().y;
                 yaw = detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES);
-                drive.pose = new Pose2d(x, y, Math.toRadians(yaw + 90));
+                drive.pose = new Pose2d(x, y, Math.toRadians(yaw));
                 if(detection.id == 16){
                     Action red1 = drive.actionBuilder(drive.pose)
-                            .setTangent(Math.toRadians(yaw-90))
-                            .splineToLinearHeading(new Pose2d(-53, -53, Math.toRadians(50)), Math.toRadians(-135))
+                            .setTangent(Math.toRadians(yaw-180))
+                            .splineToLinearHeading(new Pose2d(-60, -40, Math.toRadians(45)), Math.toRadians(-135))
                             .build();
                     //red side basket
-                    Actions.runBlocking(new ParallelAction(
+                    Actions.runBlocking(
                             new SequentialAction(
                                     new ParallelAction(
                                             red1,
@@ -344,32 +359,21 @@ public class CATeleOp extends LinearOpMode {
                                             new InstantAction(() -> {
                                                 if(!aprilTag.getDetections().isEmpty()){
                                                     Pose3D pos1 = aprilTag.getDetections().get(0).robotPose;
-                                                    drive.pose = new Pose2d(pos1.getPosition().x, pos1.getPosition().y, Math.toRadians(pos1.getOrientation().getYaw(AngleUnit.DEGREES)+90));
+                                                    drive.pose = new Pose2d(pos1.getPosition().x, pos1.getPosition().y, pos1.getOrientation().getYaw(AngleUnit.RADIANS));
                                                 }
                                             })
 
                                     ),
                                     outtake.clawOpen(),
                                     new SleepAction(1.5),
-                                    outtake.clawClose(),
-                                    new SleepAction(1),
-                                    new InstantAction(() -> {
-                                        if(gamepad1.dpad_up){
-
-                                        }
-                                    }),
-                                    outtake.slideIn()
-                            ),
-                            new SequentialAction(
-
-                            )
+                                    outtake.clawClose()
                             )
                     );
                 }
                 else if(detection.id == 13){
                     Action blue1 = drive.actionBuilder(drive.pose)
-                            .setTangent(Math.toRadians(yaw-90))
-                            .splineToLinearHeading(new Pose2d(52, 52, Math.toRadians(-130)), Math.toRadians(45))
+                            .setTangent(Math.toRadians(yaw-180))
+                            .splineToLinearHeading(new Pose2d(53, 45, Math.toRadians(-135)), Math.toRadians(45))
                             .build();
                     Actions.runBlocking(new SequentialAction(
                             new ParallelAction(
@@ -378,15 +382,15 @@ public class CATeleOp extends LinearOpMode {
                                     new InstantAction(() -> {
                                         if(!aprilTag.getDetections().isEmpty()){
                                             Pose3D pos1 = aprilTag.getDetections().get(0).robotPose;
-                                            drive.pose = new Pose2d(pos1.getPosition().x, pos1.getPosition().y, Math.toRadians(pos1.getOrientation().getYaw(AngleUnit.DEGREES)+90));
+                                            drive.pose = new Pose2d(pos1.getPosition().x, pos1.getPosition().y, pos1.getOrientation().getYaw(AngleUnit.RADIANS));
                                         }
                                     })
                             ),
                             outtake.clawOpen(),
                             new SleepAction(1.5),
-                            outtake.clawClose(),
-                            new SleepAction(1),
-                            outtake.slideIn()
+                            outtake.clawClose()
+//                            new SleepAction(1),
+//                            outtake.slideIn()
                     ));
                 }
 

@@ -56,7 +56,7 @@ import com.acmerobotics.roadrunner.ftc.Actions;
  */
 
 @TeleOp(name="TeleOp", group="Linear OpMode")
-//@Disabled
+@Disabled
 public class BasicOpMode_Linear extends LinearOpMode {
 
     // Declare OpMode members.

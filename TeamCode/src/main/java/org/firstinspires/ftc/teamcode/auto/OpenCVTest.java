@@ -7,6 +7,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -32,7 +33,8 @@ import java.util.List;
 
 
 @Config
-@Autonomous(name = "OPENCV", group = "Autonomous")
+@TeleOp(name = "OPENCV", group = "Test")
+
 public class OpenCVTest extends LinearOpMode {
     private AprilTagProcessor aprilTag;
 
@@ -50,7 +52,7 @@ public class OpenCVTest extends LinearOpMode {
      * to +/-90 degrees if it's vertical, or 180 degrees if it's upside-down.
      * */
     private Position cameraPosition = new Position(DistanceUnit.INCH, -7.25, -7.25, 5, 0);
-    private YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 130, -90, 0, 0);
+    private YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 40, -90, 0, 0);
     private ColorBlobLocatorProcessor colorLocator;
 
     @SuppressLint("DefaultLocale")

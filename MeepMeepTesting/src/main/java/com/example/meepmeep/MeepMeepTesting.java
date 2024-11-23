@@ -47,22 +47,22 @@ public class MeepMeepTesting {
                                 //intake sample
                                 .setTangent(Math.toRadians(0))
                                 .splineToLinearHeading(new Pose2d(-56, -56, Math.toRadians(-135)), Math.toRadians(-135))
+//
+//                                //score
+//                                .back(10)
+//                                .setTangent(Math.toRadians(45))
+//                                .splineToLinearHeading(new Pose2d(-60, -24, Math.toRadians(180)), Math.toRadians(180))
+//
+//                                //intake sample
+//                                .setTangent(Math.toRadians(0))
+//                                .splineToLinearHeading(new Pose2d(-56, -56, Math.toRadians(-135)), Math.toRadians(-135))
 
                                 //score
-                                .back(10)
-                                .setTangent(Math.toRadians(45))
-                                .splineToLinearHeading(new Pose2d(-60, -24, Math.toRadians(180)), Math.toRadians(180))
-
-                                //intake sample
-                                .setTangent(Math.toRadians(0))
-                                .splineToLinearHeading(new Pose2d(-56, -56, Math.toRadians(-135)), Math.toRadians(-135))
-
-                                //score
 
                                 .setTangent(Math.toRadians(45))
-                                .splineToLinearHeading(new Pose2d(28, -38, Math.toRadians(0)), Math.toRadians(0))
-                                .setTangent(Math.toRadians(0))
-                                .splineToLinearHeading(new Pose2d(20, 0, Math.toRadians(0)), Math.toRadians(170))
+//                                .splineToLinearHeading(new Pose2d(28, -38, Math.toRadians(0)), Math.toRadians(0))
+//                                .setTangent(Math.toRadians(0))
+                                .splineToLinearHeading(new Pose2d(-20, 0, Math.toRadians(0)), Math.toRadians(-10))
 
 //                                .setTangent(0)
 //                                .splineToLinearHeading(new Pose2d(60, -60, Math.toRadians(90)), Math.toRadians(-10))

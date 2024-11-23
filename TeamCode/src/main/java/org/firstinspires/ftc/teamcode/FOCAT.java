@@ -44,6 +44,7 @@ import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -57,12 +58,14 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Quaternion;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.auto.Outtake;
 import org.firstinspires.ftc.vision.VisionPortal;
@@ -87,7 +90,7 @@ import java.util.List;
  */
 
 @TeleOp(name="CAT (Field Oriented)", group="Linear OpMode")
-//@Disabled
+@Disabled
 public class FOCAT extends LinearOpMode {
 
     // Declare OpMode members.
@@ -115,7 +118,7 @@ public class FOCAT extends LinearOpMode {
     @Override
     public void runOpMode() {
         initAprilTag();
-
+        imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters imuParameters;
         imuParameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
@@ -210,8 +213,8 @@ public class FOCAT extends LinearOpMode {
             double turnPower  =  gamepad1.right_stick_x;
             double strafePower = gamepad1.left_stick_x;
 
-            double tmp = drivePower * Math.cos(yaw) + strafePower * Math.sin(yaw);
-            strafePower = -drivePower * Math.sin(yaw) + strafePower * Math.cos(yaw);
+            double tmp = drivePower * Math.sin(yaw) + strafePower * Math.cos(yaw);
+            strafePower = -drivePower * Math.cos(yaw) + strafePower * Math.sin(yaw);
             drivePower = tmp;
 
             boolean driveSnipeOn = gamepad1.left_bumper;

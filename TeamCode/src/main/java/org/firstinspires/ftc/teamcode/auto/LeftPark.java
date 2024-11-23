@@ -1,55 +1,53 @@
 package org.firstinspires.ftc.teamcode.auto;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-
-// RR-specific imports
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
-
-// Non-RR imports
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 @Config
-@Disabled
-@Autonomous(name = "BLUE_TEST", group = "Autonomous")
-public class BlueTestAuto extends LinearOpMode {
-    private OpenCvWebcam webcam;
+@Autonomous(name = "LEFT_PARK", group = "Autonomous")
+public class LeftPark extends LinearOpMode {
+    private MecanumDrive drive;
+    private Intake intake;
+    private Outtake outtake;
+    LeftSide leftSide;
+
     @Override
     public void runOpMode() throws InterruptedException {
 
-
+        
         // instantiate MecanumDrive at starting position
-        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(38, 60.0, Math.toRadians(180)));
+        drive = new MecanumDrive(hardwareMap, new Pose2d(-20, -60.0, Math.toRadians(90)));
 
-        Claw claw = new Claw(hardwareMap);
-
-        Outtake outtake = new Outtake(hardwareMap);
-
-        Intake intake = new Intake(hardwareMap);
-
+        // instantiate LeftSide (the class containing the trajectory for cycling)
+        leftSide = new LeftSide(hardwareMap);
+        outtake = new Outtake(hardwareMap);
+        outtake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        intake = new Intake(hardwareMap);
         Action trajectory1;
         // actionBuilder builds from the drive steps passed to it,
         // and .build(); is needed to build the trajectory
 
-        trajectory1 = drive.actionBuilder(drive.pose)
-                .lineToYSplineHeading(33, Math.toRadians(0))
-                .waitSeconds(2)
-                .setTangent(Math.toRadians(90))
-                .lineToY(48)
-                .setTangent(Math.toRadians(0))
-                .lineToX(32)
-                .strafeTo(new Vector2d(44.5, 30))
-                .turn(Math.toRadians(180))
-                .lineToX(47.5)
-                .waitSeconds(3)
+        trajectory1 = leftSide.getCycle(drive.pose)
+//                //go to the parking zone
+                .turnTo(Math.toRadians(90))
+                .lineToX(50)
+//                .strafeTo(new Vector2d(37, -48))
+//                .lineToY(-45)
+//                .setTangent(Math.toRadians(15))
+//                .splineToLinearHeading(new Pose2d(35, -45, Math.toRadians(90)), Math.toRadians(0))
+
                 .build();
 
 
@@ -68,11 +66,8 @@ public class BlueTestAuto extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
-                        trajectory1,
-                        outtake.slideOut(),
-                        claw.openClaw(),
-                        outtake.slideIn(),
-                        trajectory3
+                        outtake.clawClose(),
+                        trajectory1
                 )
         );
     }

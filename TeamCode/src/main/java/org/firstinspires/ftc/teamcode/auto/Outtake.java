@@ -44,13 +44,23 @@ public class Outtake {
         slideLeft.setMode(runMode);
         slideRight.setMode(runMode);
     }
+    public Action setClaw() {return new SetClaw();}
+    private class SetClaw implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            servo.setPosition(0.34);
+            return false;
+        }
+
+    }
+
 
     public Action clawOpen() { return new ClawOpen();}
     public class ClawOpen implements Action{
         private boolean initialized = false;
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            servo.setPosition(0.51);
+            servo.setPosition(1);
             return false;
         }
     }
@@ -60,7 +70,7 @@ public class Outtake {
         private boolean initialized = false;
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            servo.setPosition(0.37);
+            servo.setPosition(0.1);
             return false;
         }
     }
@@ -132,19 +142,9 @@ public class Outtake {
             else{
                 return true;
             }
-//            if(slideLeft.getCurrentPosition() < -500 || slideRight.getCurrentPosition() < -500){
-//                packet.addLine("SlidePosition: " + slideLeft.getCurrentPosition());
-//                return true; // returning true causes the action to rerunning
-//            }
-//            else{
-//                slideLeft.setPower(0);
-//                slideRight.setPower(0);
-//
-//                return false; // returning false stops the action from rerunning
-//            }
-
-            // this will set the lift motor power to 0.8 until it reaches a position of 3000, then it will turn off.
         }
 
     }
+
+
 }

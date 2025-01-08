@@ -9,9 +9,9 @@ public class LConstants {
         ThreeWheelConstants.strafeTicksToInches = .001989436789;
         ThreeWheelConstants.turnTicksToInches = .001989436789;
         // TODO: measure these values
-        ThreeWheelConstants.leftY = 1;
-        ThreeWheelConstants.rightY = -1;
-        ThreeWheelConstants.strafeX = -2.5;
+        ThreeWheelConstants.leftY = 6.75;
+        ThreeWheelConstants.rightY = -6.5;
+        ThreeWheelConstants.strafeX = 2.5;
 
         ThreeWheelConstants.leftEncoder_HardwareMapName = "leftFront";
         ThreeWheelConstants.rightEncoder_HardwareMapName = "rightFront";

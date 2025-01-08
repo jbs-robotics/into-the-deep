@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.auto;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.ParallelAction;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
@@ -59,7 +61,7 @@ public class RedRight_PP extends OpMode {
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
     private Path park;
-    private PathChain scorePreload, grabPickup1, grabPickup2, scorePickup1, scorePickup2;
+    private PathChain scorePreload, prePlow, plowPickup1, plowPickup2, grabPickup1, grabPickup2, scorePickup1, scorePickup2;
 
     public void buildPaths(){
         /* There are two major types of paths components: BezierCurves and BezierLines.
@@ -81,8 +83,65 @@ public class RedRight_PP extends OpMode {
                 .addPath(new BezierCurve(new Point(startPose), new Point(preloadControlPose), new Point(scorePose)))
                 .setConstantHeadingInterpolation(Math.toRadians(270))
                 .build();
-        grabPickup1 = follower.pathBuilder()
+        prePlow = follower.pathBuilder()
+                .addPath(new BezierCurve(new Point(scorePose), new Point(prePlowControlPose), new Point(prePlowPose)))
+                .setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(180))
                 .build();
+
+        plowPickup1 = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        new Point(prePlowPose),
+                        new Point(plow1ControlPose1),
+                        new Point(plow1ControlPose2),
+                        new Point(plow1ControlPose3),
+                        new Point(plow1Pose)))
+                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .build();
+        plowPickup2 = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        new Point(plow1Pose),
+                        new Point(plow2ControlPose1),
+                        new Point(plow2ControlPose2),
+                        new Point(plow2Pose)))
+                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .build();
+        grabPickup1 = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        new Point(plow2Pose),
+                        new Point(toPickupControlPose),
+                        new Point(pickupPose)))
+                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(270))
+                .build();
+        scorePickup1 = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        new Point(pickupPose),
+                        new Point(cycleRightControlPose),
+                        new Point(cycleLeftControlPose),
+                        new Point(scorePose)))
+                .setConstantHeadingInterpolation(Math.toRadians(-90))
+                .build();
+        grabPickup2 = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        new Point(scorePose),
+                        new Point(cycleLeftControlPose),
+                        new Point(cycleRightControlPose),
+                        new Point(pickupPose)))
+                .setConstantHeadingInterpolation(Math.toRadians(-90))
+                .build();
+        scorePickup2 = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        new Point(pickupPose),
+                        new Point(cycleRightControlPose),
+                        new Point(cycleLeftControlPose),
+                        new Point(scorePose)))
+                .setConstantHeadingInterpolation(Math.toRadians(-90))
+                .build();
+        park = new Path(new BezierLine(
+                new Point(scorePose),
+                new Point(pickupPose)));
+        park.setConstantHeadingInterpolation(Math.toRadians(-90));
+
+
     }
 
     /** This is the variable where we store the state of our auto.
@@ -99,6 +158,12 @@ public class RedRight_PP extends OpMode {
         switch (pathState) {
             case 0:
                 follower.followPath(scorePreload);
+                Actions.runBlocking(
+                        new ParallelAction(
+                                outtake.setSlide(),
+                                outtake.claw.elbowOut()
+                        )
+                );
                 setPathState(1);
                 break;
             case 1:
@@ -110,78 +175,96 @@ public class RedRight_PP extends OpMode {
                 */
 
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(follower.getPose().getX() > (scorePose.getX() - 1) && follower.getPose().getY() > (scorePose.getY() - 1)) {
+                if(follower.getPose().getX() < (scorePose.getX() + 1) && follower.getPose().getY() > (scorePose.getY() - 1)) {
                     /* Score Preload */
-
+                    Actions.runBlocking(
+                            outtake.outtakeSpecimen()
+                    );
+                    xOffset += 5;
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(grabPickup1,true);
+                    follower.followPath(prePlow,false);
+                    Actions.runBlocking(
+                            new SequentialAction(
+                                    outtake.claw.elbowIn(),
+                                    outtake.slideTo(-100)
+                            )
+                    );
                     setPathState(2);
                 }
                 break;
             case 2:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup1Pose's position */
-                if(follower.getPose().getX() > (pickupPose.getX() - 1) && follower.getPose().getY() > (pickupPose.getY() - 1)) {
-                    /* Grab Spec */
+                if(follower.getPose().getX() > (prePlowPose.getX() - 1) && follower.getPose().getY() > (prePlowPose.getY() - 1)) {
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(scorePickup1,true);
+                    follower.followPath(plowPickup1,false);
                     setPathState(3);
                 }
                 break;
             case 3:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(follower.getPose().getX() > (scorePose.getX() - 1) && follower.getPose().getY() > (scorePose.getY() - 1)) {
-                    /* Score Sample */
+                if(follower.getPose().getX() > (plow1Pose.getX() - 1) && follower.getPose().getY() < (plow1Pose.getY() + 1)) {
+                    /* Plowed 1st Sample Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(grabPickup2,true);
+                    follower.followPath(plowPickup2,false);
                     setPathState(4);
                 }
                 break;
             case 4:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
                 if(follower.getPose().getX() > (pickupPose.getX() - 1) && follower.getPose().getY() > (pickupPose.getY() - 1)) {
-                    /* Grab Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(scorePickup2,true);
+                    /* Plowed 2nd Sample Sample */
+//                    Actions.runBlocking()
+                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
+                    follower.followPath(grabPickup1,true);
                     setPathState(5);
                 }
                 break;
             case 5:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(follower.getPose().getX() > (scorePose.getX() - 1) && follower.getPose().getY() > (scorePose.getY() - 1)) {
-                    /* Score Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(grabPickup1,true);
+                    /* Grab Sample */
+//                    Actions.run
+                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
+                    follower.followPath(scorePickup1,true);
                     setPathState(6);
                 }
                 break;
             case 6:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup3Pose's position */
                 if(follower.getPose().getX() > (pickupPose.getX() - 1) && follower.getPose().getY() > (pickupPose.getY() - 1)) {
-                    /* Grab Sample */
+                    /* Score Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(scorePickup1, true);
+                    follower.followPath(grabPickup2, true);
                     setPathState(7);
                 }
                 break;
             case 7:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(follower.getPose().getX() > (scorePose.getX() - 1) && follower.getPose().getY() > (scorePose.getY() - 1)) {
-                    /* Score Sample */
+                    /* Grab Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are parked */
-                    follower.followPath(park,true);
+                    follower.followPath(scorePickup2,true);
                     setPathState(8);
                 }
                 break;
             case 8:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(follower.getPose().getX() > (pickupPose.getX() - 1) && follower.getPose().getY() > (pickupPose.getY() - 1)) {
-                    /* Level 1 Ascent */
+                    /* Score Sample */
+
+                    follower.followPath(park, true);
+                    /* Set the state to a Case we won't use or define, so it just stops running an new paths */
+                    setPathState(9);
+                }
+                break;
+            case 9:
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+                if(follower.getPose().getX() > (pickupPose.getX() - 1) && follower.getPose().getY() > (pickupPose.getY() - 1)) {
+                    /* Score Sample */
 
                     /* Set the state to a Case we won't use or define, so it just stops running an new paths */
                     setPathState(-1);
@@ -222,6 +305,9 @@ public class RedRight_PP extends OpMode {
         Constants.setConstants(FConstants.class, LConstants.class);
         follower = new Follower(hardwareMap);
         follower.setStartingPose(startPose);
+        Actions.runBlocking(
+                outtake.clawClose()
+        );
         buildPaths();
     }
 

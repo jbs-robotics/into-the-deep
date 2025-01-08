@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.auto;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
@@ -32,17 +33,23 @@ public class LeftAscent extends LinearOpMode {
         drive = new MecanumDrive(hardwareMap, new Pose2d(-20, -60.0, Math.toRadians(90)));
 
         outtake = new Outtake(hardwareMap);
+        outtake.resetEncoders();
         outtake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         intake = new Intake(hardwareMap);
         Action trajectory1;
         // actionBuilder builds from the drive steps passed to it,
         // and .build(); is needed to build the trajectory
-        trajectory1 = leftSide.getCycle(drive.pose)
+        trajectory1
+//                = drive.actionBuilder(drive.pose)
+                = leftSide.getCycle(drive.pose)
                 //go to ascent zone
                 .setTangent(Math.toRadians(45))
                 .splineToLinearHeading(new Pose2d(-30, 0, Math.toRadians(180)), Math.toRadians(-10))
                 //use the outtake to touch bar
-                .stopAndAdd(outtake.clawOpen())
+                .afterTime(0, outtake.setSlide())
+//                .waitSeconds(0.5)
+//                .afterTime(0, outtake.slideIn())
+                .stopAndAdd(outtake.outtakeSample())
                 .build();
 
 
@@ -55,10 +62,10 @@ public class LeftAscent extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
-                        outtake.clawClose(),
-                        trajectory1,
+                        outtake.outtakeSample(),
+                        trajectory1
 //                        outtake.clawOpen(),
-                        new SleepAction(100)
+//                        new SleepAction(100)
                 )
         );
 //        outServo.setPosition(1);

@@ -32,20 +32,15 @@ package org.firstinspires.ftc.teamcode;
 import android.annotation.SuppressLint;
 import android.util.Size;
 
-import androidx.annotation.NonNull;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SleepAction;
-import com.acmerobotics.roadrunner.Trajectory;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -53,11 +48,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 // Road Runner Imports
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
 // April Tag Imports
@@ -68,8 +61,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMetaAndInstance;
-import org.firstinspires.ftc.teamcode.auto.Intake;
 import org.firstinspires.ftc.teamcode.auto.Outtake;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -78,6 +69,8 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.*;
+import java.lang.*;
 
 /*
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
@@ -101,43 +94,34 @@ public class CATeleOp extends LinearOpMode {
 
     //Mecanum Drive Motors
     private DcMotor leftFront, leftBack, rightFront, rightBack, intakeSlideLeft, intakeSlideRight, outtakeSlideLeft, outtakeSlideRight;
-    private Servo outServo;
-    private CRServo inL, inR;
-    private double driveSensitivity = 1 , OSP = 0;
-    private int outtakePosition = 0, intakePosition = 0,  outtakeSlidePos = 0;
+    private Servo outServoL, outServoR, claw, inL, inR;
+    private CRServo sideSpinL, sideSpinR;
+    private double driveSensitivity = 1 , OSP = 0.94, clawPos = 1, intakePivot = 0, sideSpinPower;
+
+    private int outtakePosition = 0, intakePosition = 0,  outtakeSlidePos = 0, intakeID = 1, outtakeID;
     private TouchSensor outLimit, inLimit;
     private MecanumDrive drive;
     private Outtake outtake;
 //    private Intake intake;
-    private boolean inReset = false, outReset = false;
+    private boolean inReset = false, outReset = false, manualOverride = false, canOverride = true, clawAvailable = true, intakeAvailable = true, clawArmAvailable = true, transferring = false;
+
 
     private IMU imu;
-    private VisionPortal visionPortal;
     private FtcDashboard dash = FtcDashboard.getInstance();
     private List<Action> runningActions = new ArrayList<>();
+    private VisionPortal visionPortal;
     private AprilTagProcessor aprilTag;
     private Position cameraPosition = new Position(DistanceUnit.INCH, -7.25, -7.25, 5, 0);
     private YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 40, -90, 0, 0);
-
     @Override
     public void runOpMode() {
         initAprilTag();
-
-//        IMU.Parameters imuParameters;
-//        imuParameters = new IMU.Parameters(
-//                new RevHubOrientationOnRobot(
-//                        RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
-//                        RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
-//                )
-//        );
-//        imu.initialize(imuParameters);
 
         TelemetryPacket packet = new TelemetryPacket();
         telemetry.update();
         drive = new MecanumDrive(hardwareMap, new Pose2d(0,0,0));
         // instantiate MecanumDrive at starting position
         outtake = new Outtake(hardwareMap);
-//        intake = new Intake(hardwareMap);
 
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
@@ -149,12 +133,16 @@ public class CATeleOp extends LinearOpMode {
 
         intakeSlideLeft = hardwareMap.get(DcMotor.class, "ISL");
         intakeSlideRight = hardwareMap.get(DcMotor.class, "ISR");
-        inL = hardwareMap.get(CRServo.class, "inL");
-        inR = hardwareMap.get(CRServo.class, "inR");
+        inL = hardwareMap.get(Servo.class, "inL");
+        inR = hardwareMap.get(Servo.class, "inR");
+        sideSpinL = hardwareMap.get(CRServo.class, "sideSpinL");
+        sideSpinR = hardwareMap.get(CRServo.class, "sideSpinR");
 
         outtakeSlideLeft = hardwareMap.get(DcMotor.class, "OSL");
         outtakeSlideRight = hardwareMap.get(DcMotor.class, "OSR");
-        outServo = hardwareMap.get(Servo.class, "outServo");
+        outServoL = hardwareMap.get(Servo.class, "outServoL");
+        outServoR = hardwareMap.get(Servo.class, "outServoR");
+        claw = hardwareMap.get(Servo.class, "claw");
         outLimit = hardwareMap.get(TouchSensor.class, "outLimit");
         inLimit = hardwareMap.get(TouchSensor.class, "inLimit");
 
@@ -163,8 +151,6 @@ public class CATeleOp extends LinearOpMode {
 
         intakeSlideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         intakeSlideRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        outtakeSlideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        outtakeSlideRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         intakeSlideLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         intakeSlideRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -201,6 +187,7 @@ public class CATeleOp extends LinearOpMode {
         waitForStart();
         runtime.reset();
         double deltaServo = 0.004;
+        int changeIntakeID = 1;
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
@@ -212,20 +199,67 @@ public class CATeleOp extends LinearOpMode {
             boolean driveSnipeOn = gamepad1.left_bumper;
             boolean driveSnipeOff = gamepad1.right_bumper;
             boolean score = gamepad1.left_trigger > 0.5;
+            if(manualOverride){
+                intakePivot += Range.clip(gamepad2.right_stick_y, -0.025, 0.025);
+//                if(!manualOverride && intakePivot > 1) intakePivot = 1;
+//                if(!manualOverride && intakePivot < 0.1446) intakePivot = 0.1446;
+            }
+            else{
+                if(intakeAvailable && gamepad2.y){
+                    intakeID = ++intakeID % 2;
+                    intakeAvailable = false;
+                    CanPitchIntakeThread thread = new CanPitchIntakeThread();
+                    thread.start();
+                }
+                switch(intakeID){
+                    case 0:
+                        intakePivot = 0.1446; // set intake out
+                        break;
+                    case 1:
+                        intakePivot = 0.95; // set intake in
+                        break;
+                    default:
+                        break;
+                }
+            }
 
+            intakePosition += (gamepad1.right_bumper? 85 : 0) - (gamepad1.left_bumper? 85 : 0);
+            if(!manualOverride) intakePosition = Range.clip(intakePosition, -10, 1000);
 
-            intakePosition += (gamepad2.right_bumper? 85 : 0) - (gamepad2.left_bumper? 85 : 0);
-            intakePosition = Range.clip(intakePosition, -10, 1300);
-//            int upperBound = 1000, lowerBound = -1000;
             if(gamepad2.left_stick_y < 0 || outtakeSlideLeft.getCurrentPosition() <= -50 || outtakeSlideRight.getCurrentPosition() <= -50 || !outLimit.isPressed()){
                 outtakeSlidePos += 100 * gamepad2.left_stick_y;
-                outtakeSlidePos = Range.clip(outtakeSlidePos, -3900, -10);
+                if(!manualOverride) outtakeSlidePos = Range.clip(outtakeSlidePos, -3005, -10);
             }
-            OSP += (gamepad2.x)? deltaServo: 0;
-            OSP += (gamepad2.b)? -deltaServo: 0;
+            //TODO: CHANGE WHEN DRIVING
+            sideSpinPower = gamepad1.dpad_down? 1 : (gamepad1.dpad_up)? -1 : 0;
 
-            if(OSP > 1) OSP = 1;
-            if(OSP < 0) OSP = 0.;
+            if(manualOverride){
+                OSP += (gamepad2.x)? deltaServo: 0;
+                OSP += (gamepad2.b)? -deltaServo: 0;
+                if(OSP > 1) OSP = 1;
+                if(OSP < 0) OSP = 0.;
+            }
+            else{
+                if(clawArmAvailable && gamepad2.right_trigger > 0.5){
+                    if(OSP == 0){
+//                        OSP = 0.91; // put claw arm in
+                        OSP = 0.94; // put claw arm in
+                    }
+                    else{
+                        OSP = 0; // put claw arm out
+                    }
+                    clawArmAvailable = !clawArmAvailable;
+                    CanPitchClawThread thread = new CanPitchClawThread();
+                    thread.start();
+                }
+            }
+            if(clawAvailable && gamepad2.b){
+                clawPos = (++clawPos % 2);
+                clawAvailable = false;
+
+                CanOperateClawThread thread = new CanOperateClawThread();
+                thread.start();
+            }
 
             //gamepad 1(drivebase control)
             double lfPower = Range.clip(drivePower + turnPower + strafePower, -driveSensitivity, driveSensitivity);
@@ -238,34 +272,74 @@ public class CATeleOp extends LinearOpMode {
             leftBack.setPower(lbPower);
             rightFront.setPower(rfPower);
             rightBack.setPower(rbPower);
-            outServo.setPosition(OSP);
 
 
-            intakeSlideLeft.setTargetPosition(intakePosition);
-            intakeSlideRight.setTargetPosition(intakePosition);
-            if(outtakeSlidePos < -1700){
+            if(outtakeSlidePos < -800){
                 deltaServo = 0.8;
             }
             else{
                 deltaServo = 0.015;
             }
-            if(outtakeSlidePos < -100 && OSP <= 0.33){
-                OSP = 0.35;
+
+            if(!transferring){
+                outServoL.setPosition(1 - OSP);
+                outServoR.setPosition(OSP);
+                claw.setPosition(clawPos);
+                inL.setPosition(intakePivot);
+                inR.setPosition(1 - intakePivot);
+                intakeSlideLeft.setTargetPosition(intakePosition);
+                intakeSlideRight.setTargetPosition(intakePosition);
+                sideSpinL.setPower(-sideSpinPower);
+                sideSpinR.setPower(sideSpinPower);
+                outtakeSlideRight.setTargetPosition(outtakeSlidePos);
+                outtakeSlideLeft.setTargetPosition(outtakeSlidePos);
             }
-            outtakeSlideRight.setTargetPosition(outtakeSlidePos);
-            outtakeSlideLeft.setTargetPosition(outtakeSlidePos);
+            if(canOverride && gamepad2.left_bumper && gamepad2.right_bumper && gamepad2.right_trigger > 0.5 && gamepad2.left_trigger > 0.5){
+                manualOverride = !manualOverride;
+                if(!manualOverride){
+                    intakeSlideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    outtakeSlideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    intakeSlideRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    outtakeSlideRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    intakePosition = 0;
+                    outtakeSlidePos = 0;
 
-            double inLP = (gamepad2.right_trigger) - (gamepad2.left_trigger) - (0.3 * gamepad2.right_stick_y);
-            double inRP = (gamepad2.right_trigger) - (gamepad2.left_trigger) + (0.3 * gamepad2.right_stick_y);
-            inL.setPower(-inLP);
-            inR.setPower(-inRP);
+                    intakeSlideLeft.setTargetPosition(0);
+                    intakeSlideRight.setTargetPosition(0);
+                    outtakeSlideLeft.setTargetPosition(0);
+                    outtakeSlideRight.setTargetPosition(0);
 
-            telemetry.addData("OSP", outServo.getPosition());
-            telemetry.addData("ISL", intakeSlideLeft.getCurrentPosition());
-            telemetry.addData("ISR", intakeSlideRight.getCurrentPosition());
+
+                    intakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    intakeSlideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    outtakeSlideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                }
+                canOverride = false;
+//                new Thread("1"){
+//                    public void run(){
+//                        try {
+//                            Thread.sleep(500);
+//                        } catch (InterruptedException e) {
+//                            throw new RuntimeException(e);
+//                        }
+//                        canOverride = true;
+//                    }
+//                }.start();
+                ToggleCanOverrideThread thread = new ToggleCanOverrideThread();
+                thread.start();
+//                timer.schedule(new ToggleCanOverride(), 500L);
+            }
+
+            telemetry.addData("Manual Override Status ", manualOverride);
+            telemetry.addData("Left Elbow Servo Position", outServoL.getPosition());
+            telemetry.addData("Right Elbow Servo Position", outServoR.getPosition());
+            telemetry.addData("Intake Slide Left", intakeSlideLeft.getCurrentPosition());
+            telemetry.addData("Intake Slide Right", intakeSlideRight.getCurrentPosition());
             telemetry.addData("Intake Slide Position", intakePosition);
-            telemetry.addData("OSlL Position", outtakeSlideLeft.getCurrentPosition());
-            telemetry.addData("OSlR Position", outtakeSlideRight.getCurrentPosition());
+            telemetry.addData("Out Slide Left", outtakeSlideLeft.getCurrentPosition());
+            telemetry.addData("Out Slide Right", outtakeSlideRight.getCurrentPosition());
+//            telemetry.addData("intakePivot Position", intakePivot);
 
             if(!inReset && intakeSlideLeft.getCurrentPosition() != 0 && outtakeSlideRight.getCurrentPosition() != 0 && inLimit.isPressed()){
                 telemetry.addData("Intake Slides reset", inLimit.isPressed());
@@ -283,8 +357,9 @@ public class CATeleOp extends LinearOpMode {
             else{
                 inReset = false;
             }
-            if (driveSnipeOn) driveSensitivity = 0.3;
-            else if (driveSnipeOff) driveSensitivity = 1;
+            //TODO: CHANGE WHEN DRIVING
+//            if (driveSnipeOn) driveSensitivity = 0.3;
+//            else if (driveSnipeOff) driveSensitivity = 1;
 
             if(!outReset && outLimit.isPressed()){
                 telemetry.addData("Outtake Slides reset", outLimit.isPressed());
@@ -303,6 +378,22 @@ public class CATeleOp extends LinearOpMode {
                     outReset = false;
                 }
             }
+            if(!manualOverride && gamepad2.a){
+                new Thread("transfer"){
+                    public void run(){
+//                        try {
+//                            Thread.sleep(500);
+//                        } catch (InterruptedException e) {
+//                            throw new RuntimeException(e);
+//                        }
+                        transferring = true;
+                        transfer();
+                        intakeID = 1;
+                        transferring = false;
+
+                    }
+                }.start();
+            }
             if(score){
                 score();
                 telemetry.addData("CAT finished", "FISH");
@@ -313,7 +404,6 @@ public class CATeleOp extends LinearOpMode {
             telemetry.update();
         }
     }
-
     private void initAprilTag(){
         aprilTag = new AprilTagProcessor.Builder()
                 .setDrawAxes(false)
@@ -330,6 +420,56 @@ public class CATeleOp extends LinearOpMode {
                 .addProcessor(aprilTag)
                 .build();
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
+    }
+
+    private void transfer(){
+
+        Actions.runBlocking(
+                new SequentialAction(
+                        new InstantAction(()->{
+                            //set intake slide
+                            intakePosition = 300;
+                            intakeSlideLeft.setTargetPosition(300);
+                            intakeSlideRight.setTargetPosition(300);
+
+
+                            //set outtake slide
+                            outtakeSlidePos = 0;
+                            outtakeSlideLeft.setTargetPosition(outtakeSlidePos);
+                            outtakeSlideRight.setTargetPosition(outtakeSlidePos);
+                            outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            outtakeSlideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            //set intake servos
+                            intakePivot = 0.95;
+                            inL.setPosition(intakePivot);
+                            inR.setPosition(1-intakePivot);
+
+//                            OSP = 0.87;
+                            OSP = 0.92;
+                            outServoL.setPosition(1-OSP);
+                            outServoR.setPosition(OSP);
+
+                            clawPos = 0;
+                            claw.setPosition(clawPos);
+                        }),
+                        new SleepAction(0.5),
+                        new InstantAction(()->{
+                            //set spin wheels
+                            sideSpinPower = -1;
+                            sideSpinR.setPower(sideSpinPower);
+                            sideSpinL.setPower(-sideSpinPower);
+                        }),
+                        new SleepAction(0.2),
+                        new InstantAction(()->{
+                            sideSpinR.setPower(0);
+                            sideSpinL.setPower(0);
+                            clawPos = 1;
+                            claw.setPosition(clawPos);
+                        }),
+                        new SleepAction(0.2)
+
+                        )
+        );
     }
 
     @SuppressLint("DefaultLocale")
@@ -364,9 +504,7 @@ public class CATeleOp extends LinearOpMode {
                                             })
 
                                     ),
-                                    outtake.clawOpen(),
-                                    new SleepAction(1.5),
-                                    outtake.clawClose()
+                                    outtake.outtakeSample()
                             )
                     );
                 }
@@ -386,9 +524,7 @@ public class CATeleOp extends LinearOpMode {
                                         }
                                     })
                             ),
-                            outtake.clawOpen(),
-                            new SleepAction(1.5),
-                            outtake.clawClose()
+                            outtake.outtakeSample()
 //                            new SleepAction(1),
 //                            outtake.slideIn()
                     ));
@@ -397,5 +533,95 @@ public class CATeleOp extends LinearOpMode {
             }
         }
     }
-
+    private class ToggleCanOverride extends TimerTask {
+        @Override
+        public void run(){
+            try {
+                // code that need to be executed after this delay
+                canOverride = true;
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+    private class ToggleCanOverrideThread extends Thread {
+        @Override
+        public void run(){
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            canOverride = true;
+        }
+    }
+    private class CanOperateClaw extends TimerTask {
+        @Override
+        public void run(){
+            try {
+                // code that need to be executed after this delay
+                clawAvailable = true;
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+    private class CanOperateClawThread extends Thread {
+        @Override
+        public void run(){
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            clawAvailable = true;
+        }
+    }
+    private class CanPitchClaw extends TimerTask {
+        @Override
+        public void run(){
+            try {
+                // code that need to be executed after this delay
+                clawArmAvailable = true;
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+    private class CanPitchClawThread extends Thread {
+        @Override
+        public void run(){
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            clawArmAvailable = true;
+        }
+    }
+    private class CanPitchIntakeThread extends Thread {
+        public void run(){
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            intakeAvailable = true;
+        }
+    }
+    private class CanPitchIntake extends TimerTask {
+        @Override
+        public void run(){
+            try {
+                // code that need to be executed after this delay
+                intakeAvailable = true;
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
 }

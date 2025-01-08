@@ -4,51 +4,69 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.SleepAction;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-@Config
-@Autonomous(name = "LEFT_PARK", group = "Autonomous")
-public class LeftPark extends LinearOpMode {
+//@Config
+@Autonomous(name = "RED_RIGHT", group = "Autonomous")
+
+@Disabled
+public class RightPark extends LinearOpMode {
+    private OpenCvWebcam webcam;
     private MecanumDrive drive;
+    private Claw claw;
     private Intake intake;
     private Outtake outtake;
-    LeftSide leftSide;
+
+    private Action outtakeOn(){
+        return new SequentialAction(
+                outtake.slideOut(),
+                claw.openClaw()
+        );
+    }
+    private Action outtakeOff(){
+        return new SequentialAction(
+                claw.closeClaw(),
+                outtake.slideIn()
+        );
+    }
+
+    private Action intakeOn(){
+        return new SequentialAction(
+                intake.elbowOut(),
+                intake.bootIn()
+        );
+    }
+    private Action intakeOff(){
+        return new SequentialAction(
+                intake.elbowIn(),
+                intake.bootOff()
+        );
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         
         // instantiate MecanumDrive at starting position
-        drive = new MecanumDrive(hardwareMap, new Pose2d(-20, -60.0, Math.toRadians(90)));
+        drive = new MecanumDrive(hardwareMap, new Pose2d(22, -60.0, Math.toRadians(180)));
 
-        // instantiate LeftSide (the class containing the trajectory for cycling)
-        leftSide = new LeftSide(hardwareMap);
+        claw = new Claw(hardwareMap);
+
         outtake = new Outtake(hardwareMap);
-        outtake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         intake = new Intake(hardwareMap);
+
         Action trajectory1;
         // actionBuilder builds from the drive steps passed to it,
         // and .build(); is needed to build the trajectory
 
-        trajectory1 = leftSide.getCycle(drive.pose)
-//                //go to the parking zone
-                .turnTo(Math.toRadians(90))
-//                .lineToX(50)
-//                .lineToY(-48)
-                .strafeTo(new Vector2d(45, -58))
-
-//                .lineToY(-45)
-//                .setTangent(Math.toRadians(15))
-//                .splineToLinearHeading(new Pose2d(35, -45, Math.toRadians(90)), Math.toRadians(0))
+        trajectory1 = drive.actionBuilder(drive.pose)
 
                 .build();
 
@@ -68,8 +86,11 @@ public class LeftPark extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
-                        outtake.clawClose(),
                         trajectory1
+//                        outtake.slideOut(),
+//                        claw.openClaw(),
+//                        outtake.slideIn(),
+//                        trajectory3
                 )
         );
     }

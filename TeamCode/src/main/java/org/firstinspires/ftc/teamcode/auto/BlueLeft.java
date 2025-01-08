@@ -37,13 +37,13 @@ public class BlueLeft extends LinearOpMode {
 
     private Action intakeOn(){
         return new SequentialAction(
-                intake.elbowOpen(),
+                intake.elbowOut(),
                 intake.bootIn()
         );
     }
     private Action intakeOff(){
         return new SequentialAction(
-                intake.elbowClose(),
+                intake.elbowIn(),
                 intake.bootOff()
         );
     }

@@ -51,8 +51,9 @@ public class OpenCVTest extends LinearOpMode {
      * it's pointing straight left, -90 degrees for straight right, etc. You can also set the roll
      * to +/-90 degrees if it's vertical, or 180 degrees if it's upside-down.
      * */
-    private Position cameraPosition = new Position(DistanceUnit.INCH, -7.25, -7.25, 5, 0);
-    private YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 40, -90, 0, 0);
+    private Position cameraPosition = new Position(DistanceUnit.INCH, 0, 5.5, 1.5, 0);
+    private YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, -90, -90, 0, 0);
+//    private YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 40, -90, 0, 0);
     private ColorBlobLocatorProcessor colorLocator;
 
     @SuppressLint("DefaultLocale")

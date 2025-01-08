@@ -94,9 +94,9 @@ public class RedRight extends LinearOpMode {
                     .splineToLinearHeading(new Pose2d(0, -46, Math.toRadians(-90)), Math.toRadians(90))
                     .stopAndAdd(new SleepAction(0.3))
                     .stopAndAdd(()->{relocalize();})
-                    .strafeTo(new Vector2d(-10, -45.5))
+                    .strafeTo(new Vector2d(-10, -44))
                     .stopAndAdd(()->{relocalize();})
-                    .strafeTo(new Vector2d(-10, -45.5))
+                    .strafeTo(new Vector2d(-10, -44))
 
                     .stopAndAdd( outtake.outtakeSpecimen()) // score the specimen
                     .afterTime(1, outtake.slideTo(-200)) // bring the slide back in
@@ -104,25 +104,25 @@ public class RedRight extends LinearOpMode {
 
                     // plow the samples into the observation zone
                     .setTangent(Math.toRadians(-90))
-                    .splineToLinearHeading(new Pose2d(31, -47, Math.toRadians(180)), Math.toRadians(90))
-                    .stopAndAdd(new SleepAction(0.3))
+                    .splineToLinearHeading(new Pose2d(35, -47, Math.toRadians(180)), Math.toRadians(90))
+                    .stopAndAdd(new SleepAction(0.1))
                     .setTangent(Math.toRadians(90))
-                    .splineToConstantHeading(new Vector2d(31, -10), Math.toRadians(90))
-                    .splineToConstantHeading(new Vector2d(35, -10), Math.toRadians(-90))
+                    .splineToConstantHeading(new Vector2d(35, -10), Math.toRadians(90))
+                    .splineToConstantHeading(new Vector2d(43, -10), Math.toRadians(-90))
 
                     // plow first sample
-                    .splineToConstantHeading(new Vector2d(35, -63), Math.toRadians(90))
+                    .splineToConstantHeading(new Vector2d(43, -61), Math.toRadians(90))
 
                     // go back up to second spike mark
-                    .splineToConstantHeading(new Vector2d(35, -20), Math.toRadians(90))
-                    .splineToConstantHeading(new Vector2d(50, -10), Math.toRadians(-90))
+                    .splineToConstantHeading(new Vector2d(43, -10), Math.toRadians(90))
+                    .splineToConstantHeading(new Vector2d(51, -10), Math.toRadians(-90))
 
                     //plow second sample
-                    .splineToConstantHeading(new Vector2d(50, -63), Math.toRadians(-90))
+                    .splineToConstantHeading(new Vector2d(51, -61), Math.toRadians(-90))
 
                     // go pick up the specimen
                     .turn(Math.toRadians(90))
-                    .splineToLinearHeading(new Pose2d(50, -71.5, Math.toRadians(-90)), Math.toRadians(-90))
+                    .splineToLinearHeading(new Pose2d(50, -69, Math.toRadians(-90)), Math.toRadians(-90))
 
                     // score second specimen
                     .stopAndAdd(outtake.clawClose())
@@ -132,11 +132,11 @@ public class RedRight extends LinearOpMode {
 
                     .setTangent(Math.toRadians(135))
                     .splineToLinearHeading(new Pose2d(-5, -50,  Math.toRadians(-90)), Math.toRadians(90))
-                    .stopAndAdd(new SleepAction(0.3))
+                    .stopAndAdd(new SleepAction(0.1))
                     .stopAndAdd(()->{relocalize();})
-                    .strafeTo(new Vector2d(-8, -49))
+                    .strafeTo(new Vector2d(-8, -48))
                     .stopAndAdd(()->{relocalize();})
-                    .strafeTo(new Vector2d(-8, -49))
+                    .strafeTo(new Vector2d(-8, -48))
 
 //                    .splineToLinearHeading(new Pose2d(-8, -47, Math.toRadians(-90)), Math.toRadians(90))
 
@@ -147,7 +147,7 @@ public class RedRight extends LinearOpMode {
                     // go back to the observation zone
                     .setTangent(Math.toRadians(-90))
                     .splineToLinearHeading(new Pose2d(30, -50, Math.toRadians(-90)), Math.toRadians(0))
-                    .splineToLinearHeading(new Pose2d(46, -71.5, Math.toRadians(-90)), Math.toRadians(-90))
+                    .splineToLinearHeading(new Pose2d(46, -69, Math.toRadians(-90)), Math.toRadians(-90))
 
                     // pick up specimen
                     .stopAndAdd(outtake.clawClose())
@@ -157,11 +157,11 @@ public class RedRight extends LinearOpMode {
 
                     //score third specimen
                     .splineToLinearHeading(new Pose2d(0, -49, Math.toRadians(-90)), Math.toRadians(90))
-                    .stopAndAdd(new SleepAction(0.3))
+                    .stopAndAdd(new SleepAction(0.1))
                     .stopAndAdd(()->{relocalize();})
-                    .strafeTo(new Vector2d(5, -47.5))
+                    .strafeTo(new Vector2d(5, -46.5))
                     .stopAndAdd(()->{relocalize();})
-                    .strafeTo(new Vector2d(5, -47.5))
+                    .strafeTo(new Vector2d(5, -46))
 
 //                    .splineToLinearHeading(new Pose2d(5, -47, Math.toRadians(-90)), Math.toRadians(90))
 

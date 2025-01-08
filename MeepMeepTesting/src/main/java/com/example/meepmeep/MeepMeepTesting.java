@@ -109,13 +109,13 @@ public class MeepMeepTesting {
 //                                .setTangent(Math.toRadians(90))
 //                                .splineToConstantHeading(new Vector2d(46, -10), Math.toRadians(0))
                                 .setTangent(Math.toRadians(-90))
-                                .splineToLinearHeading(new Pose2d(31, -47, Math.toRadians(180)), Math.toRadians(90))
+                                .splineToLinearHeading(new Pose2d(35, -47, Math.toRadians(180)), Math.toRadians(90))
                                 .setTangent(Math.toRadians(90))
-                                .splineToConstantHeading(new Vector2d(31, -10), Math.toRadians(90))
-                                .splineToConstantHeading(new Vector2d(35, -10), Math.toRadians(-90))
+                                .splineToConstantHeading(new Vector2d(35, -10), Math.toRadians(90))
+                                .splineToConstantHeading(new Vector2d(46, -10), Math.toRadians(-90))
 
                                 // plow first sample
-                                .splineToConstantHeading(new Vector2d(46, -61), Math.toRadians(90))
+                                .splineTo(new Vector2d(43, -61), Math.toRadians(-130))
 
                                 // go back up to second spike mark
                                 .splineToConstantHeading(new Vector2d(46, -20), Math.toRadians(90))

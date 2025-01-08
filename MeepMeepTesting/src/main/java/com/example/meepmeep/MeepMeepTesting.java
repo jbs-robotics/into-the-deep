@@ -74,7 +74,7 @@ public class MeepMeepTesting {
                 );
         RoadRunnerBotEntity RR = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxA60ccel, maxAngVel, maxAngAccel, track width
-                .setConstraints(80, 80, Math.toRadians(360), Math.toRadians(360), 17.5)
+                .setConstraints(70, 70, Math.toRadians(180), Math.toRadians(180), 18)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(9.5, -61, Math.toRadians(-90)))
 
@@ -108,22 +108,20 @@ public class MeepMeepTesting {
 //                                .splineToLinearHeading(new Pose2d(36, -32, Math.toRadians(180)), Math.toRadians(90))
 //                                .setTangent(Math.toRadians(90))
 //                                .splineToConstantHeading(new Vector2d(46, -10), Math.toRadians(0))
-                                .setTangent(Math.toRadians(-0))
-                                .splineToLinearHeading(new Pose2d(30, -40, Math.toRadians(180)), Math.toRadians(90))
+                                .setTangent(Math.toRadians(-90))
+                                .splineToLinearHeading(new Pose2d(31, -47, Math.toRadians(180)), Math.toRadians(90))
                                 .setTangent(Math.toRadians(90))
-                                .splineToConstantHeading(new Vector2d(30, -20), Math.toRadians(90))
-                                .setTangent(Math.toRadians(90))
-                                .splineToConstantHeading(new Vector2d(33, -10), Math.toRadians(0))
-//                    .stopAndAdd(new SleepAction(1))
-//                    .setTangent(90)
+                                .splineToConstantHeading(new Vector2d(31, -10), Math.toRadians(90))
+                                .splineToConstantHeading(new Vector2d(35, -10), Math.toRadians(-90))
+
                                 // plow first sample
-                                .splineToConstantHeading(new Vector2d(33, -65), Math.toRadians(-90))
+                                .splineToConstantHeading(new Vector2d(46, -61), Math.toRadians(90))
 
                                 // go back up to second spike mark
-                                .splineToConstantHeading(new Vector2d(31, -20), Math.toRadians(90))
-                                .splineToConstantHeading(new Vector2d(40, -2), Math.toRadians(0))
+                                .splineToConstantHeading(new Vector2d(46, -20), Math.toRadians(90))
+                                .splineToConstantHeading(new Vector2d(53, -10), Math.toRadians(-90))
 
-                                .splineToConstantHeading(new Vector2d(47, -65), Math.toRadians(-90))
+                                .splineToConstantHeading(new Vector2d(53, -61), Math.toRadians(-90))
 ////                                .setTangent(Math.toRadians(90))
 ////                                .splineToConstantHeading(new Vector2d(57, -10), Math.toRadians(0))
 //                                .lineTo(new Vector2d(57, -60))

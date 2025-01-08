@@ -223,7 +223,7 @@ public class CATeleOp extends LinearOpMode {
                 }
             }
 
-            intakePosition += (gamepad1.right_bumper? 85 : 0) - (gamepad1.left_bumper? 85 : 0);
+            intakePosition += (gamepad2.right_bumper? 85 : 0) - (gamepad2.left_bumper? 85 : 0);
             if(!manualOverride) intakePosition = Range.clip(intakePosition, -10, 1000);
 
             if(gamepad2.left_stick_y < 0 || outtakeSlideLeft.getCurrentPosition() <= -50 || outtakeSlideRight.getCurrentPosition() <= -50 || !outLimit.isPressed()){
@@ -231,7 +231,7 @@ public class CATeleOp extends LinearOpMode {
                 if(!manualOverride) outtakeSlidePos = Range.clip(outtakeSlidePos, -3005, -10);
             }
             //TODO: CHANGE WHEN DRIVING
-            sideSpinPower = gamepad1.dpad_down? 1 : (gamepad1.dpad_up)? -1 : 0;
+            sideSpinPower = gamepad2.dpad_down? 1 : (gamepad2.dpad_up)? -1 : 0;
 
             if(manualOverride){
                 OSP += (gamepad2.x)? deltaServo: 0;
@@ -358,8 +358,8 @@ public class CATeleOp extends LinearOpMode {
                 inReset = false;
             }
             //TODO: CHANGE WHEN DRIVING
-//            if (driveSnipeOn) driveSensitivity = 0.3;
-//            else if (driveSnipeOff) driveSensitivity = 1;
+            if (driveSnipeOn) driveSensitivity = 0.3;
+            else if (driveSnipeOff) driveSensitivity = 1;
 
             if(!outReset && outLimit.isPressed()){
                 telemetry.addData("Outtake Slides reset", outLimit.isPressed());

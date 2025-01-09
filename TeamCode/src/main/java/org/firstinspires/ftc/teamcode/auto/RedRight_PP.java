@@ -81,103 +81,65 @@ public class RedRight_PP extends OpMode {
          * Here is a explanation of the difference between Paths and PathChains <https://pedropathing.com/commonissues/pathtopathchain.html> */
 
         scorePreload = follower.pathBuilder()
-                .addPath(
-                        // Line 1
-                        new BezierCurve(
-                                new Point(81.000, 9.000, Point.CARTESIAN),
-                                new Point(71.000, 16.000, Point.CARTESIAN),
-                                new Point(72.000, 23.000, Point.CARTESIAN)
-                        )
-                )
+                .addPath(new BezierCurve(new Point(startPose), new Point(preloadControlPose), new Point(scorePose)))
                 .setConstantHeadingInterpolation(Math.toRadians(270))
                 .build();
         prePlow = follower.pathBuilder()
-                .addPath(
-                        // Line 2
-                        new BezierCurve(
-                                new Point(72.000, 28.000, Point.CARTESIAN),
-                                new Point(110.000, 0.000, Point.CARTESIAN),
-                                new Point(108.000, 46.000, Point.CARTESIAN)
-                        )
-                )
-                .setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(180)).build();
+                .addPath(new BezierCurve(new Point(scorePose), new Point(prePlowControlPose), new Point(prePlowPose)))
+                .setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(180))
+                .build();
 
         plowPickup1 = follower.pathBuilder()
-                .addPath(
-                        // Line 3
-                        new BezierCurve(
-                                new Point(108.000, 46.000, Point.CARTESIAN),
-                                new Point(110.000, 72.000, Point.CARTESIAN),
-                                new Point(123.000, 78.000, Point.CARTESIAN),
-                                new Point(112.000, 30.000, Point.CARTESIAN),
-                                new Point(116.000, 16.000, Point.CARTESIAN)
-                        )
-                )
+                .addPath(new BezierCurve(
+                        new Point(prePlowPose),
+                        new Point(plow1ControlPose1),
+                        new Point(plow1ControlPose2),
+                        new Point(plow1ControlPose3),
+                        new Point(plow1Pose)))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
         plowPickup2 = follower.pathBuilder()
-                .addPath(
-                        // Line 4
-                        new BezierCurve(
-                                new Point(116.000, 16.000, Point.CARTESIAN),
-                                new Point(112.000, 74.000, Point.CARTESIAN),
-                                new Point(128.000, 90.000, Point.CARTESIAN),
-                                new Point(128.000, 16.000, Point.CARTESIAN)
-                        )
-                )
+                .addPath(new BezierCurve(
+                        new Point(plow1Pose),
+                        new Point(plow2ControlPose1),
+                        new Point(plow2ControlPose2),
+                        new Point(plow2Pose)))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
         grabPickup1 = follower.pathBuilder()
-                .addPath(
-                        // Line 5
-                        new BezierCurve(
-                                new Point(128.000, 16.000, Point.CARTESIAN),
-                                new Point(117.000, 19.000, Point.CARTESIAN),
-                                new Point(117.000, 9.000, Point.CARTESIAN)
-                        )
-                )
+                .addPath(new BezierCurve(
+                        new Point(plow2Pose),
+                        new Point(toPickupControlPose),
+                        new Point(pickupPose)))
                 .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(270))
                 .build();
         scorePickup1 = follower.pathBuilder()
-                .addPath(
-                // Line 6
-                new BezierCurve(
-                        new Point(117.000, 9.000, Point.CARTESIAN),
-                        new Point(113.000, 52.000, Point.CARTESIAN),
-                        new Point(76.000, 5.000, Point.CARTESIAN),
-                        new Point(72.000, 23.000, Point.CARTESIAN)
-                )
-        )
+                .addPath(new BezierCurve(
+                        new Point(pickupPose),
+                        new Point(cycleRightControlPose),
+                        new Point(cycleLeftControlPose),
+                        new Point(scorePose)))
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
                 .build();
         grabPickup2 = follower.pathBuilder()
-                .addPath(
-                        // Line 7
-                        new BezierCurve(
-                                new Point(72.000, 28.000, Point.CARTESIAN),
-                                new Point(76.000, 5.000, Point.CARTESIAN),
-                                new Point(113.000, 52.000, Point.CARTESIAN),
-                                new Point(117.000, 9.000, Point.CARTESIAN)
-                        )
-                )
+                .addPath(new BezierCurve(
+                        new Point(scorePose),
+                        new Point(cycleLeftControlPose),
+                        new Point(cycleRightControlPose),
+                        new Point(pickupPose)))
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
-
                 .build();
         scorePickup2 = follower.pathBuilder()
-                .addPath(
-                        // Line 8
-                        new BezierCurve(
-                                new Point(117.000, 9.000, Point.CARTESIAN),
-                                new Point(113.000, 52.000, Point.CARTESIAN),
-                                new Point(76.000, 5.000, Point.CARTESIAN),
-                                new Point(72.000, 23.000, Point.CARTESIAN)
-                        )
-                )
+                .addPath(new BezierCurve(
+                        new Point(pickupPose),
+                        new Point(cycleRightControlPose),
+                        new Point(cycleLeftControlPose),
+                        new Point(scorePose)))
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
                 .build();
         park = new Path(new BezierLine(
-                new Point(72.000, 28.000, Point.CARTESIAN),
-                new Point(117.000, 9.000, Point.CARTESIAN)));
+                new Point(scorePose),
+                new Point(pickupPose)));
         park.setConstantHeadingInterpolation(Math.toRadians(-90));
 
 
@@ -216,22 +178,22 @@ public class RedRight_PP extends OpMode {
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(follower.getPose().getX() < (scorePose.getX() + 1) && follower.getPose().getY() > (scorePose.getY() - 1)) {
                     /* Score Preload */
-//                    Actions.runBlocking(
-//                            new SequentialAction(
-//                                    outtake.outtakeSpecimen(),
-//                                    new SleepAction(2)
-//                            )
-//
-//                    );
+                    Actions.runBlocking(
+                            new SequentialAction(
+                                    outtake.outtakeSpecimen(),
+                                    new SleepAction(2)
+                            )
+
+                    );
                     xOffset += 5;
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(prePlow,true);
-//                    Actions.runBlocking(
-//                            new SequentialAction(
-//                                    outtake.claw.elbowIn(),
-//                                    outtake.slideTo(-100)
-//                            )
-//                    );
+                    follower.followPath(prePlow,false);
+                    Actions.runBlocking(
+                            new SequentialAction(
+                                    outtake.claw.elbowIn(),
+                                    outtake.slideTo(-100)
+                            )
+                    );
                     setPathState(2);
                 }
                 break;
@@ -240,7 +202,7 @@ public class RedRight_PP extends OpMode {
                 if(follower.getPose().getX() > (prePlowPose.getX() - 1) && follower.getPose().getY() > (prePlowPose.getY() - 1)) {
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(plowPickup1,true);
+                    follower.followPath(plowPickup1,false);
                     setPathState(3);
                 }
                 break;
@@ -250,7 +212,7 @@ public class RedRight_PP extends OpMode {
                     /* Plowed 1st Sample Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(plowPickup2,true);
+                    follower.followPath(plowPickup2,false);
                     setPathState(4);
                 }
                 break;

@@ -22,32 +22,6 @@ public class RedRight extends LinearOpMode {
     private Intake intake;
     private Outtake outtake;
 
-    private Action outtakeOn(){
-        return new SequentialAction(
-                outtake.slideOut(),
-                claw.openClaw()
-        );
-    }
-    private Action outtakeOff(){
-        return new SequentialAction(
-                claw.closeClaw(),
-                outtake.slideIn()
-        );
-    }
-
-    private Action intakeOn(){
-        return new SequentialAction(
-                intake.elbowOpen(),
-                intake.bootIn()
-        );
-    }
-    private Action intakeOff(){
-        return new SequentialAction(
-                intake.elbowClose(),
-                intake.bootOff()
-        );
-    }
-
     @Override
     public void runOpMode() throws InterruptedException {
 

@@ -21,32 +21,32 @@ public class BlueLeft extends LinearOpMode {
     private Claw claw;
     private Intake intake;
     private Outtake outtake;
-
-    private Action outtakeOn(){
-        return new SequentialAction(
-                outtake.slideOut(),
-                claw.openClaw()
-        );
-    }
-    private Action outtakeOff(){
-        return new SequentialAction(
-                claw.closeClaw(),
-                outtake.slideIn()
-        );
-    }
-
-    private Action intakeOn(){
-        return new SequentialAction(
-                intake.elbowOpen(),
-                intake.bootIn()
-        );
-    }
-    private Action intakeOff(){
-        return new SequentialAction(
-                intake.elbowClose(),
-                intake.bootOff()
-        );
-    }
+//
+//    private Action outtakeOn(){
+//        return new SequentialAction(
+//                outtake.slideOut(),
+//                claw.openClaw()
+//        );
+//    }
+//    private Action outtakeOff(){
+//        return new SequentialAction(
+//                claw.closeClaw(),
+//                outtake.slideIn()
+//        );
+//    }
+//
+//    private Action intakeOn(){
+//        return new SequentialAction(
+//                intake.elbowOpen(),
+//                intake.bootIn()
+//        );
+//    }
+//    private Action intakeOff(){
+//        return new SequentialAction(
+//                intake.elbowClose(),
+//                intake.bootOff()
+//        );
+//    }
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -68,77 +68,77 @@ public class BlueLeft extends LinearOpMode {
         trajectory1 = drive.actionBuilder(drive.pose)
                 //go to the basket
                 .setTangent(Math.toRadians(-45))
-                .splineToLinearHeading(new Pose2d(56, 56, Math.toRadians(45)), Math.toRadians(45))
-
-                //score here
-                .stopAndAdd(outtakeOn())
-                .waitSeconds(1)
-                .stopAndAdd(outtakeOff())
-
-                //go to the 1st sample
-                .lineToX(47)
-                .lineToY(47)
-                .splineToSplineHeading(new Pose2d(36, 25, Math.toRadians(0)), Math.toRadians(-90))
-
-                //intake sample
-                .stopAndAdd(intakeOn())
-                .waitSeconds(1)
-                .stopAndAdd(intakeOff())
-
-                //go to the basket
-                .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(50, 25, Math.toRadians(0)), Math.toRadians(0))
-
-                //score here
-                .stopAndAdd(outtakeOn())
-                .waitSeconds(1)
-                .stopAndAdd(outtakeOff())
-
-                //go to the 2nd sample
-                .lineToX(47)
-                .lineToY(47)
-                .setTangent(Math.toRadians(-135))
-                .splineToLinearHeading(new Pose2d(50, 25, Math.toRadians(0)), Math.toRadians(0))
-
-                //intake sample
-                .stopAndAdd(intakeOn())
-                .waitSeconds(1)
-                .stopAndAdd(intakeOff())
-
-                //go to the basket
-                .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(56, 56, Math.toRadians(45)), Math.toRadians(45))
-
-                //score here
-                .stopAndAdd(outtakeOn())
-                .waitSeconds(1)
-                .stopAndAdd(outtakeOff())
-
-                //go to the 3rd sample
-                .lineToX(47)
-                .lineToY(47)
-                .setTangent(Math.toRadians(-135))
-                .splineToLinearHeading(new Pose2d(60, 25, Math.toRadians(0)), Math.toRadians(0))
-
-                //intake sample
-                .stopAndAdd(intakeOn())
-                .waitSeconds(1)
-                .stopAndAdd(intakeOff())
-
-                //go to the basket
-                .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(56, 56, Math.toRadians(45)), Math.toRadians(45))
-
-                //score here
-                .stopAndAdd(outtakeOn())
-                .waitSeconds(1)
-                .stopAndAdd(outtakeOff())
-
-                //go to the parking zone
-                .lineToX(47.0)
-                .lineToY(47)
-                .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(-60, -60, Math.toRadians(-90)), Math.toRadians(170))
+//                .splineToLinearHeading(new Pose2d(56, 56, Math.toRadians(45)), Math.toRadians(45))
+//
+//                //score here
+//                .stopAndAdd(aouttakeOn())
+//                .waitSeconds(1)
+//                .stopAndAdd(outtakeOff())
+//
+//                //go to the 1st sample
+//                .lineToX(47)
+//                .lineToY(47)
+//                .splineToSplineHeading(new Pose2d(36, 25, Math.toRadians(0)), Math.toRadians(-90))
+//
+//                //intake sample
+//                .stopAndAdd(intakeOn())
+//                .waitSeconds(1)
+//                .stopAndAdd(intakeOff())
+//
+//                //go to the basket
+//                .setTangent(Math.toRadians(90))
+//                .splineToLinearHeading(new Pose2d(50, 25, Math.toRadians(0)), Math.toRadians(0))
+//
+//                //score here
+//                .stopAndAdd(outtakeOn())
+//                .waitSeconds(1)
+//                .stopAndAdd(outtakeOff())
+//
+//                //go to the 2nd sample
+//                .lineToX(47)
+//                .lineToY(47)
+//                .setTangent(Math.toRadians(-135))
+//                .splineToLinearHeading(new Pose2d(50, 25, Math.toRadians(0)), Math.toRadians(0))
+//
+//                //intake sample
+//                .stopAndAdd(intakeOn())
+//                .waitSeconds(1)
+//                .stopAndAdd(intakeOff())
+//
+//                //go to the basket
+//                .setTangent(Math.toRadians(180))
+//                .splineToLinearHeading(new Pose2d(56, 56, Math.toRadians(45)), Math.toRadians(45))
+//
+//                //score here
+//                .stopAndAdd(outtakeOn())
+//                .waitSeconds(1)
+//                .stopAndAdd(outtakeOff())
+//
+//                //go to the 3rd sample
+//                .lineToX(47)
+//                .lineToY(47)
+//                .setTangent(Math.toRadians(-135))
+//                .splineToLinearHeading(new Pose2d(60, 25, Math.toRadians(0)), Math.toRadians(0))
+//
+//                //intake sample
+//                .stopAndAdd(intakeOn())
+//                .waitSeconds(1)
+//                .stopAndAdd(intakeOff())
+//
+//                //go to the basket
+//                .setTangent(Math.toRadians(180))
+//                .splineToLinearHeading(new Pose2d(56, 56, Math.toRadians(45)), Math.toRadians(45))
+//
+//                //score here
+//                .stopAndAdd(outtakeOn())
+//                .waitSeconds(1)
+//                .stopAndAdd(outtakeOff())
+//
+//                //go to the parking zone
+//                .lineToX(47.0)
+//                .lineToY(47)
+//                .setTangent(Math.toRadians(180))
+//                .splineToLinearHeading(new Pose2d(-60, -60, Math.toRadians(-90)), Math.toRadians(170))
 
                 .build();
 

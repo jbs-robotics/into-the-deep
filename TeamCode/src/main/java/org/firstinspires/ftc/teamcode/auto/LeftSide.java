@@ -35,7 +35,7 @@ public class LeftSide {
 
     private Action intakeIn(){
         return new SequentialAction(
-                intake.elbowOpen(),
+                intake.elbowIn(),
                 new SleepAction(2),
                 intake.bootOff(),
                 intake.bootIn(),
@@ -45,7 +45,7 @@ public class LeftSide {
     }
     private Action intakeOut(){
         return new SequentialAction(
-                intake.elbowClose(),
+                intake.elbowOut(),
                 new SleepAction(1),
                 intake.bootOff(),
                 intake.slideIn(),

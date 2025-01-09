@@ -37,13 +37,13 @@ public class BlueRight extends LinearOpMode {
 
     private Action intakeOn(){
         return new SequentialAction(
-                intake.elbowOpen(),
+                intake.elbowIn(),
                 intake.bootIn()
         );
     }
     private Action intakeOff(){
         return new SequentialAction(
-                intake.elbowClose(),
+                intake.elbowOut(),
                 intake.bootOff()
         );
     }

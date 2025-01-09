@@ -5,10 +5,11 @@ import com.pedropathing.localization.constants.ThreeWheelConstants;
 
 public class LConstants {
     static {
-        ThreeWheelConstants.forwardTicksToInches = .001989436789;
-        ThreeWheelConstants.strafeTicksToInches = .001989436789;
-        ThreeWheelConstants.turnTicksToInches = .001989436789;
-        // TODO: measure these values
+//        ThreeWheelConstants.forwardTicksToInches = .001989436789;
+        ThreeWheelConstants.forwardTicksToInches = 0.0029;
+        ThreeWheelConstants.strafeTicksToInches = 0.003;
+        ThreeWheelConstants.turnTicksToInches = .0028;
+
         ThreeWheelConstants.leftY = 6.75;
         ThreeWheelConstants.rightY = -6.5;
         ThreeWheelConstants.strafeX = 2.5;

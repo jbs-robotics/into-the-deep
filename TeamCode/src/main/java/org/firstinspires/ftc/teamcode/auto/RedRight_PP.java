@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.auto;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
@@ -178,7 +179,11 @@ public class RedRight_PP extends OpMode {
                 if(follower.getPose().getX() < (scorePose.getX() + 1) && follower.getPose().getY() > (scorePose.getY() - 1)) {
                     /* Score Preload */
                     Actions.runBlocking(
-                            outtake.outtakeSpecimen()
+                            new SequentialAction(
+                                    outtake.outtakeSpecimen(),
+                                    new SleepAction(0.5)
+                            )
+
                     );
                     xOffset += 5;
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
@@ -213,7 +218,7 @@ public class RedRight_PP extends OpMode {
                 break;
             case 4:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
-                if(follower.getPose().getX() > (pickupPose.getX() - 1) && follower.getPose().getY() > (pickupPose.getY() - 1)) {
+                if(follower.getPose().getX() < (plow2Pose.getX() + 1) && follower.getPose().getY() > (plow2Pose.getY() - 1)) {
                     /* Plowed 2nd Sample Sample */
 //                    Actions.runBlocking()
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
@@ -223,7 +228,7 @@ public class RedRight_PP extends OpMode {
                 break;
             case 5:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(follower.getPose().getX() > (scorePose.getX() - 1) && follower.getPose().getY() > (scorePose.getY() - 1)) {
+                if(follower.getPose().getX() < (pickupPose.getX() + 1) && follower.getPose().getY() < (pickupPose.getY() + 1)) {
                     /* Grab Sample */
 //                    Actions.run
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
@@ -233,9 +238,9 @@ public class RedRight_PP extends OpMode {
                 break;
             case 6:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup3Pose's position */
-                if(follower.getPose().getX() > (pickupPose.getX() - 1) && follower.getPose().getY() > (pickupPose.getY() - 1)) {
+                if(follower.getPose().getX() < (scorePose.getX() + 1) && follower.getPose().getY() > (scorePose.getY() - 1)) {
                     /* Score Sample */
-
+                    xOffset += 5;
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
                     follower.followPath(grabPickup2, true);
                     setPathState(7);
@@ -243,7 +248,7 @@ public class RedRight_PP extends OpMode {
                 break;
             case 7:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(follower.getPose().getX() > (scorePose.getX() - 1) && follower.getPose().getY() > (scorePose.getY() - 1)) {
+                if(follower.getPose().getX() > (pickupPose.getX() - 1) && follower.getPose().getY() < (pickupPose.getY() + 1)) {
                     /* Grab Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are parked */
@@ -253,7 +258,7 @@ public class RedRight_PP extends OpMode {
                 break;
             case 8:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(follower.getPose().getX() > (pickupPose.getX() - 1) && follower.getPose().getY() > (pickupPose.getY() - 1)) {
+                if(follower.getPose().getX() < (scorePose.getX() + 1) && follower.getPose().getY() > (scorePose.getY() - 1)) {
                     /* Score Sample */
 
                     follower.followPath(park, true);
@@ -263,8 +268,8 @@ public class RedRight_PP extends OpMode {
                 break;
             case 9:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(follower.getPose().getX() > (pickupPose.getX() - 1) && follower.getPose().getY() > (pickupPose.getY() - 1)) {
-                    /* Score Sample */
+                if(follower.getPose().getX() > (pickupPose.getX() - 1) && follower.getPose().getY() < (pickupPose.getY() + 1)) {
+                    /* Parking */
 
                     /* Set the state to a Case we won't use or define, so it just stops running an new paths */
                     setPathState(-1);
@@ -301,6 +306,8 @@ public class RedRight_PP extends OpMode {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
+        outtake = new Outtake(hardwareMap);
+        intake = new Intake(hardwareMap);
 
         Constants.setConstants(FConstants.class, LConstants.class);
         follower = new Follower(hardwareMap);

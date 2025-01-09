@@ -218,7 +218,7 @@ public class RedRight_PP extends OpMode {
                 break;
             case 4:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
-                if(!follower.isBusy()) {
+                if(follower.getPose().getX() > (plow1Pose.getX() - 1) && follower.getPose().getY() < (plow1Pose.getY() + 1)) {
                     /* Plowed 2nd Sample Sample */
 //                    Actions.runBlocking()
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */

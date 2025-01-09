@@ -216,7 +216,7 @@ public class CATeleOp extends LinearOpMode {
                         intakePivot = 0.1446; // set intake out
                         break;
                     case 1:
-                        intakePivot = 0.95; // set intake in
+                        intakePivot = 0.91; // set intake in
                         break;
                     default:
                         break;
@@ -339,7 +339,7 @@ public class CATeleOp extends LinearOpMode {
             telemetry.addData("Intake Slide Position", intakePosition);
             telemetry.addData("Out Slide Left", outtakeSlideLeft.getCurrentPosition());
             telemetry.addData("Out Slide Right", outtakeSlideRight.getCurrentPosition());
-//            telemetry.addData("intakePivot Position", intakePivot);
+            telemetry.addData("intakePivot Position", intakePivot);
 
             if(!inReset && intakeSlideLeft.getCurrentPosition() != 0 && outtakeSlideRight.getCurrentPosition() != 0 && inLimit.isPressed()){
                 telemetry.addData("Intake Slides reset", inLimit.isPressed());
@@ -440,12 +440,12 @@ public class CATeleOp extends LinearOpMode {
                             outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             outtakeSlideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             //set intake servos
-                            intakePivot = 0.95;
+                            intakePivot = 0.91;
                             inL.setPosition(intakePivot);
                             inR.setPosition(1-intakePivot);
 
 //                            OSP = 0.87;
-                            OSP = 0.92;
+                            OSP = 0.91;
                             outServoL.setPosition(1-OSP);
                             outServoR.setPosition(OSP);
 

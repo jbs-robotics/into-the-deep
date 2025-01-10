@@ -81,7 +81,7 @@ public class Outtake {
 //            resetEncoders();
 //        }
             return new SequentialAction(
-                    slideTo(-1700),
+                    slideTo(-2000),
                     new SleepAction(0.5),
                     claw.openClaw(),
                     claw.elbowIn()

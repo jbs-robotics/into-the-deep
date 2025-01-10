@@ -54,8 +54,7 @@ public class RedRight_PP extends OpMode {
     private final Pose plow1ControlPose2 = new Pose(123.000, 78.000);
     private final Pose plow1ControlPose3 = new Pose(112.000, 30.000);
     private final Pose plow2ControlPose1 = new Pose(112.000, 74.000);
-    private final Pose plow2ControlPose2 = new Pose(112.000, 74.000);
-    private final Pose plow2ControlPose3 = new Pose(128.000, 90.000);
+    private final Pose plow2ControlPose2 = new Pose(128.000, 90.000);
     private final Pose toPickupControlPose = new Pose(117.000, 19.000);
     private final Pose cycleRightControlPose = new Pose(113.000, 52.000);
     private final Pose cycleLeftControlPose = new Pose(76.000, 5.000);
@@ -160,12 +159,12 @@ public class RedRight_PP extends OpMode {
         switch (pathState) {
             case 0:
                 follower.followPath(scorePreload);
-//                Actions.runBlocking(
-//                        new ParallelAction(
-//                                outtake.setSlide(),
-//                                outtake.claw.elbowOut()
-//                        )
-//                );
+                Actions.runBlocking(
+                        new ParallelAction(
+                                outtake.setSlide(),
+                                outtake.claw.elbowOut()
+                        )
+                );
                 setPathState(1);
                 break;
             case 1:
@@ -179,22 +178,22 @@ public class RedRight_PP extends OpMode {
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(follower.getPose().getX() < (scorePose.getX() + 1) && follower.getPose().getY() > (scorePose.getY() - 1)) {
                     /* Score Preload */
-//                    Actions.runBlocking(
-//                            new SequentialAction(
-//                                    outtake.outtakeSpecimen(),
-//                                    new SleepAction(2)
-//                            )
-//
-//                    );
+                    Actions.runBlocking(
+                            new SequentialAction(
+                                    outtake.outtakeSpecimen(),
+                                    new SleepAction(2)
+                            )
+
+                    );
                     xOffset += 5;
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(prePlow,true);
-//                    Actions.runBlocking(
-//                            new SequentialAction(
-//                                    outtake.claw.elbowIn(),
-//                                    outtake.slideTo(-100)
-//                            )
-//                    );
+                    follower.followPath(prePlow,false);
+                    Actions.runBlocking(
+                            new SequentialAction(
+                                    outtake.claw.elbowIn(),
+                                    outtake.slideTo(-100)
+                            )
+                    );
                     setPathState(2);
                 }
                 break;
@@ -203,7 +202,7 @@ public class RedRight_PP extends OpMode {
                 if(follower.getPose().getX() > (prePlowPose.getX() - 1) && follower.getPose().getY() > (prePlowPose.getY() - 1)) {
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(plowPickup1,true);
+                    follower.followPath(plowPickup1,false);
                     setPathState(3);
                 }
                 break;
@@ -213,15 +212,13 @@ public class RedRight_PP extends OpMode {
                     /* Plowed 1st Sample Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(plowPickup2,true);
+                    follower.followPath(plowPickup2,false);
                     setPathState(4);
                 }
                 break;
             case 4:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the plow2Pose's position */
-                if(pathTimer.getElapsedTime() > 3){
-//                if(follower.getPose().getX() > (plow2Pose.getX() - 1) && follower.getPose().getY() < (plow2Pose.getY() + 1)) {
-                    telemetry.addLine("RUNNING PATH");
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
+                if(follower.getPose().getX() > (plow1Pose.getX() - 1) && follower.getPose().getY() < (plow1Pose.getY() + 1)) {
                     /* Plowed 2nd Sample Sample */
 //                    Actions.runBlocking()
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
@@ -231,7 +228,7 @@ public class RedRight_PP extends OpMode {
                 break;
             case 5:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(follower.getPose().getX() < (pickupPose.getX() + 1) && follower.getPose().getY() < (pickupPose.getY() + 1)) {
+                if(!follower.isBusy()) {
                     /* Grab Sample */
                     Actions.runBlocking(
                             new SleepAction(1)
@@ -302,16 +299,12 @@ public class RedRight_PP extends OpMode {
 
         // These loop the movements of the robot
         follower.update();
-//        follower.telemetryDebug(telemetry);
         autonomousPathUpdate();
 
         // Feedback to Driver Hub
-        telemetry.addData("is busy: ", follower.isBusy());
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());
-        telemetry.addData("plow2 pose x: ", plow2Pose.getX());
         telemetry.addData("y", follower.getPose().getY());
-        telemetry.addData("plow2 pose y: ", plow2Pose.getY());
         telemetry.addData("heading", follower.getPose().getHeading());
         telemetry.update();
     }

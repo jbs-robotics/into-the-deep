@@ -460,7 +460,7 @@ public class CATeleOp extends LinearOpMode {
                             sideSpinR.setPower(sideSpinPower);
                             sideSpinL.setPower(-sideSpinPower);
                         }),
-                        new SleepAction(0.2),
+                        new SleepAction(0.25),
                         new InstantAction(()->{
                             sideSpinR.setPower(0);
                             sideSpinL.setPower(0);

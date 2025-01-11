@@ -144,6 +144,7 @@ public class RedRight_PP extends OpMode {
                         new Point(toPickupControlPose),
                         new Point(pickupPose)))
                 .setConstantHeadingInterpolation(Math.toRadians(270))
+                .setPathEndVelocityConstraint(5)
                 .build();
         scorePickup1 = follower.pathBuilder()
                 .addPath(new BezierCurve(

@@ -27,7 +27,7 @@ import pedroPathing.constants.LConstants;
 public class RedRight_PP extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
-
+    private CheckOuttakeSlides checkSlides = new CheckOuttakeSlides();
     private int xOffset = 72;
 
     /* Create and Define Poses + Paths
@@ -52,7 +52,7 @@ public class RedRight_PP extends OpMode {
     private final Pose plow1ControlPose3 = new Pose(114.000, 30.000);
     private final Pose plow2ControlPose1 = new Pose(112.000, 74.000);
     private final Pose plow2ControlPose2 = new Pose(128.000, 90.000);
-    private final Pose toPickupControlPose = new Pose(117.000, 19.000);
+    private final Pose toPickupControlPose = new Pose(117.000, 30.000);
     private final Pose cycleRightControlPose = new Pose(113.000, 35.000);
     private final Pose cycleLeftControlPose = new Pose(76.000, 5.000);
 
@@ -86,19 +86,20 @@ public class RedRight_PP extends OpMode {
                         new Point(scorePose),
                         new Point(prePlowControlPose),
                         new Point(prePlowPose)))
-                .setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(270))
                 .addPath(new BezierCurve(
                         new Point(prePlowPose),
                         new Point(prePlowControlPose),
                         new Point(110, 60)))
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(270))
                 .addPath(new BezierCurve(
                         new Point(110, 60),
                         new Point(plow1ControlPose1),
                         new Point(plow1ControlPose2),
                         new Point(plow1ControlPose3),
                         new Point(plow1Pose)))
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(270))
+                .setPathEndVelocityConstraint(5)
 //                .addPath(new BezierCurve(
 //                        new Point(plow1Pose),
 //                        new Point(plow2ControlPose1),
@@ -118,7 +119,7 @@ public class RedRight_PP extends OpMode {
                         new Point(plow1ControlPose2),
                         new Point(plow1ControlPose3),
                         new Point(plow1Pose)))
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(270))
                 .build();
         plowPickup1 = follower.pathBuilder()
                 .addPath(new BezierCurve(
@@ -127,7 +128,7 @@ public class RedRight_PP extends OpMode {
                         new Point(plow1ControlPose2),
                         new Point(plow1ControlPose3),
                         new Point(plow1Pose)))
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(270))
                 .build();
         plowPickup2 = follower.pathBuilder()
                 .addPath(new BezierCurve(
@@ -135,22 +136,23 @@ public class RedRight_PP extends OpMode {
                         new Point(plow2ControlPose1),
                         new Point(plow2ControlPose2),
                         new Point(plow2Pose)))
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(270))
                 .build();
         grabPickup1 = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         new Point(plow2Pose),
                         new Point(toPickupControlPose),
                         new Point(pickupPose)))
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(270))
+                .setConstantHeadingInterpolation(Math.toRadians(270))
                 .build();
         scorePickup1 = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         new Point(pickupPose),
                         new Point(cycleRightControlPose),
                         new Point(cycleLeftControlPose),
-                        new Point(new Pose(scorePose.getX() - 4, scorePose.getY() - 2))))
+                        new Point(new Pose(scorePose.getX() - 4, scorePose.getY() - 0.5))))
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
+                .setPathEndVelocityConstraint(5)
                 .build();
         grabPickup2 = follower.pathBuilder()
                 .addPath(new BezierCurve(
@@ -165,9 +167,10 @@ public class RedRight_PP extends OpMode {
                         new Point(pickupPose),
                         new Point(cycleRightControlPose),
                         new Point(cycleLeftControlPose),
-                        new Point(new Pose(scorePose.getX() + 4, scorePose.getY() - 3))
+                        new Point(new Pose(scorePose.getX() + 4, scorePose.getY() - 0.5))
                 ))
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
+//                .setPathEndVelocityConstraint(5)
                 .build();
         park = new Path(new BezierLine(
                 new Point(scorePose),
@@ -260,7 +263,7 @@ public class RedRight_PP extends OpMode {
                 break;
             case 4:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
-                if(follower.getPose().getY() < 18 && follower.getPose().getX() > 115) {
+                if(follower.getPose().getY() < 18 && follower.getPose().getX() > 110) {
                     /* Plowed 2nd Sample Sample */
 //                    Actions.runBlocking()
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
@@ -270,12 +273,12 @@ public class RedRight_PP extends OpMode {
                 break;
             case 5:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-//                if(follower.getPose().getY() < 10) {
-                if(!follower.isBusy()) {
+                if(follower.getPose().getY() < 10) {
+//                if(!follower.isBusy()) {
                     /* Grab Sample */
                     Actions.runBlocking(
                             new SequentialAction(
-                                    new SleepAction(0.5),
+                                    new SleepAction(1.5),
                                     outtake.clawClose(),
                                     outtake.claw.elbowOut(),
                                     outtake.slideTo(-1100),
@@ -311,11 +314,12 @@ public class RedRight_PP extends OpMode {
                 break;
             case 7:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(follower.getPose().getY() < 10) {
+                if(follower.getPose().getY() < 10.5) {
                     /* Grab Sample */
 
                     Actions.runBlocking(
                             new SequentialAction(
+                                    new SleepAction(0.5),
                                     outtake.clawClose(),
                                     outtake.claw.elbowOut(),
                                     outtake.slideTo(-1100),
@@ -336,7 +340,7 @@ public class RedRight_PP extends OpMode {
                             new SequentialAction(
                                     outtake.outtakeSpecimen(),
                                     new SleepAction(1),
-                                    outtake.slideTo(-200),
+                                    outtake.slideTo(-400),
                                     new InstantAction(()->{
                                         follower.followPath(park, true);
                                     })
@@ -368,7 +372,6 @@ public class RedRight_PP extends OpMode {
     /** This is the main loop of the OpMode, it will run repeatedly after clicking "Play". **/
     @Override
     public void loop() {
-
         // These loop the movements of the robot
         follower.update();
         autonomousPathUpdate();
@@ -389,10 +392,11 @@ public class RedRight_PP extends OpMode {
         opmodeTimer.resetTimer();
         outtake = new Outtake(hardwareMap);
         intake = new Intake(hardwareMap);
-
+        checkSlides.start();
         Constants.setConstants(FConstants.class, LConstants.class);
         follower = new Follower(hardwareMap);
         follower.setStartingPose(startPose);
+//        follower.set
         Actions.runBlocking(
                 outtake.clawClose()
         );
@@ -414,6 +418,22 @@ public class RedRight_PP extends OpMode {
     /** We do not use this because everything should automatically disable **/
     @Override
     public void stop() {
+        checkSlides.interrupt();
+    }
+
+    public class CheckOuttakeSlides extends Thread {
+        @Override
+        public void run(){
+
+            while(!Thread.currentThread().isInterrupted()){
+                if(outtake.outLimit.isPressed() && (outtake.slideLeft.getTargetPosition() > outtake.slideLeft.getCurrentPosition())){
+                    outtake.resetEncoders();
+                    telemetry.addLine("Encoders reset");
+                }
+
+                telemetry.update();
+            }
+        }
     }
 }
 

@@ -1,5 +1,6 @@
 package pedroPathing.constants;
 
+import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.localization.Localizers;
 import com.pedropathing.util.CustomFilteredPIDFCoefficients;
@@ -34,6 +35,7 @@ public class FConstants {
         FollowerConstants.zeroPowerAccelerationMultiplier= 4;
         FollowerConstants.drivePIDFCoefficients = new CustomFilteredPIDFCoefficients(0.025, 0.0, 0.00001, 0.6, 0.0);
 
+//        FollowerConstants.
         FollowerConstants.centripetalScaling = 0.0006;
 
     }

@@ -27,19 +27,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
- * the autonomous or the teleop period of an FTC match. The names of OpModes appear on the menu
- * of the FTC Driver Station. When a selection is made from the menu, the corresponding OpMode
- * class is instantiated on the Robot Controller and executed.
- *
- * This particular OpMode just executes a basic Tank Drive Teleop for a two wheeled robot
- * It includes all the skeletal structure that all linear OpModes contain.
- *
- * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
- */
-
 package org.firstinspires.ftc.teamcode;
 
 import android.annotation.SuppressLint;
@@ -83,7 +70,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.*;
-        import java.lang.*;
+import java.lang.*;
 
 /*
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
@@ -226,17 +213,18 @@ public class CATeleOp extends LinearOpMode {
                 }
                 switch(intakeID){
                     case 0:
-                        intakePivot = 0.1446; // set intake out
+                        intakePivot = 0.1150; // set intake out
+//                        intakePivot = 0.13312; // set intake out
                         break;
                     case 1:
-                        intakePivot = 0.95; // set intake in
+                        intakePivot = 0.90; // set intake in
                         break;
                     default:
                         break;
                 }
             }
 
-            intakePosition += (gamepad1.right_bumper? 85 : 0) - (gamepad1.left_bumper? 85 : 0);
+            intakePosition += (gamepad2.right_bumper? 85 : 0) - (gamepad2.left_bumper? 85 : 0);
             if(!manualOverride) intakePosition = Range.clip(intakePosition, -10, 1000);
 
             if(gamepad2.left_stick_y < 0 || outtakeSlideLeft.getCurrentPosition() <= -50 || outtakeSlideRight.getCurrentPosition() <= -50 || !outLimit.isPressed()){
@@ -352,7 +340,7 @@ public class CATeleOp extends LinearOpMode {
             telemetry.addData("Intake Slide Position", intakePosition);
             telemetry.addData("Out Slide Left", outtakeSlideLeft.getCurrentPosition());
             telemetry.addData("Out Slide Right", outtakeSlideRight.getCurrentPosition());
-//            telemetry.addData("intakePivot Position", intakePivot);
+            telemetry.addData("intakePivot Position", intakePivot);
 
             if(!inReset && intakeSlideLeft.getCurrentPosition() != 0 && outtakeSlideRight.getCurrentPosition() != 0 && inLimit.isPressed()){
                 telemetry.addData("Intake Slides reset", inLimit.isPressed());
@@ -441,9 +429,9 @@ public class CATeleOp extends LinearOpMode {
                 new SequentialAction(
                         new InstantAction(()->{
                             //set intake slide
-                            intakePosition = 300;
-                            intakeSlideLeft.setTargetPosition(300);
-                            intakeSlideRight.setTargetPosition(300);
+                            intakePosition = 350;
+                            intakeSlideLeft.setTargetPosition(350);
+                            intakeSlideRight.setTargetPosition(350);
 
 
                             //set outtake slide
@@ -453,12 +441,12 @@ public class CATeleOp extends LinearOpMode {
                             outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             outtakeSlideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             //set intake servos
-                            intakePivot = 0.95;
+                            intakePivot = 0.90;
                             inL.setPosition(intakePivot);
                             inR.setPosition(1-intakePivot);
 
 //                            OSP = 0.87;
-                            OSP = 0.92;
+                            OSP = 0.91;
                             outServoL.setPosition(1-OSP);
                             outServoR.setPosition(OSP);
 

@@ -30,10 +30,13 @@ public class FConstants {
 
         FollowerConstants.forwardZeroPowerAcceleration = -33.4054;
         FollowerConstants.lateralZeroPowerAcceleration = -84.5;
-        FollowerConstants.translationalPIDFCoefficients = new CustomPIDFCoefficients(0.4, 0.0,0.04, 0.0);
-        FollowerConstants.headingPIDFCoefficients = new CustomPIDFCoefficients(3, 0.0,0.04, 0.0);
+//        FollowerConstants.translationalPIDFCoefficients = new CustomPIDFCoefficients(0.4, 0.0,0.04, 0.0);
+        FollowerConstants.translationalPIDFCoefficients.setCoefficients(0.4, 0.0, 0.04, 0.0);
+//        FollowerConstants.headingPIDFCoefficients = new CustomPIDFCoefficients(3, 0.0,0.04, 0.0);
+        FollowerConstants.headingPIDFCoefficients.setCoefficients(3, 0.0,0.04, 0.0);
         FollowerConstants.zeroPowerAccelerationMultiplier= 4;
-        FollowerConstants.drivePIDFCoefficients = new CustomFilteredPIDFCoefficients(0.025, 0.0, 0.00001, 0.6, 0.0);
+//        FollowerConstants.drivePIDFCoefficients = new CustomFilteredPIDFCoefficients(0.025, 0.0, 0.00001, 0.6, 0.0);
+        FollowerConstants.drivePIDFCoefficients.setCoefficients(0.025, 0.0, 0.00001, 0.6, 0.0);
 
 //        FollowerConstants.
         FollowerConstants.centripetalScaling = 0.0006;

@@ -4,9 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.InstantAction;
-import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
@@ -26,9 +24,9 @@ import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
 
 @Config
-@Autonomous(name = "PP_RIGHT", group = "Autonomous")
+@Autonomous(name = "HT_PP", group = "Autonomous")
 //@Disabled
-public class Right_PP extends OpMode {
+public class HT_PP extends OpMode {
     private Telemetry telemetryA;
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;

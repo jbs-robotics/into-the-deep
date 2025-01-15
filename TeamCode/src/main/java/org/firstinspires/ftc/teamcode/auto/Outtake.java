@@ -52,20 +52,8 @@ public class Outtake {
             slideRight.setMode(runMode);
         }
 
-        public Action setClaw() {return new SetClaw();}
-        private class SetClaw implements Action {
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                claw.setElbow();
-                return false;
-            }
-        }
         public Action outtakeSample() {
-//        if(outLimit.isPressed()){
-//            resetEncoders();
-//        }
             return new SequentialAction(
-
                     claw.closeClaw(),
                     slideOut(),
                     claw.elbowOut(),
@@ -77,9 +65,6 @@ public class Outtake {
             //Preconditions:
             //  - slides are already set to the right spot (call setSlide() before this)
             //  - elbow is set to be out (call elbowOut())
-//        if(outLimit.isPressed()){
-//            resetEncoders();
-//        }
             return new SequentialAction(
                     slideTo(-1900),
                     new SleepAction(0.5),
@@ -209,8 +194,7 @@ public class Outtake {
                     if(slideLeft.getMode() == DcMotor.RunMode.RUN_USING_ENCODER) {
                         slideLeft.setPower(1);
                         slideRight.setPower(1);
-                        slideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        slideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     }
                     initialized = true;
                 }

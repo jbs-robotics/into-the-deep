@@ -33,7 +33,7 @@ public class Right_PP extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
     private CheckOuttakeSlides checkSlides = new CheckOuttakeSlides();
-    private int xOffset = 72;
+    private int xOffset = 10;
 
     /* Create and Define Poses + Paths
      * Poses are built with three constructors: x, y, and heading (in Radians).
@@ -101,17 +101,17 @@ public class Right_PP extends OpMode {
                         new Point(scorePose)))
                 .setConstantHeadingInterpolation(Math.toRadians(270))
 
-                .addPath(new BezierLine(
-                        new Point(scorePose),
-                        new Point(chamberClearPose)
-                ))
-                .setConstantHeadingInterpolation(Math.toRadians(270))
-
-                .addPath(new BezierLine(
-                        new Point(chamberClearPose),
-                        new Point(scorePose)
-                ))
-                .setConstantHeadingInterpolation(scorePose.getHeading())
+//                .addPath(new BezierLine(
+//                        new Point(scorePose),
+//                        new Point(chamberClearPose)
+//                ))
+//                .setConstantHeadingInterpolation(Math.toRadians(270))
+//
+///                .addPath(new BezierLine(
+//                        new Point(chamberClearPose),
+//                        new Point(scorePose)
+//                ))
+//                .setConstantHeadingInterpolation(scorePose.getHeading())
                 .build();
 
         plow = follower.pathBuilder()
@@ -123,11 +123,11 @@ public class Right_PP extends OpMode {
                         new Point(plow1ControlPose2),
                         new Point(plow1ControlPose3),
                         new Point(plow1ControlPose4),
-                        new Point(120, 65)))
+                        new Point(120, 60)))
                 .setConstantHeadingInterpolation(plow1Pose.getHeading())
 
                 .addPath(new BezierLine(
-                        new Point(120, 60),
+                        new Point(120, 55),
                         new Point(plow1Pose)
                 ))
                 .setConstantHeadingInterpolation(plow1Pose.getHeading())
@@ -140,27 +140,27 @@ public class Right_PP extends OpMode {
                         new Point(130, 60)))
                 .setConstantHeadingInterpolation(Math.toRadians(270))
                 .addPath(new BezierLine(
-                        new Point(130, 60),
+                        new Point(130, 55),
                         new Point(plow2Pose)
                 ))
                 .setConstantHeadingInterpolation(Math.toRadians(270))
 
 
                 // Third Spike Mark
-                .addPath(new BezierCurve(
-                        new Point(plow2Pose),
-                        new Point(plow3ControlPose1),
-                        new Point(135, 60)))
-                .setConstantHeadingInterpolation(Math.toRadians(270))
-                .addPath(new BezierLine(
-                        new Point(135, 60),
-                        new Point(plow3Pose)
-                ))
+//                .addPath(new BezierCurve(
+//                        new Point(plow2Pose),
+//                        new Point(plow3ControlPose1),
+//                        new Point(135, 60)))
+//                .setConstantHeadingInterpolation(Math.toRadians(270))
+//                .addPath(new BezierLine(
+//                        new Point(135, 60),
+//                        new Point(plow3Pose)
+//                ))
                 .build();
 
         grabPickup1 = follower.pathBuilder()
                 .addPath(new BezierCurve(
-                        new Point(plow3Pose),
+                        new Point(plow2Pose),
                         new Point(toPickupControlPose),
                         new Point(pickupPose)))
                 .setConstantHeadingInterpolation(Math.toRadians(270))
@@ -172,21 +172,21 @@ public class Right_PP extends OpMode {
                         new Point(pickupPose),
                         new Point(cycleRightControlPose),
                         new Point(cycleLeftControlPose),
-                        new Point(new Pose(scorePose.getX(), scorePose.getY()))))
+                        new Point(new Pose(scorePose.getX() - xOffset, scorePose.getY()))))
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
                 .setPathEndVelocityConstraint(5)
 
-                .addPath(new BezierLine(
-                        new Point(scorePose),
-                        new Point(chamberClearPose)
-                ))
-                .setConstantHeadingInterpolation(Math.toRadians(270))
+//                .addPath(new BezierLine(
+//                        new Point(scorePose),
+//                        new Point(chamberClearPose)
+//                ))
+//                .setConstantHeadingInterpolation(Math.toRadians(270))
 
-                .addPath(new BezierLine(
-                        new Point(chamberClearPose),
-                        new Point(scorePose)
-                ))
-                .setConstantHeadingInterpolation(Math.toRadians(270))
+//                .addPath(new BezierLine(
+//                        new Point(chamberClearPose),
+//                        new Point(scorePose)
+//                ))
+//                .setConstantHeadingInterpolation(Math.toRadians(270))
 
                 .build();
 
@@ -238,6 +238,7 @@ public class Right_PP extends OpMode {
 //                                ),
                                 new InstantAction(()->{
                                     follower.followPath(scorePreload, true);
+                                    xOffset -= 3;
                                     setPathState(1);
                                 })
 
@@ -268,7 +269,7 @@ public class Right_PP extends OpMode {
                 }
                 break;
             case 2:
-                if(follower.getPose().getX() > 133 && follower.getPose().getY() < 21){
+                if(follower.getPose().getX() > 128 && follower.getPose().getY() < 21){
 
                     follower.followPath(grabPickup1);
                     setPathState(3);
@@ -277,6 +278,7 @@ public class Right_PP extends OpMode {
             case 3:
                 if(!follower.isBusy()){
                     follower.followPath(scorePickup);
+                    xOffset -= 3;
                     setPathState(4);
                 }
 //                if(Math.abs(follower.getPose().getX() - pickupPose.getX()) < 1 && follower.getPose().getY() - pickupPose.getY() < 1){
@@ -321,6 +323,7 @@ public class Right_PP extends OpMode {
                 if(Math.abs(follower.getPose().getX() - pickupPose.getX()) < 1 && follower.getPose().getY() - pickupPose.getY() < 1){
                     /* Grab Specimen 3 */
                     follower.followPath(scorePickup, true);
+                    xOffset -= 3;
                     setPathState(6);
 //                    Actions.runBlocking(
 //                            new SequentialAction(
@@ -359,7 +362,8 @@ public class Right_PP extends OpMode {
                 if(Math.abs(follower.getPose().getX() - pickupPose.getX()) < 1 && follower.getPose().getY() - pickupPose.getY() < 1){
                     /* Grab Specimen 4 */
                     follower.followPath(scorePickup, true);
-                    setPathState(8);
+                    xOffset -= 3;
+                    setPathState(10);
 //                    Actions.runBlocking(
 //                            new SequentialAction(
 //                                    new SleepAction(1.5),

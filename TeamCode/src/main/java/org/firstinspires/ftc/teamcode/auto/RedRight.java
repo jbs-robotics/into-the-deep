@@ -14,7 +14,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
 
 @Config
 @Autonomous(name = "RED_RIGHT", group = "Autonomous")
-//@Disabled
+@Disabled
 public class RedRight extends LinearOpMode {
     private OpenCvWebcam webcam;
     private MecanumDrive drive;

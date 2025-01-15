@@ -78,11 +78,16 @@ public class Claw {
             return false;
         }
     }
-    public Action setElbow() {return new SetElbow();}
-    public class SetElbow implements Action {
+    public Action elbowTo(double pos) {return new ElbowTo(pos);}
+    public class ElbowTo implements Action {
+        private double pos;
+        public ElbowTo(double elbowPos){
+            pos = elbowPos;
+        }
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            lElbow.setPosition(0.34);
+            lElbow.setPosition(1-pos);
+            rElbow.setPosition(pos);
             return false;
         }
     }

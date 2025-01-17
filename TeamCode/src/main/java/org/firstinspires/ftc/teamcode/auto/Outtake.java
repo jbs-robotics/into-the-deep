@@ -134,8 +134,9 @@ public class Outtake {
                     slideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     slideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 }
-                if(slideLeft.getCurrentPosition() == encoderPos) return false;
-                return true;
+                return false;
+//                if(slideLeft.getCurrentPosition() == encoderPos) return false;
+//                return true;
                 // this will set the lift motor power to 0.8 until it reaches a position of 3000, then it will turn off.
             }
         }

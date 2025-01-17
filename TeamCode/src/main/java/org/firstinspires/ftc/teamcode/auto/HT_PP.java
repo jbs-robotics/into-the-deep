@@ -120,10 +120,20 @@ public class HT_PP extends OpMode {
         grabPickup1 = follower.pathBuilder()
                 .addPath(new BezierLine(
                         new Point(spit2Pose),
-                        new Point(pickupPose)
+                        new Point(pickupPose.getX(), pickupPose.getY() + 2)
                 ))
 //                .setConstantHeadingInterpolation(Math.toRadians(270))
                 .setLinearHeadingInterpolation(spit2Pose.getHeading()+0.01, Math.toRadians(270))
+                .setPathEndVelocityConstraint(10)
+                .addTemporalCallback(0, ()->{
+                    intake.elbowOut();
+                    intake.sideSpinOut();
+                })
+                .addPath(new BezierLine(
+                        new Point(spit2Pose),
+                        new Point(pickupPose)
+                ))
+                .setConstantHeadingInterpolation(Math.toRadians(270))
                 .setPathEndVelocityConstraint(10)
                 .build();
 
@@ -203,7 +213,6 @@ public class HT_PP extends OpMode {
                                         follower.followPath(spit1,true);
                                         setPathState(2);
                                     })
-
                             )
                     );
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
@@ -215,6 +224,7 @@ public class HT_PP extends OpMode {
                     follower.holdPoint(spit1Pose);
                     Actions.runBlocking(new SequentialAction(
                             intake.elbowOut(),
+//                            intake.elbowOut(),
                             new SleepAction(0.4),
 //                            new ParallelAction(
                                     intake.sideSpinIn(),
@@ -238,7 +248,7 @@ public class HT_PP extends OpMode {
                     Actions.runBlocking(
                             new SequentialAction(
                                     outtake.claw.elbowOut(),
-                                    new SleepAction(0.4),
+                                    new SleepAction(0.5),
                                     outtake.clawOpen()
                             )
                     );
@@ -248,6 +258,7 @@ public class HT_PP extends OpMode {
 
                 break;
             case 3:
+                /* Spit out the second sample */
                 if(!follower.isBusy()){
                     follower.holdPoint(spit2Pose);
                     Actions.runBlocking(new SequentialAction(
@@ -262,7 +273,7 @@ public class HT_PP extends OpMode {
                             intake.sideSpinOff(),
 //                            transfer(),
                             intake.slideIn(),
-                            intake.elbowIn(),
+//                            intake.elbowIn(),
                             new InstantAction(()->{
                                 setPathState(420);
                             })
@@ -273,14 +284,14 @@ public class HT_PP extends OpMode {
             case 69:
                 if(!follower.isBusy()){
                     /* Grab Specimen 2 */
-//                    Actions.runBlocking(
-//                            new SequentialAction(
-//                                    new InstantAction(()->{
-//                                        intake.elbowIn();
-//                                    })
-//                            )
-//                    );
-                    follower.followPath(grabPickup1, true);
+                    Actions.runBlocking(
+                            new SequentialAction(
+                                    intake.elbowIn(),
+                                    new InstantAction(()->{
+                                        follower.followPath(grabPickup1, true);
+                                    })
+                            )
+                    );
                     setPathState(4);
                 }
                 break;

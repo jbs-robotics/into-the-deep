@@ -75,7 +75,7 @@ public class Claw {
         public boolean run(@NonNull TelemetryPacket packet) {
             lElbow.setPosition(0);
             rElbow.setPosition(1);
-            return false;
+            return lElbow.getPosition() != 0 ;
         }
     }
     public Action elbowTo(double pos) {return new ElbowTo(pos);}
@@ -88,7 +88,7 @@ public class Claw {
         public boolean run(@NonNull TelemetryPacket packet) {
             lElbow.setPosition(1-pos);
             rElbow.setPosition(pos);
-            return false;
+            return lElbow.getPosition() != 1 - pos;
         }
     }
 }

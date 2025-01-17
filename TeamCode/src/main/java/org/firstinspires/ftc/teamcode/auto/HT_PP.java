@@ -122,7 +122,8 @@ public class HT_PP extends OpMode {
                         new Point(spit2Pose),
                         new Point(pickupPose)
                 ))
-                .setConstantHeadingInterpolation(Math.toRadians(270))
+//                .setConstantHeadingInterpolation(Math.toRadians(270))
+                .setLinearHeadingInterpolation(spit2Pose.getHeading()+0.01, Math.toRadians(270))
                 .setPathEndVelocityConstraint(10)
                 .build();
 
@@ -194,9 +195,9 @@ public class HT_PP extends OpMode {
                     Actions.runBlocking(
                             new SequentialAction(
                                     outtake.outtakeSpecimen(),
-                                    outtake.slideTo(-100),
                                     outtake.claw.elbowTo(0.86),
-                                    new SleepAction(0.4),
+                                    outtake.slideTo(-100),
+//                                    new SleepAction(0.4),
                                     new InstantAction(()->{
                                         xOffset += 5;
                                         follower.followPath(spit1,true);
@@ -219,7 +220,7 @@ public class HT_PP extends OpMode {
                                     intake.sideSpinIn(),
                                     intake.slideOut(),
 //                                    ),
-                            new SleepAction(0.5),
+                            new SleepAction(0.6),
                             intake.sideSpinOff(),
                             transfer(),
                             intake.slideIn(),
@@ -234,6 +235,13 @@ public class HT_PP extends OpMode {
                 if(!follower.isBusy()){
                     /* Put the first spec in the observation zone*/
                     follower.holdPoint(new Pose(spit1Pose.getX(), spit1Pose.getY(), Math.toRadians(90)));
+                    Actions.runBlocking(
+                            new SequentialAction(
+                                    outtake.claw.elbowOut(),
+                                    new SleepAction(0.4),
+                                    outtake.clawOpen()
+                            )
+                    );
                     follower.followPath(spit2, true);
                     setPathState(3);
                 }
@@ -241,13 +249,37 @@ public class HT_PP extends OpMode {
                 break;
             case 3:
                 if(!follower.isBusy()){
-                    follower.holdPoint(new Pose(spit2Pose.getX(), spit2Pose.getY(), Math.toRadians(90)));
+                    follower.holdPoint(spit2Pose);
+                    Actions.runBlocking(new SequentialAction(
+                            intake.elbowOut(),
+                            outtake.claw.elbowIn(),
+                            new SleepAction(0.4),
+//                            new ParallelAction(
+                            intake.sideSpinIn(),
+                            intake.slideOut(),
+//                                    ),
+                            new SleepAction(0.5),
+                            intake.sideSpinOff(),
+//                            transfer(),
+                            intake.slideIn(),
+                            intake.elbowIn(),
+                            new InstantAction(()->{
+                                setPathState(420);
+                            })
+                    ));
                     setPathState(69);
                 }
                 break;
             case 69:
                 if(!follower.isBusy()){
                     /* Grab Specimen 2 */
+//                    Actions.runBlocking(
+//                            new SequentialAction(
+//                                    new InstantAction(()->{
+//                                        intake.elbowIn();
+//                                    })
+//                            )
+//                    );
                     follower.followPath(grabPickup1, true);
                     setPathState(4);
                 }
@@ -384,7 +416,7 @@ public class HT_PP extends OpMode {
                             outtake.claw.openClaw(),
                             new SleepAction(0.4),
                             intake.sideSpinOut(),
-                            new SleepAction(0.3),
+                            new SleepAction(0.2),
                             outtake.clawClose(),
                             intake.sideSpinOff()
                     )

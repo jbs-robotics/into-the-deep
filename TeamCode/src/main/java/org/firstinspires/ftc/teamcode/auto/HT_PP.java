@@ -122,10 +122,10 @@ public class HT_PP extends OpMode {
                         new Point(spit2Pose),
                         new Point(pickupPose.getX(), pickupPose.getY() + 2)
                 ))
-//                .setConstantHeadingInterpolation(Math.toRadians(270))
-                .setLinearHeadingInterpolation(spit2Pose.getHeading()+0.01, Math.toRadians(270))
-                .setPathEndVelocityConstraint(10)
-                .addTemporalCallback(0, ()->{
+                .setConstantHeadingInterpolation(Math.toRadians(270))
+//                .setLinearHeadingInterpolation(spit2Pose.getHeading()+0.01, Math.toRadians(270))
+//                .setPathEndVelocityConstraint(10)
+                .addTemporalCallback(1, ()->{
                     intake.elbowOut();
                     intake.sideSpinOut();
                 })
@@ -135,6 +135,11 @@ public class HT_PP extends OpMode {
                 ))
                 .setConstantHeadingInterpolation(Math.toRadians(270))
                 .setPathEndVelocityConstraint(10)
+
+                .addTemporalCallback(0, ()->{
+                    intake.elbowIn();
+                    intake.sideSpinOff();
+                })
                 .build();
 
         scorePickup = follower.pathBuilder()
@@ -206,7 +211,7 @@ public class HT_PP extends OpMode {
                             new SequentialAction(
                                     outtake.outtakeSpecimen(),
                                     outtake.claw.elbowTo(0.86),
-                                    outtake.slideTo(-100),
+                                    outtake.slideTo(-300),
 //                                    new SleepAction(0.4),
                                     new InstantAction(()->{
                                         xOffset += 5;
@@ -264,40 +269,42 @@ public class HT_PP extends OpMode {
                     Actions.runBlocking(new SequentialAction(
                             intake.elbowOut(),
                             outtake.claw.elbowIn(),
-                            new SleepAction(0.4),
-//                            new ParallelAction(
+//                            new SleepAction(0.4),
                             intake.sideSpinIn(),
                             intake.slideOut(),
-//                                    ),
                             new SleepAction(0.5),
+
                             intake.sideSpinOff(),
-//                            transfer(),
+
                             intake.slideIn(),
-//                            intake.elbowIn(),
                             new InstantAction(()->{
-                                setPathState(420);
+                                follower.followPath(grabPickup1, true);
+                                setPathState(96);
                             })
                     ));
-                    setPathState(69);
+//                    setPathState(69);
                 }
                 break;
-            case 69:
-                if(!follower.isBusy()){
-                    /* Grab Specimen 2 */
+            case 96:
+                if(follower.getPose().getY() < 15){
                     Actions.runBlocking(
                             new SequentialAction(
-                                    intake.elbowIn(),
-                                    new InstantAction(()->{
-                                        follower.followPath(grabPickup1, true);
-                                    })
-                            )
+                                        intake.sideSpinOut(),
+                                        intake.elbowIn(),
+                                        new SleepAction(0.5)
+                                    )
                     );
                     setPathState(4);
                 }
                 break;
             case 4:
+
                 if(!follower.isBusy()){
                     /* Score Specimen 2 */
+                    Actions.runBlocking(
+                        intake.sideSpinOff()
+                    );
+
                     follower.followPath(scorePickup, true);
                     setPathState(5);
                 }
@@ -370,7 +377,7 @@ public class HT_PP extends OpMode {
         opmodeTimer.resetTimer();
         outtake = new Outtake(hardwareMap);
         intake = new Intake(hardwareMap);
-//        checkSlides.start();
+        checkSlides.start();
         Constants.setConstants(FConstants.class, LConstants.class);
         follower = new Follower(hardwareMap);
         follower.setStartingPose(startPose);
@@ -397,7 +404,7 @@ public class HT_PP extends OpMode {
     /** We do not use this because everything should automatically disable **/
     @Override
     public void stop() {
-//        checkSlides.interrupt();
+        checkSlides.interrupt();
     }
 
     public class CheckOuttakeSlides extends Thread {

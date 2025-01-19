@@ -31,10 +31,6 @@ import kotlin.annotation.MustBeDocumented;
 public class Outtake implements Subsystem {
     public static final Outtake INSTANCE = new Outtake();
 
-    // TODO: fine-tune targetTolerance
-    /// Used to determine when slides are at desired position. If slide position is within targetTolerance of target position, actions will be considered complete.
-    private int targetTolerance = 100;
-
     public static DcMotor slideLeft, slideRight;
 
     public static TouchSensor outLimit;

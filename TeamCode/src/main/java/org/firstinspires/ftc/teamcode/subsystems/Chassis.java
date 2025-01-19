@@ -5,8 +5,10 @@ import androidx.annotation.NonNull;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.localization.Pose;
+import com.pedropathing.pathgen.BezierPoint;
 import com.pedropathing.pathgen.Path;
 import com.pedropathing.pathgen.PathChain;
+import com.pedropathing.pathgen.Point;
 import com.pedropathing.util.Constants;
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
@@ -100,5 +102,38 @@ public class Chassis implements Subsystem {
                 .setEnd((interrupted) -> {
                     if (interrupted) follower.breakFollowing();
                 });
+    }
+
+    public static Lambda holdPoint(Pose point) {
+        return new Lambda("hold-point")
+                .addRequirements(INSTANCE)
+                .setInterruptible(true)
+                .setInit(() -> follower.holdPoint(point))
+                .setEnd((interrupted) -> {
+                    if (interrupted) follower.breakFollowing();
+                })
+                ;
+    }
+
+    public static Lambda holdPoint(BezierPoint point, double heading){
+        return new Lambda("hold-point")
+                .addRequirements(INSTANCE)
+                .setInterruptible(true)
+                .setInit(() -> follower.holdPoint(point, heading))
+                .setEnd((interrupted) -> {
+                    if (interrupted) follower.breakFollowing();
+                })
+                ;
+    }
+
+    public static Lambda holdPoint(Point point, double heading) {
+        return new Lambda("hold-point")
+                .addRequirements(INSTANCE)
+                .setInterruptible(true)
+                .setInit(() -> follower.holdPoint(point, heading))
+                .setEnd((interrupted) -> {
+                    if (interrupted) follower.breakFollowing();
+                })
+                ;
     }
 }

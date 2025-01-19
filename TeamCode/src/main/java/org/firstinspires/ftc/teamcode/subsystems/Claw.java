@@ -17,6 +17,8 @@ import dev.frozenmilk.dairy.core.dependency.Dependency;
 import dev.frozenmilk.dairy.core.dependency.annotation.SingleAnnotation;
 import dev.frozenmilk.dairy.core.wrapper.Wrapper;
 import dev.frozenmilk.mercurial.commands.Lambda;
+import dev.frozenmilk.mercurial.commands.groups.Sequential;
+import dev.frozenmilk.mercurial.commands.util.Wait;
 import dev.frozenmilk.mercurial.subsystems.Subsystem;
 import kotlin.annotation.MustBeDocumented;
 
@@ -25,6 +27,10 @@ public class Claw implements Subsystem {
     public static final Claw INSTANCE = new Claw();
 
     public static Servo clawServo, lElbow, rElbow; // declare the claw servos
+
+    // TODO: adjust to fit
+    /// changes how long servo actions should wait until reporting they are complete
+    public static final double SERVO_DELAY = 0.4;
 
     private Claw() {}
 
@@ -58,44 +64,59 @@ public class Claw implements Subsystem {
     public void postUserLoopHook(@NonNull Wrapper opMode) {}
 
     public static Lambda openClaw() {
-        return new Lambda("open-claw")
+        return Lambda.from(new Sequential(
+                new Lambda("open-claw")
                 .setInit(() -> clawServo.setPosition(0))
                 .addRequirements(clawServo)
-                ;
+                ,
+                new Wait(SERVO_DELAY)
+        ));
     }
     public static Lambda closeClaw() {
-        return new Lambda("close-claw")
+        return Lambda.from(new Sequential(
+            new Lambda("close-claw")
                 .setInit(() -> clawServo.setPosition(0.5))
                 .addRequirements(clawServo)
-                ;
+                ,
+                new Wait(SERVO_DELAY)
+        ));
     }
 
     public static Lambda elbowOut() {
-        return new Lambda("elbow-out")
+        return Lambda.from(new Sequential(
+        new Lambda("elbow-out")
                 .setInit(() -> {
                     lElbow.setPosition(1);
                     rElbow.setPosition(0);
                 })
                 .addRequirements(rElbow, lElbow)
-                ;
+                ,
+                new Wait(SERVO_DELAY)
+        ));
     }
     public static Lambda elbowIn() {
-        return new Lambda("elbow-in")
+        return Lambda.from(new Sequential(
+            new Lambda("elbow-in")
                 .setInit(() -> {
                     lElbow.setPosition(0);
                     rElbow.setPosition(1);
                 })
                 .addRequirements(rElbow, lElbow)
-                ;
+                ,
+                new Wait(SERVO_DELAY)
+        ));
     }
 
     public static Lambda elbowTo(double pos) {
-        return new Lambda("elbow-to")
+        return Lambda.from(new Sequential(
+            new Lambda("elbow-to")
                 .setInit(() -> {
                     lElbow.setPosition(1-pos);
                     rElbow.setPosition(pos);
                 })
                 .addRequirements(rElbow, lElbow)
-                ;
+                ,
+                new Wait(SERVO_DELAY)
+        ));
     }
 }

@@ -34,10 +34,6 @@ public class Chassis implements Subsystem {
     public static final Chassis INSTANCE = new Chassis();
     public static Follower follower;
 
-    public static DcMotorEx fl;
-    public static DcMotorEx fr;
-    public static DcMotorEx bl;
-    public static DcMotorEx br;
     public static Telemetry telemetry;
 
     public Chassis() {}
@@ -67,11 +63,6 @@ public class Chassis implements Subsystem {
         follower.setStartingPose(new Pose(81 , 9, Math.toRadians(-90)));
 
 
-        HardwareMap hMap = opMode.getOpMode().hardwareMap;
-        fl = hMap.get(DcMotorEx.class, FollowerConstants.leftFrontMotorName);
-        bl = hMap.get(DcMotorEx.class, FollowerConstants.leftRearMotorName);
-        fr = hMap.get(DcMotorEx.class, FollowerConstants.rightFrontMotorName);
-        br = hMap.get(DcMotorEx.class, FollowerConstants.rightRearMotorName);
     }
 
     @Override
@@ -83,11 +74,11 @@ public class Chassis implements Subsystem {
     @Override
     public void postUserLoopHook(@NonNull Wrapper opMode) {}
 
-    public static Lambda followPath(Path path) {
+    public static Lambda followPath(Path path, boolean holdEnd) {
         return new Lambda("follow-path")
                 .addRequirements(INSTANCE)
                 .setInterruptible(true)
-                .setInit(() -> follower.followPath(path, true))
+                .setInit(() -> follower.followPath(path, holdEnd))
                 .setExecute(() -> {
                     follower.update();
                 })
@@ -97,11 +88,11 @@ public class Chassis implements Subsystem {
                 });
     }
 
-    public static Lambda followPathChain(PathChain chain) {
+    public static Lambda followPath(PathChain chain, boolean holdEnd) {
         return new Lambda("follow-path-chain")
                 .addRequirements(INSTANCE)
                 .setInterruptible(true)
-                .setInit(() -> follower.followPath(chain, true))
+                .setInit(() -> follower.followPath(chain, holdEnd))
                 .setExecute(() -> {
                     follower.update();
                 })

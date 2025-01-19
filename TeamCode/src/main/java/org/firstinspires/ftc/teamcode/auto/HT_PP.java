@@ -28,6 +28,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.Chassis;
 
 import dev.frozenmilk.mercurial.Mercurial;
+import dev.frozenmilk.mercurial.commands.Lambda;
+import dev.frozenmilk.mercurial.commands.groups.Parallel;
+import dev.frozenmilk.mercurial.commands.groups.Sequential;
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
 
@@ -388,7 +391,40 @@ public class HT_PP extends OpMode {
     public void start() {
         opmodeTimer.resetTimer();
         setPathState(0);
+        new Sequential(
 
+                // Start Movement (case 0)
+                new Sequential(
+                        new Parallel(
+                                new Lambda("initial-elbow-out")
+                                        .setInit(() -> outtake.slideTo(-1000)),
+                                new Lambda("initial-slide-move")
+                                        .setInit(() -> outtake.claw.elbowOut())
+                        ),
+                        Chassis.followPath(scorePreload, true)
+                ),
+//
+//                Actions.runBlocking(
+//                        new SequentialAction(
+//                                outtake.outtakeSpecimen(),
+//                                outtake.claw.elbowTo(0.86),
+//                                outtake.slideTo(-100),
+////                                    new SleepAction(0.4),
+//                                new InstantAction(()->{
+//                                    xOffset += 5;
+//                                    follower.followPath(spit1,true);
+//                                    setPathState(2);
+//                                })
+//
+//                        )
+//                );
+                // Score Preload (case 1)
+                new Sequential(
+                        new Lambda("score-preload")
+                                .setInit()
+                )
+
+        );
 
 
     }

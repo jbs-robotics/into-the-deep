@@ -20,6 +20,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
+@Deprecated
 public class Claw {
     private Servo clawServo, lElbow, rElbow; // declare the claw servos
 

@@ -10,6 +10,10 @@ import com.pedropathing.pathgen.Path;
 import com.pedropathing.pathgen.PathChain;
 import com.pedropathing.pathgen.Point;
 import com.pedropathing.util.Constants;
+
+import dev.frozenmilk.mercurial.commands.groups.Sequential;
+import dev.frozenmilk.mercurial.commands.stateful.StatefulLambda;
+import dev.frozenmilk.util.cell.RefCell;
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -23,6 +27,7 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.function.Supplier;
 
 import dev.frozenmilk.dairy.core.FeatureRegistrar;
 import dev.frozenmilk.dairy.core.dependency.Dependency;
@@ -99,6 +104,24 @@ public class Chassis implements Subsystem {
                     follower.update();
                 })
                 .setFinish(() -> !follower.isBusy())
+                .setEnd((interrupted) -> {
+                    if (interrupted) follower.breakFollowing();
+                });
+    }
+
+    public static Lambda followPath(PathChain chain, @NonNull Supplier<Boolean> pathEndAt, boolean holdEnd, Supplier<Boolean> actionAt, Lambda action) {
+        return new StatefulLambda<RefCell<Boolean>>("follow-path-chain", new RefCell<Boolean>(false))
+                .addRequirements(INSTANCE)
+                .setInterruptible(true)
+                .setInit(() -> follower.followPath(chain, holdEnd))
+                .setExecute((stateRef) -> {
+                    follower.update();
+                    if (actionAt.get() && !stateRef.get()) {
+                        stateRef.accept(true);
+                        action.schedule();
+                    }
+                })
+                .setFinish(pathEndAt)
                 .setEnd((interrupted) -> {
                     if (interrupted) follower.breakFollowing();
                 });

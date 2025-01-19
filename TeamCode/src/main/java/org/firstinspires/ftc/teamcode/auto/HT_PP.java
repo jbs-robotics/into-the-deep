@@ -207,8 +207,9 @@ public class HT_PP extends OpMode {
     @Override
     public void init_loop() {}
 
-    /** This method is called once at the start of the OpMode.
-     * It runs all the setup actions, including building paths and starting the path system **/
+
+            /** This method is called once at the start of the OpMode.
+             * It runs all the setup actions, including building paths and starting the path system **/
     @Override
     public void start() {
         opmodeTimer.resetTimer();
@@ -228,7 +229,7 @@ public class HT_PP extends OpMode {
                 new Sequential(
                         Outtake.outtakeSpecimen(),
                         Claw.elbowTo(0.86),
-                        Outtake.slideTo(-100),
+                        Outtake.slideTo(-300),
                         new Lambda("set-x-offset-preload")
                                 .setInit(() -> {
                                     xOffset += 5;
@@ -266,15 +267,26 @@ public class HT_PP extends OpMode {
                         Intake.slideOut(),
                         Intake.sideSpinOff(),
                         Intake.slideIn(),
-                        Intake.elbowIn()
+                        Chassis.followPath(
+                                grabPickup1,
+                                () -> {return !Chassis.follower.isBusy();},
+                                false,
+                                () -> {return Chassis.follower.getPose().getY() < 15;},
+                                // Spit into observation
+                                Lambda.from(new Sequential(
+                                        Intake.sideSpinOut(),
+                                        Intake.elbowIn()
+                                ))
+                        )
                 ),
 
-                // TODO: Add mechs
-                // Grab specimen 2 (case 69)
-                Chassis.followPath(grabPickup1, true),
+
 
                 // Score specimen 2 (case 4)
-                Chassis.followPath(scorePickup, true),
+                new Sequential(
+                        Intake.sideSpinOff(),
+                        Chassis.followPath(scorePickup, true)
+                ),
 
                 // Grab specimen 3 (case 5)
                 Chassis.followPath(grabPickup1, true),

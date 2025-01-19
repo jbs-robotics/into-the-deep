@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
+@Deprecated
 public class Intake {
     private DcMotorEx slideLeft, slideRight;
     private CRServo sideSpinL, sideSpinR;

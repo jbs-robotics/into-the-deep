@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
+@Deprecated
 public class Outtake {
      public DcMotor slideLeft, slideRight;
      private Servo servo;

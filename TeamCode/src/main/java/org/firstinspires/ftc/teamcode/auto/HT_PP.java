@@ -25,12 +25,17 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.subsystems.Chassis;
 
+import dev.frozenmilk.mercurial.Mercurial;
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
 
 @Config
 @Autonomous(name = "HT_PP", group = "Autonomous")
+// Attach Mercurial and all subsystems
+@Mercurial.Attach
+@Chassis.Attach
 //@Disabled
 public class HT_PP extends OpMode {
     private Telemetry telemetryA;
@@ -49,7 +54,7 @@ public class HT_PP extends OpMode {
      * Lets assume the Robot is facing the human player and we want to score in the bucket */
 
     // Target Points
-    private final Pose startPose        = new Pose(81 , 9, Math.toRadians(-90));
+    private final Pose startPose = new Pose(81 , 9, Math.toRadians(-90));
     private final Pose spit1Pose = new Pose(120, 25, Math.toRadians(90));
     private final Pose spit2Pose = new Pose(130, 25, Math.toRadians(90));
     private final Pose pickupPose       = new Pose(130, 10, Math.toRadians(-90));
@@ -73,6 +78,9 @@ public class HT_PP extends OpMode {
     private Claw claw;
     private Intake intake;
     private Outtake outtake;
+
+
+
 
     public void buildPaths(){
         /* There are two major types of paths components: BezierCurves and BezierLines.
@@ -171,20 +179,20 @@ public class HT_PP extends OpMode {
         switch (pathState) {
             case 0:
 
-                Actions.runBlocking(
-                        new SequentialAction(
-                                new ParallelAction(
-                                        outtake.slideTo(-1000),
-                                        outtake.claw.elbowOut()
-                                ),
-                                new InstantAction(()->{
-                                    follower.followPath(scorePreload, true);
-                                    setPathState(1);
-                                })
-
-                        )
-                );
-                break;
+//                Actions.runBlocking(
+//                        new SequentialAction(
+//                                new ParallelAction(
+//                                        outtake.slideTo(-1000),
+//                                        outtake.claw.elbowOut()
+//                                ),
+//                                new InstantAction(()->{
+//                                    follower.followPath(scorePreload, true);
+//                                    setPathState(1);
+//                                })
+//
+//                        )
+//                );
+//                break;
             case 1:
                 if(!follower.isBusy()) {
                     /* Score Preload */
@@ -380,6 +388,8 @@ public class HT_PP extends OpMode {
     public void start() {
         opmodeTimer.resetTimer();
         setPathState(0);
+
+
 
     }
 

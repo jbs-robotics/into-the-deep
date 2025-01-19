@@ -23,6 +23,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Claw;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import dev.frozenmilk.mercurial.Mercurial;
 import dev.frozenmilk.mercurial.commands.Lambda;
 import dev.frozenmilk.mercurial.commands.groups.Parallel;
@@ -86,6 +88,7 @@ public class HT_PP extends OpMode {
 
 
     public void buildPaths(){
+        follower = Chassis.follower;
         /* There are two major types of paths components: BezierCurves and BezierLines.
          *    * BezierCurves are curved, and require >= 3 points. There are the start and end points, and the control points.
          *    - Control points manipulate the curve between the start and end points.
@@ -181,12 +184,13 @@ public class HT_PP extends OpMode {
     /** This is the main loop of the OpMode, it will run repeatedly after clicking "Play". **/
     @Override
     public void loop() {
+        follower = Chassis.follower;
         // Feedback to Driver Hub
-        telemetryA.addData("path state", pathState);
-        telemetryA.addData("x", follower.getPose().getX());
-        telemetryA.addData("y", follower.getPose().getY());
-        telemetryA.addData("heading", follower.getPose().getHeading());
-        follower.telemetryDebug(telemetryA);
+//        telemetryA.addData("path state", pathState);
+//        telemetryA.addData("x", follower.getPose().getX());
+//        telemetryA.addData("y", follower.getPose().getY());
+//        telemetryA.addData("heading", follower.getPose().getHeading());
+//        follower.telemetryDebug(telemetryA);
     }
 
     /** This method is called once at the init of the OpMode. **/
@@ -196,7 +200,6 @@ public class HT_PP extends OpMode {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
-
         Constants.setConstants(FConstants.class, LConstants.class);
         Claw.openClaw().schedule();
         buildPaths();
@@ -220,9 +223,9 @@ public class HT_PP extends OpMode {
                 new Sequential(
                         new Parallel(
                                 Outtake.slideTo(-1000),
-                                Claw.elbowOut()
-                        ),
-                        Chassis.followPath(scorePreload, true)
+                                Claw.elbowOut(),
+                                Chassis.followPath(scorePreload, true)
+                        )
                 ),
 
                 // Score Preload (case 1)
@@ -267,17 +270,20 @@ public class HT_PP extends OpMode {
                         Intake.slideOut(),
                         Intake.sideSpinOff(),
                         Intake.slideIn(),
-                        Chassis.followPath(
-                                grabPickup1,
-                                () -> {return !Chassis.follower.isBusy();},
-                                false,
-                                () -> {return Chassis.follower.getPose().getY() < 15;},
-                                // Spit into observation
-                                Lambda.from(new Sequential(
-                                        Intake.sideSpinOut(),
-                                        Intake.elbowIn()
-                                ))
-                        )
+                        Intake.elbowIn(),
+                        Chassis.followPath(grabPickup1, true),
+                        Intake.sideSpinOut()
+//                        Chassis.followPath(
+//                                grabPickup1,
+//                                () -> {return !Chassis.follower.isBusy();},
+//                                false,
+//                                () -> {return Chassis.follower.getPose().getY() < 15;},
+//                                // Spit into observation
+//                                Lambda.from(new Sequential(
+//                                        Intake.sideSpinOut(),
+//                                        Intake.elbowIn()
+//                                ))
+//                        )
                 ),
 
 
@@ -289,13 +295,13 @@ public class HT_PP extends OpMode {
                 ),
 
                 // Grab specimen 3 (case 5)
-                Chassis.followPath(grabPickup1, true),
+                Chassis.followPath(grabPickup, true),
 
                 // Score specimen 3 (case 6)
                 Chassis.followPath(scorePickup, true),
 
                 // Grab specimen 4 (case 7)
-                Chassis.followPath(grabPickup1, true),
+                Chassis.followPath(grabPickup, true),
 
                 // Score specimen 4 (case 8)
                 Chassis.followPath(scorePickup, true)
@@ -347,13 +353,18 @@ public class HT_PP extends OpMode {
 //                    )
 //            );
 //    }
+        AtomicInteger counter = new AtomicInteger();
         return new Sequential(
                 //set intake slide
+
+//                new Lambda("tel-A").addInit(() -> {counter.getAndIncrement();telemetryA.addData("Counter", counter);}),
             Claw.elbowTo(0.91),
-            Intake.slideTo(350),
+
+                Intake.slideTo(350),
+                new Wait(0.6),
 
                 //set outtake slide (NOTE: this is not fast enough to pull fully extended slides down in time)
-                Outtake.slideIn(),
+                Intake.slideIn(),
                 Intake.elbowIn(),
                 Claw.openClaw(),
                 Intake.sideSpinOut(),

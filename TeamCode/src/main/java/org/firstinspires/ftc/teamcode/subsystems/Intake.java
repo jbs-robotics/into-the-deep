@@ -13,6 +13,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
+import org.firstinspires.ftc.teamcode.auto.HT_PP;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -41,6 +43,7 @@ public class Intake implements Subsystem {
     // TODO: adjust to fit
     /// changes how long servo actions should wait until reporting they are complete
     public static final double SERVO_DELAY = 0.4;
+    public static final int SLIDE_TOLERANCE = 50;
 
     private Intake() {
     }
@@ -136,15 +139,18 @@ public class Intake implements Subsystem {
     public static Lambda slideTo(int target) {
         return new Lambda("intake-slide-to")
                 .setInit(() -> {
-                    slideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    slideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
                     slideLeft.setPower(1);
                     slideRight.setPower(1);
                     slideLeft.setTargetPosition(target);
                     slideRight.setTargetPosition(target);
+                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+//                    slideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    slideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 })
                 .setFinish(() -> {
-                    return !slideLeft.isBusy() && !slideRight.isBusy();
+                    return Math.abs(target - slideLeft.getCurrentPosition()) < SLIDE_TOLERANCE;
                 })
                 .addRequirements(slideLeft, slideRight)
                 ;

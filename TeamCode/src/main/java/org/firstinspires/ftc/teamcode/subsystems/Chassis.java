@@ -103,29 +103,32 @@ public class Chassis implements Subsystem {
                 .setExecute(() -> {
                     follower.update();
                 })
-                .setFinish(() -> !follower.isBusy())
+                .setFinish(() -> {
+                    return follower.isBusy();
+//                    return chain.getPath(chain.size()-1).getLastControlPoint().getX() - follower.getPose().getX() < 1 && chain.getPath(chain.size()-1).getLastControlPoint().getY() - follower.getPose().getY() < 1;
+                })
                 .setEnd((interrupted) -> {
                     if (interrupted) follower.breakFollowing();
                 });
     }
 
-    public static Lambda followPath(PathChain chain, @NonNull Supplier<Boolean> pathEndAt, boolean holdEnd, Supplier<Boolean> actionAt, Lambda action) {
-        return new StatefulLambda<RefCell<Boolean>>("follow-path-chain", new RefCell<Boolean>(false))
-                .addRequirements(INSTANCE)
-                .setInterruptible(true)
-                .setInit(() -> follower.followPath(chain, holdEnd))
-                .setExecute((stateRef) -> {
-                    follower.update();
-                    if (actionAt.get() && !stateRef.get()) {
-                        stateRef.accept(true);
-                        action.schedule();
-                    }
-                })
-                .setFinish(pathEndAt)
-                .setEnd((interrupted) -> {
-                    if (interrupted) follower.breakFollowing();
-                });
-    }
+//    public static Lambda followPath(PathChain chain, @NonNull Supplier<Boolean> pathEndAt, boolean holdEnd, Supplier<Boolean> actionAt, Lambda action) {
+//        return new StatefulLambda<RefCell<Boolean>>("follow-path-chain", new RefCell<Boolean>(false))
+//                .addRequirements(INSTANCE)
+//                .setInterruptible(true)
+//                .setInit(() -> follower.followPath(chain, holdEnd))
+//                .setExecute((stateRef) -> {
+//                    follower.update();
+//                    if (actionAt.get() && !stateRef.get()) {
+//                        stateRef.accept(true);
+//                        action.schedule();
+//                    }
+//                })
+//                .setFinish(pathEndAt)
+//                .setEnd((interrupted) -> {
+//                    if (interrupted) follower.breakFollowing();
+//                });
+//    }
 
     public static Lambda holdPoint(Pose point) {
         return new Lambda("hold-point")

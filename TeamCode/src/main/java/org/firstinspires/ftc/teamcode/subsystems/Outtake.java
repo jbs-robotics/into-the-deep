@@ -34,6 +34,7 @@ public class Outtake implements Subsystem {
     public static DcMotor slideLeft, slideRight;
 
     public static TouchSensor outLimit;
+    public static final int SLIDE_TOLERANCE = 50;
 
     private Outtake() {}
 
@@ -125,15 +126,14 @@ public class Outtake implements Subsystem {
     public static Lambda slideTo(int encoderPos) {
         return new Lambda("slide-to")
                 .setInit(() -> {
-                    slideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    slideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     slideLeft.setTargetPosition(encoderPos);
                     slideRight.setTargetPosition(encoderPos);
                     slideLeft.setPower(1);
                     slideRight.setPower(1);
+                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 })
                 .setFinish(() -> {
-                    return !slideLeft.isBusy() && !slideLeft.isBusy();
+                    return Math.abs(encoderPos - slideLeft.getCurrentPosition()) < SLIDE_TOLERANCE;
                 })
                 .addRequirements(slideLeft, slideRight)
                 ;
@@ -141,41 +141,11 @@ public class Outtake implements Subsystem {
     }
 
     public static Lambda slideOut() {
-        return new Lambda("slide-out")
-                .setInit(() -> {
-                    slideLeft.setTargetPosition(-4000);
-                    slideRight.setTargetPosition(-4000);
-                    if(slideLeft.getMode() == DcMotor.RunMode.RUN_USING_ENCODER) {
-                        slideLeft.setPower(1);
-                        slideRight.setPower(1);
-                        slideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        slideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    }
-                })
-                .setFinish(() -> {
-                    // TODO: Ken let me know if this is me interpreting you correctly in auto/Outtake.java:163
-                    return (!slideLeft.isBusy() && !slideLeft.isBusy()) || slideLeft.getCurrentPosition() > -4000 || slideRight.getCurrentPosition() > -4000;
-                })
-                .addRequirements(slideLeft, slideRight)
-                ;
+        return slideTo(-4000);
     }
 
     public static Lambda slideIn() {
-        return new Lambda("slide-in")
-                .setInit(() -> {
-                    slideLeft.setTargetPosition(0);
-                    slideRight.setTargetPosition(0);
-                    if (slideLeft.getMode() == DcMotor.RunMode.RUN_USING_ENCODER) {
-                        slideLeft.setPower(1);
-                        slideRight.setPower(1);
-                        setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    }
-                })
-                .setFinish(() -> {
-                    return !slideLeft.isBusy() && !slideLeft.isBusy();
-                })
-                .addRequirements(slideLeft, slideRight)
-                ;
+        return slideTo(-10);
     }
 
 }

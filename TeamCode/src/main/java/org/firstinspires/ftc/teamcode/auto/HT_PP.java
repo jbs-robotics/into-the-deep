@@ -134,9 +134,9 @@ public class HT_PP extends OpMode {
         grabPickup1 = follower.pathBuilder()
                 .addPath(new BezierLine(
                         new Point(spit2Pose),
-                        new Point(new Pose(pickupPose.getX(), pickupPose.getY()-1))
+                        new Point(new Pose(pickupPose.getX(), pickupPose.getY()+7))
                 ))
-                .setConstantHeadingInterpolation(Math.toRadians(-90))
+                .setConstantHeadingInterpolation(Math.toRadians(90))
                 .build();
 
         scorePickup1 = follower.pathBuilder()
@@ -144,7 +144,7 @@ public class HT_PP extends OpMode {
                         new Point(pickupPose),
                         new Point(cycleRightControlPose),
                         new Point(cycleLeftControlPose),
-                        new Point(new Pose(scorePose.getX() + 2, scorePose.getY()))))
+                        new Point(new Pose(scorePose.getX() + 2, scorePose.getY() + 0.75 ))))
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
                 .build();
 
@@ -153,7 +153,7 @@ public class HT_PP extends OpMode {
                         new Point(pickupPose),
                         new Point(cycleRightControlPose),
                         new Point(cycleLeftControlPose),
-                        new Point(new Pose(scorePose.getX() + 4, scorePose.getY() + 1 ))))
+                        new Point(new Pose(scorePose.getX() + 4, scorePose.getY() + 1.75 ))))
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
                 .build();
 
@@ -162,7 +162,7 @@ public class HT_PP extends OpMode {
                         new Point(pickupPose),
                         new Point(cycleRightControlPose),
                         new Point(cycleLeftControlPose),
-                        new Point(new Pose(scorePose.getX() + 6, scorePose.getY()))))
+                        new Point(new Pose(scorePose.getX() + 6, scorePose.getY() ))))
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
                 .build();
 
@@ -282,7 +282,6 @@ public class HT_PP extends OpMode {
                 // Put spec in observation zone (case 420)
                 new Sequential(
                         new Parallel(
-
                                 Chassis.followPath(spit2, 2),
                                 new Sequential(
                                     Claw.elbowOut(),
@@ -304,34 +303,42 @@ public class HT_PP extends OpMode {
                             Claw.elbowTo(0.86),
                             Intake.sideSpinIn()
                         ),
-                        Intake.elbowOut(),
                         Claw.elbowIn(),
                         Intake.sideSpinIn(),
                         Intake.slideOut(),
-                        new Wait(0.3),
+//                        new Wait(0.3),
                         Intake.sideSpinOff(),
-
-
+                        transfer(),
+                        Intake.slideIn(),
                         new Parallel(
-                                Chassis.followPath(grabPickup1, true),
-                                new Sequential(
-                                        Intake.elbowIn(),
-                                        new Parallel(
-                                                Claw.elbowTo(0.7),
-                                                Claw.openClaw(),
-                                                Intake.sideSpinOut(),
-                                                Intake.slideIn(),
-                                                Intake.elbowTo(0.95)
-                                        )
-                                ),
-                            Intake.elbowIn(),
+                            Chassis.followPath(grabPickup1, true),
                             new Sequential(
-                                    new Wait(0.5),
-                                    Intake.sideSpinOff(),
-                                    Claw.elbowIn(),
-                                    Claw.openClaw()
+                                Claw.elbowOut(),
+                                Claw.openClaw()
                             )
                         )
+
+
+//                        new Parallel(
+//                                Chassis.followPath(grabPickup1, true),
+//                                Claw.elbowTo(0.7),
+//                                new Sequential(
+//                                        Intake.elbowIn(),
+//                                        new Parallel(
+//                                                Claw.openClaw(),
+//                                                Intake.sideSpinOut(),
+//                                                Intake.elbowTo(0.95)
+//                                        )
+//                                ),
+//                                Intake.elbowIn(),
+//                                new Sequential(
+//                                    new Wait(0.5),
+//                                    Intake.slideIn(),
+//                                    Intake.sideSpinOff(),
+//                                    Claw.elbowIn(),
+//                                    Claw.openClaw()
+//                                )
+//                        )
                 ),
 
 
@@ -343,7 +350,7 @@ public class HT_PP extends OpMode {
                         new Parallel(
                             Intake.sideSpinOff(),
                             Chassis.followPath(scorePickup1, true),
-                            Outtake.slideTo(-1300),
+                            Outtake.slideTo(-1400),
                             Claw.elbowOut()
                         )
                 ),
@@ -369,7 +376,7 @@ public class HT_PP extends OpMode {
                         Intake.sideSpinOff(),
                         new Parallel(
                                 Chassis.followPath(scorePickup2, true),
-                                Outtake.slideTo(-1300),
+                                Outtake.slideTo(-1400),
                                 Claw.elbowOut()
                         )
                 ),
@@ -395,20 +402,21 @@ public class HT_PP extends OpMode {
                         Claw.closeClaw(),
                         Intake.sideSpinOff(),
                         new Parallel(
-                                Chassis.followPath(scorePickup3, true),
-                                Outtake.slideTo(-1300),
+                                Chassis.followPath(scorePickup3, 1),
+                                Outtake.slideTo(-100),
                                 Claw.elbowOut()
                         )
                 ),
 
                 // Score Specimen 4
-                new Sequential(
-                        Outtake.outtakeSpecimen(),
-                        new Parallel(
-                                Claw.elbowTo(0.86), // pulls outtake to a salute
-                                Outtake.slideTo(-300),
-                                Chassis.followPath(grabPickup, true)
-                        )
+                new Parallel(
+                        Chassis.holdPoint(new Pose(scorePose.getX() + 6, scorePose.getY() )),
+                        Outtake.outtakeSpecimen()
+//                        new Parallel(
+//                                Claw.elbowTo(0.86), // pulls outtake to a salute
+//                                Outtake.slideTo(-300)
+//                                Chassis.followPath(grabPickup, true)
+//                        )
 
 
                 )

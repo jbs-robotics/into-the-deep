@@ -13,6 +13,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.auto.HT_PP;
 
 import java.lang.annotation.ElementType;
@@ -42,6 +44,7 @@ public class Intake implements Subsystem {
 
     // TODO: adjust to fit
     /// changes how long servo actions should wait until reporting they are complete
+    public static Telemetry telemetry;
     public static final double SERVO_DELAY = 0.4;
     public static final int SLIDE_TOLERANCE = 50;
 
@@ -70,6 +73,8 @@ public class Intake implements Subsystem {
 
     @Override
     public void preUserInitHook(@NonNull Wrapper opMode) {
+        Telemetry telemetry = opMode.getOpMode().telemetry;
+
         HardwareMap hardwareMap = opMode.getOpMode().hardwareMap;
 
         slideLeft = hardwareMap.get(DcMotorEx.class, "ISL");
@@ -144,10 +149,15 @@ public class Intake implements Subsystem {
                     slideRight.setPower(1);
                     slideLeft.setTargetPosition(target);
                     slideRight.setTargetPosition(target);
-                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    if(slideLeft.getMode() == DcMotor.RunMode.RUN_USING_ENCODER)
+                        setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 //                    slideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //                    slideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                })
+                .setExecute(()->{
+//                    telemetry.addData("slideLeft Position", slideLeft.getCurrentPosition());
+//                    slideLeft.getCurrent(CurrentUnit.AMPS)
                 })
                 .setFinish(() -> {
                     return Math.abs(target - slideLeft.getCurrentPosition()) < SLIDE_TOLERANCE;
@@ -173,18 +183,21 @@ public class Intake implements Subsystem {
                     lElbow.setPosition(pos);
                     rElbow.setPosition(1-pos);
                 })
-                .addRequirements(lElbow, rElbow),
-                new Wait(SERVO_DELAY)
+                .addRequirements(lElbow, rElbow)
+//                .setFinish(()->{
+//                    return Math.abs(lElbow.getPosition() - pos) < 0.001;
+//                })
+//                new Wait(SERVO_DELAY)
         ))
                 ;
     }
 
     public static Lambda elbowOut() {
-        return elbowTo(0.1150);
+        return elbowTo(0.09);
     }
 
     public static Lambda elbowIn() {
-        return elbowTo(0.9);
+        return elbowTo(0.85);
     }
 
 

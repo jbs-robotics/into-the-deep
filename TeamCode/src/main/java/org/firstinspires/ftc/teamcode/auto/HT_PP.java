@@ -59,11 +59,11 @@ public class HT_PP extends OpMode {
      * Lets assume the Robot is facing the human player and we want to score in the bucket */
 
     // Target Points
-    private final Pose startPose = new Pose(81 , 9, Math.toRadians(-90));
-    private final Pose spit1Pose = new Pose(120, 25, Math.toRadians(90));
-    private final Pose spit2Pose = new Pose(130, 25, Math.toRadians(90));
-    private final Pose pickupPose       = new Pose(130, 10, Math.toRadians(-90));
-    private final Pose scorePose        = new Pose(xOffset , 28.5, Math.toRadians(-90));
+    private final Pose startPose        = new Pose(81 , 9, Math.toRadians(-90));
+    private final Pose spit1Pose        = new Pose(120, 25, Math.toRadians(90));
+    private final Pose spit2Pose        = new Pose(130, 25, Math.toRadians(90));
+    private final Pose pickupPose       = new Pose(116, 9, Math.toRadians(-90));
+    private final Pose scorePose        = new Pose(72 , 28.5, Math.toRadians(-90));
 //    private final Pose chamberClearPose = new Pose(69 , 28, Math.toRadians(270));
 
     // Control Points
@@ -75,7 +75,7 @@ public class HT_PP extends OpMode {
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
     private Path park, clearChamber;
-    private PathChain scorePreload, spit1, spit2, grabPickup1, grabPickup, scorePickup;
+    private PathChain scorePreload, spit1, spit2, grabPickup1, grabPickup, scorePickup1, scorePickup2, scorePickup3;
 
     /** This is the variable where we store the state of our auto.
      * It is used by the pathUpdate method. */
@@ -134,22 +134,38 @@ public class HT_PP extends OpMode {
         grabPickup1 = follower.pathBuilder()
                 .addPath(new BezierLine(
                         new Point(spit2Pose),
-                        new Point(pickupPose)
+                        new Point(new Pose(pickupPose.getX(), pickupPose.getY()-1))
                 ))
-//                .setConstantHeadingInterpolation(Math.toRadians(270))
-                .setLinearHeadingInterpolation(spit2Pose.getHeading()+0.01, Math.toRadians(270))
-                .setPathEndVelocityConstraint(10)
+                .setConstantHeadingInterpolation(Math.toRadians(-90))
                 .build();
 
-        scorePickup = follower.pathBuilder()
+        scorePickup1 = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         new Point(pickupPose),
                         new Point(cycleRightControlPose),
                         new Point(cycleLeftControlPose),
-                        new Point(new Pose(scorePose.getX(), scorePose.getY()))))
+                        new Point(new Pose(scorePose.getX() + 2, scorePose.getY()))))
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
-                .setPathEndVelocityConstraint(5)
                 .build();
+
+        scorePickup2 = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        new Point(pickupPose),
+                        new Point(cycleRightControlPose),
+                        new Point(cycleLeftControlPose),
+                        new Point(new Pose(scorePose.getX() + 4, scorePose.getY() + 1 ))))
+                .setConstantHeadingInterpolation(Math.toRadians(-90))
+                .build();
+
+        scorePickup3 = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        new Point(pickupPose),
+                        new Point(cycleRightControlPose),
+                        new Point(cycleLeftControlPose),
+                        new Point(new Pose(scorePose.getX() + 6, scorePose.getY()))))
+                .setConstantHeadingInterpolation(Math.toRadians(-90))
+                .build();
+
 
         grabPickup = follower.pathBuilder()
                 .addPath(new BezierCurve(
@@ -201,7 +217,7 @@ public class HT_PP extends OpMode {
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
         Constants.setConstants(FConstants.class, LConstants.class);
-        Claw.openClaw().schedule();
+        Claw.closeClaw().schedule();
         buildPaths();
 
     }
@@ -222,92 +238,180 @@ public class HT_PP extends OpMode {
                 // Start Movement (case 0)
                 new Sequential(
                         new Parallel(
+                                Claw.closeClaw(),
                                 Outtake.slideTo(-1000),
                                 Claw.elbowOut(),
+                                Intake.elbowTo(0.13),
                                 Chassis.followPath(scorePreload, true)
                         )
                 ),
 
                 // Score Preload (case 1)
                 new Sequential(
-                        Outtake.outtakeSpecimen(),
-                        Claw.elbowTo(0.86),
-                        Outtake.slideTo(-300),
-                        new Lambda("set-x-offset-preload")
+                        new Parallel(
+                            Outtake.outtakeSpecimen(),
+                            Chassis.followPath(spit1, 1),
+                            Claw.elbowTo(0.86), // pulls outtake to a salute
+
+                            new Lambda("set-x-offset-preload")
                                 .setInit(() -> {
                                     xOffset += 5;
                                 }),
-                        Chassis.followPath(spit1, true)
+                            new Sequential(
+                                new Wait(0.5),
+                                Outtake.slideTo(-100)
+                            )
+                        )
                 ),
 
                 // Intake first sample (case 2)
                 new Sequential(
                     Chassis.holdPoint(spit1Pose),
-                        Intake.elbowOut(),
-                        Intake.sideSpinIn(),
-                        Intake.slideOut(),
-                        Intake.sideSpinOff(),
-                        transfer(),
-                        Intake.slideIn()
+                    Intake.elbowOut(),
+                    Claw.elbowIn(),
+                    Intake.sideSpinIn(),
+                    Intake.slideOut(),
+                    new Wait(0.3),
+                    Intake.sideSpinOff(),
+                    transfer(),
+                    Intake.elbowOut(),
+                    Intake.slideTo(300)
+//                    Intake.slideIn()
                 ),
 
                 // Put spec in observation zone (case 420)
                 new Sequential(
                         new Parallel(
-                                Chassis.holdPoint(new Pose(spit1Pose.getX(), spit1Pose.getY(), Math.toRadians(90))),
-                                Claw.elbowOut()
-                                        .then(Claw.openClaw())
-                        ),
-                        Chassis.followPath(spit2, true)
+
+                                Chassis.followPath(spit2, 2),
+                                new Sequential(
+                                    Claw.elbowOut(),
+                                    Claw.openClaw(),
+                                    new Parallel(
+                                            Intake.elbowOut(),
+                                            Claw.elbowTo(0.86),
+                                            Intake.sideSpinIn()
+                                    )
+                                )
+                        )
                 ),
 
-                // Pick up second sample (case 3)
+                // Put second spec in the observation zone (case 3)
                 new Sequential(
                         Chassis.holdPoint(spit2Pose),
+                        new Parallel(
+                            Intake.elbowOut(),
+                            Claw.elbowTo(0.86),
+                            Intake.sideSpinIn()
+                        ),
                         Intake.elbowOut(),
                         Claw.elbowIn(),
                         Intake.sideSpinIn(),
                         Intake.slideOut(),
+                        new Wait(0.3),
                         Intake.sideSpinOff(),
-                        Intake.slideIn(),
-                        Intake.elbowIn(),
-                        Chassis.followPath(grabPickup1, true),
-                        Intake.sideSpinOut()
-//                        Chassis.followPath(
-//                                grabPickup1,
-//                                () -> {return !Chassis.follower.isBusy();},
-//                                false,
-//                                () -> {return Chassis.follower.getPose().getY() < 15;},
-//                                // Spit into observation
-//                                Lambda.from(new Sequential(
-//                                        Intake.sideSpinOut(),
-//                                        Intake.elbowIn()
-//                                ))
-//                        )
+
+
+                        new Parallel(
+                                Chassis.followPath(grabPickup1, true),
+                                new Sequential(
+                                        Intake.elbowIn(),
+                                        new Parallel(
+                                                Claw.elbowTo(0.7),
+                                                Claw.openClaw(),
+                                                Intake.sideSpinOut(),
+                                                Intake.slideIn(),
+                                                Intake.elbowTo(0.95)
+                                        )
+                                ),
+                            Intake.elbowIn(),
+                            new Sequential(
+                                    new Wait(0.5),
+                                    Intake.sideSpinOff(),
+                                    Claw.elbowIn(),
+                                    Claw.openClaw()
+                            )
+                        )
                 ),
 
 
 
-                // Score specimen 2 (case 4)
+                // Grab specimen 2 (case 4)
                 new Sequential(
-                        Intake.sideSpinOff(),
-                        Chassis.followPath(scorePickup, true)
+                        /* Grab the Specimen Here */
+                        Claw.closeClaw(),
+                        new Parallel(
+                            Intake.sideSpinOff(),
+                            Chassis.followPath(scorePickup1, true),
+                            Outtake.slideTo(-1300),
+                            Claw.elbowOut()
+                        )
                 ),
 
-                // Grab specimen 3 (case 5)
-                Chassis.followPath(grabPickup, true),
+                // Score specimen 2 (case 5)
+                new Sequential(
+                        new Parallel(
+                            Outtake.outtakeSpecimen(),
+                            Claw.elbowTo(0.86), // pulls outtake to a salute
+                            Chassis.followPath(grabPickup, true),
+                            new Sequential(
+                                    new Wait(0.5),
+                                    Outtake.slideTo(-100)
+                            )
+                        )
 
-                // Score specimen 3 (case 6)
-                Chassis.followPath(scorePickup, true),
 
-                // Grab specimen 4 (case 7)
-                Chassis.followPath(grabPickup, true),
+                ),
 
-                // Score specimen 4 (case 8)
-                Chassis.followPath(scorePickup, true)
+                // Grab specimen 3 (case 6)
+                new Sequential(
+                        Claw.closeClaw(),
+                        Intake.sideSpinOff(),
+                        new Parallel(
+                                Chassis.followPath(scorePickup2, true),
+                                Outtake.slideTo(-1300),
+                                Claw.elbowOut()
+                        )
+                ),
+
+                // Score specimen 3 (case 7)
+                new Sequential(
+                        new Parallel(
+                                Outtake.outtakeSpecimen(),
+                                Claw.elbowTo(0.86), // pulls outtake to a salute
+                                Chassis.followPath(grabPickup, true),
+                                new Sequential(
+                                        new Wait(0.5),
+                                        Outtake.slideTo(-100)
+                                )
+                        )
 
 
+                ),
 
+                // Grab specimen 4 (case 8)
+                new Sequential(
+                        Claw.elbowIn(),
+                        Claw.closeClaw(),
+                        Intake.sideSpinOff(),
+                        new Parallel(
+                                Chassis.followPath(scorePickup3, true),
+                                Outtake.slideTo(-1300),
+                                Claw.elbowOut()
+                        )
+                ),
+
+                // Score Specimen 4
+                new Sequential(
+                        Outtake.outtakeSpecimen(),
+                        new Parallel(
+                                Claw.elbowTo(0.86), // pulls outtake to a salute
+                                Outtake.slideTo(-300),
+                                Chassis.followPath(grabPickup, true)
+                        )
+
+
+                )
         )
                 .schedule();
 
@@ -335,40 +439,17 @@ public class HT_PP extends OpMode {
         }
     }
     private Sequential transfer() {
-//        return new SequentialAction(
-//                    new SequentialAction(
-//                            //set intake slide
-//                            outtake.claw.elbowTo(0.91),
-//                            intake.slideTo(350),
-//
-//                            //set outtake slide (NOTE: this is not fast enough to pull fully extended slides down in time)
-//                            outtake.slideIn(),
-//                            intake.elbowIn(),
-//                            outtake.claw.openClaw(),
-//                            new SleepAction(0.4),
-//                            intake.sideSpinOut(),
-//                            new SleepAction(0.2),
-//                            outtake.clawClose(),
-//                            intake.sideSpinOff()
-//                    )
-//            );
-//    }
-        AtomicInteger counter = new AtomicInteger();
         return new Sequential(
                 //set intake slide
+                new Parallel(
+                    Claw.elbowTo(0.9),
+                    Intake.slideTo(350),
+                    Intake.elbowIn(),
+                    Claw.openClaw()
+                ),
 
-//                new Lambda("tel-A").addInit(() -> {counter.getAndIncrement();telemetryA.addData("Counter", counter);}),
-            Claw.elbowTo(0.91),
-
-                Intake.slideTo(350),
-                new Wait(0.6),
-
-                //set outtake slide (NOTE: this is not fast enough to pull fully extended slides down in time)
-                Intake.slideIn(),
-                Intake.elbowIn(),
-                Claw.openClaw(),
                 Intake.sideSpinOut(),
-                new Wait(0.2),
+                new Wait(0.3),
                 Claw.closeClaw(),
                 Intake.sideSpinOff()
         );

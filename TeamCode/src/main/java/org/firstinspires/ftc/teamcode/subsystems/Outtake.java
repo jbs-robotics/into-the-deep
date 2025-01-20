@@ -22,6 +22,7 @@ import dev.frozenmilk.dairy.core.dependency.Dependency;
 import dev.frozenmilk.dairy.core.dependency.annotation.SingleAnnotation;
 import dev.frozenmilk.dairy.core.wrapper.Wrapper;
 import dev.frozenmilk.mercurial.commands.Lambda;
+import dev.frozenmilk.mercurial.commands.groups.Parallel;
 import dev.frozenmilk.mercurial.commands.groups.Sequential;
 import dev.frozenmilk.mercurial.commands.util.Wait;
 import dev.frozenmilk.mercurial.subsystems.Subsystem;
@@ -114,9 +115,16 @@ public class Outtake implements Subsystem {
     }
     public static Lambda outtakeSpecimen() {
         return Lambda.from(new Sequential(
-                slideTo(-1900),
-                Claw.openClaw(),
-                Claw.elbowIn()
+                new Parallel(
+                    slideTo(-1800),
+                    new Sequential(
+                        new Wait(0.3),
+                        new Parallel(
+                            Claw.openClaw(),
+                            Claw.elbowIn()
+                        )
+                    )
+                )
         ))
                 .addRequirements(Claw.INSTANCE)
                 ;
@@ -132,8 +140,16 @@ public class Outtake implements Subsystem {
                     slideRight.setPower(1);
                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 })
+                .setExecute(()->{
+                    if(outLimit.isPressed() && slideLeft.getCurrentPosition() < slideLeft.getTargetPosition()){
+                        setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                        slideLeft.setTargetPosition(0);
+                        slideRight.setTargetPosition(0);
+                        setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    }
+                })
                 .setFinish(() -> {
-                    return Math.abs(encoderPos - slideLeft.getCurrentPosition()) < SLIDE_TOLERANCE;
+                    return Math.abs(slideLeft.getTargetPosition() - slideLeft.getCurrentPosition()) < SLIDE_TOLERANCE || (outLimit.isPressed() && slideLeft.getTargetPosition() > slideLeft.getCurrentPosition());
                 })
                 .addRequirements(slideLeft, slideRight)
                 ;

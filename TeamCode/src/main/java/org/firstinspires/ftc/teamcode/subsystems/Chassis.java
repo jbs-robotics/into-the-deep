@@ -88,6 +88,8 @@ public class Chassis implements Subsystem {
                 .setInit(() -> follower.followPath(path, holdEnd))
                 .setExecute(() -> {
                     follower.update();
+                    telemetry.addData("Pose: ", follower.getPose());
+                    telemetry.update();
                 })
                 .setFinish(() -> !follower.isBusy())
                 .setEnd((interrupted) -> {
@@ -102,10 +104,30 @@ public class Chassis implements Subsystem {
                 .setInit(() -> follower.followPath(chain, holdEnd))
                 .setExecute(() -> {
                     follower.update();
+                    telemetry.addData("Pose: ", follower.getPose());
+                    telemetry.update();
                 })
                 .setFinish(() -> {
-                    return follower.isBusy();
+                    return !follower.isBusy();
 //                    return chain.getPath(chain.size()-1).getLastControlPoint().getX() - follower.getPose().getX() < 1 && chain.getPath(chain.size()-1).getLastControlPoint().getY() - follower.getPose().getY() < 1;
+                })
+                .setEnd((interrupted) -> {
+                    if (interrupted) follower.breakFollowing();
+                });
+    }
+    public static Lambda followPath(PathChain chain, int tolerance) {
+        return new Lambda("follow-path-chain")
+                .addRequirements(INSTANCE)
+                .setInterruptible(true)
+                .setInit(() -> follower.followPath(chain, true))
+                .setExecute(() -> {
+                    follower.update();
+                    telemetry.addData("Pose: ", follower.getPose());
+                    telemetry.update();
+                })
+                .setFinish(() -> {
+//                    return
+                    return chain.getPath(chain.size()-1).getLastControlPoint().getX() - follower.getPose().getX() < tolerance && chain.getPath(chain.size()-1).getLastControlPoint().getY() - follower.getPose().getY() < tolerance;
                 })
                 .setEnd((interrupted) -> {
                     if (interrupted) follower.breakFollowing();

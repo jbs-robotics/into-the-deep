@@ -115,7 +115,7 @@ public class Chassis implements Subsystem {
                     if (interrupted) follower.breakFollowing();
                 });
     }
-    public static Lambda followPath(PathChain chain, int tolerance) {
+    public static Lambda followPath(PathChain chain, double tolerance) {
         return new Lambda("follow-path-chain")
                 .addRequirements(INSTANCE)
                 .setInterruptible(true)

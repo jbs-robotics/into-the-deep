@@ -14,6 +14,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.util.Constants;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -47,6 +48,7 @@ import pedroPathing.constants.LConstants;
  * @version 1.0, 3/13/2024
  */
 @Config
+@Disabled
 @Autonomous(name = "Forward Velocity Tuner", group = "Automatic Tuners")
 public class ForwardVelocityTuner extends OpMode {
     private ArrayList<Double> velocities = new ArrayList<>();

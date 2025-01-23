@@ -122,8 +122,8 @@ public class Chassis implements Subsystem {
                 .setInit(() -> follower.followPath(chain, true))
                 .setExecute(() -> {
                     follower.update();
-                    telemetry.addData("Pose: ", follower.getPose());
-                    telemetry.update();
+//                    telemetry.addData("Pose: ", follower.getPose());
+//                    telemetry.update();
                 })
                 .setFinish(() -> {
 //                    return
@@ -152,17 +152,29 @@ public class Chassis implements Subsystem {
 //                });
 //    }
 
-    public static Lambda holdPoint(Pose point) {
+    public static Lambda holdPoint(Pose pose) {
         return new Lambda("hold-point")
                 .addRequirements(INSTANCE)
                 .setInterruptible(true)
-                .setInit(() -> follower.holdPoint(point))
+                .setInit(() -> follower.holdPoint(pose))
                 .setEnd((interrupted) -> {
                     if (interrupted) follower.breakFollowing();
                 })
                 ;
     }
-
+    public static Lambda turnTo(double heading, double toleranceHeading) {
+        return new Lambda("hold-point")
+                .addRequirements(INSTANCE)
+                .setInterruptible(true)
+                .setInit(() -> follower.holdPoint(new Pose(follower.getPose().getX(), follower.getPose().getY(), heading)))
+                .setFinish(()->{
+                    return Math.abs(follower.getPose().getHeading() - heading) < toleranceHeading;
+                })
+                .setEnd((interrupted) -> {
+                    if(interrupted) follower.breakFollowing();
+                })
+                ;
+    }
     public static Lambda holdPoint(BezierPoint point, double heading){
         return new Lambda("hold-point")
                 .addRequirements(INSTANCE)

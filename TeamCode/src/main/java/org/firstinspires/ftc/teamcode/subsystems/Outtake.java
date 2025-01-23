@@ -86,10 +86,11 @@ public class Outtake implements Subsystem {
     }
 
     public static void resetEncoders(){
-        slideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        slideRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        slideLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        slideRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        slideLeft.setTargetPosition(0);
+        slideRight.setTargetPosition(0);
+        setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
     }
     public static void setMode(DcMotor.RunMode runMode){
         slideLeft.setMode(runMode);
@@ -126,6 +127,22 @@ public class Outtake implements Subsystem {
                     )
                 )
         ))
+                .addRequirements(Claw.INSTANCE)
+                ;
+    }
+    public static Lambda slowOuttakeSpecimen() {
+        return Lambda.from(new Sequential(
+                        new Sequential(
+                                slideTo(-1900),
+                                new Sequential(
+                                        new Wait(0.3),
+                                        new Parallel(
+                                                Claw.openClaw(),
+                                                Claw.elbowIn()
+                                        )
+                                )
+                        )
+                ))
                 .addRequirements(Claw.INSTANCE)
                 ;
     }

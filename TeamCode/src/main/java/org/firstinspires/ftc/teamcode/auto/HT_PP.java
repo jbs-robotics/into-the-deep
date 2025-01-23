@@ -150,7 +150,7 @@ public class HT_PP extends OpMode {
                 .addPath(
                         new BezierLine(
                                 new Point(pickupPose),
-                                new Point(new Pose(scorePose.getX() + 4, scorePose.getY() ))
+                                new Point(new Pose(scorePose.getX() + 3, scorePose.getY() + 1 ))
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
@@ -166,7 +166,7 @@ public class HT_PP extends OpMode {
 //                 )
                 .addPath(new BezierLine(
                         new Point(pickupPose),
-                        new Point(new Pose(scorePose.getX() + 8, scorePose.getY() + 1.75 ))))
+                        new Point(new Pose(scorePose.getX() + 6, scorePose.getY() + 0.75 ))))
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
                 .build();
 
@@ -179,7 +179,7 @@ public class HT_PP extends OpMode {
 //                ))
                 .addPath(new BezierLine(
                         new Point(pickupPose),
-                        new Point(new Pose(scorePose.getX() + 12, scorePose.getY() ))
+                        new Point(new Pose(scorePose.getX() + 9, scorePose.getY() ))
                 ))
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
                 .build();
@@ -316,8 +316,14 @@ public class HT_PP extends OpMode {
                             new Parallel(
                                     Chassis.followPath(spit2, true),
                                     new Sequential(
-                                        Claw.elbowOut(),
-                                        Claw.openClaw(),
+                                            new Parallel(
+                                                    Claw.elbowOut(),
+                                                    new Sequential(
+                                                            new Wait(0.29),
+                                                            Claw.openClaw()
+                                                    )
+
+                                            ),
                                         new Parallel(
                                                 Intake.elbowOut(),
                                                 Claw.elbowTo(0.86),
@@ -344,8 +350,9 @@ public class HT_PP extends OpMode {
                             new Parallel(
                                 Chassis.followPath(grabPickup1, true),
                                 new Sequential(
-                                    Claw.elbowIn(),
-                                    Claw.openClaw()
+                                        Claw.elbowIn(),
+                                        new Wait(0.1),
+                                        Claw.openClaw()
                                 )
                             )
                     ),
@@ -424,7 +431,7 @@ public class HT_PP extends OpMode {
                             new Parallel(
                                     Claw.elbowOut(),
                                     Chassis.followPath(scorePickup3, 1),
-                                    Outtake.slideTo(-1000)
+                                    Outtake.slideTo(-970)
     //                                Claw.elbowOut()
                             )
                     ),
@@ -432,7 +439,7 @@ public class HT_PP extends OpMode {
                     // Score Specimen 4
                     new Parallel(
                             Chassis.holdPoint(new Pose(scorePose.getX(), scorePose.getY() )),
-                            Outtake.outtakeSpecimen()
+                            Outtake.slowOuttakeSpecimen()
     //                        new Parallel(
     //                                Claw.elbowTo(0.86), // pulls outtake to a salute
     //                                Outtake.slideTo(-300)
@@ -484,7 +491,7 @@ public class HT_PP extends OpMode {
                 ),
 
                 Intake.sideSpinOut(),
-                new Wait(0.3),
+                new Wait(0.33),
                 Claw.closeClaw(),
                 Intake.sideSpinOff()
         );

@@ -117,9 +117,9 @@ public class Outtake implements Subsystem {
     public static Lambda outtakeSpecimen() {
         return Lambda.from(new Sequential(
                 new Parallel(
-                    slideTo(-1800),
+                    slideTo(-1900),
                     new Sequential(
-                        new Wait(0.3),
+                        new Wait(0.25),
                         new Parallel(
                             Claw.openClaw(),
                             Claw.elbowIn()
@@ -135,7 +135,7 @@ public class Outtake implements Subsystem {
                         new Sequential(
                                 slideTo(-1900),
                                 new Sequential(
-                                        new Wait(0.3),
+                                        new Wait(0.4),
                                         new Parallel(
                                                 Claw.openClaw(),
                                                 Claw.elbowIn()

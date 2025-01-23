@@ -34,14 +34,13 @@ import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
 
 @Config
-@Autonomous(name = "4 Spec", group = "Autonomous")
+@Autonomous(name = "4 Spec (experimental)", group = "Autonomous")
 // Attach Mercurial and all subsystems
 @Mercurial.Attach
 @Chassis.Attach
 @Claw.Attach
 @Intake.Attach
 @Outtake.Attach
-//@Disabled
 public class HT_PP extends OpMode {
     private Telemetry telemetryA;
     private Follower follower;
@@ -60,9 +59,9 @@ public class HT_PP extends OpMode {
 
     // Target Points
     private final Pose startPose        = new Pose(81 , 9, Math.toRadians(-90));
-    private final Pose spit1Pose        = new Pose(120, 25, Math.toRadians(90));
-    private final Pose spit2Pose        = new Pose(130, 25, Math.toRadians(90));
-    private final Pose pickupPose       = new Pose(116, 9, Math.toRadians(-90));
+    private final Pose spit1Pose        = new Pose(119, 25, Math.toRadians(90));
+    private final Pose spit2Pose        = new Pose(129, 25, Math.toRadians(90));
+    private final Pose pickupPose       = new Pose(116, 8, Math.toRadians(-90));
     private final Pose scorePose        = new Pose(72 , 28.5, Math.toRadians(-90));
 //    private final Pose chamberClearPose = new Pose(69 , 28, Math.toRadians(270));
 
@@ -75,7 +74,7 @@ public class HT_PP extends OpMode {
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
     private Path park, clearChamber;
-    private PathChain scorePreload, spit1, spit2, grabPickup1, grabPickup, grabPickup2, grabPickup3, grabPickup4, scorePickup1, scorePickup2, scorePickup3;
+    private PathChain scorePreload, spit1, spit2, grabPickup1, grabPickup, scorePickup1, scorePickup2, scorePickup3;
 
     /** This is the variable where we store the state of our auto.
      * It is used by the pathUpdate method. */
@@ -134,7 +133,7 @@ public class HT_PP extends OpMode {
         grabPickup1 = follower.pathBuilder()
                 .addPath(new BezierLine(
                         new Point(spit2Pose),
-                        new Point(new Pose(pickupPose.getX(), pickupPose.getY()+7))
+                        new Point(new Pose(pickupPose.getX(), pickupPose.getY()))
                 ))
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
                 .build();
@@ -151,7 +150,7 @@ public class HT_PP extends OpMode {
                 .addPath(
                         new BezierLine(
                                 new Point(pickupPose),
-                                new Point(new Pose(scorePose.getX() + 2, scorePose.getY() + 0.75 ))
+                                new Point(new Pose(scorePose.getX() + 4, scorePose.getY() ))
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
@@ -167,7 +166,7 @@ public class HT_PP extends OpMode {
 //                 )
                 .addPath(new BezierLine(
                         new Point(pickupPose),
-                        new Point(new Pose(scorePose.getX() + 4, scorePose.getY() + 1.75 ))))
+                        new Point(new Pose(scorePose.getX() + 8, scorePose.getY() + 1.75 ))))
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
                 .build();
 
@@ -180,24 +179,11 @@ public class HT_PP extends OpMode {
 //                ))
                 .addPath(new BezierLine(
                         new Point(pickupPose),
-                        new Point(new Pose(scorePose.getX() + 6, scorePose.getY() ))
+                        new Point(new Pose(scorePose.getX() + 12, scorePose.getY() ))
                 ))
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
                 .build();
 
-        grabPickup2 = follower.pathBuilder()
-//                .addPath(new BezierCurve(
-//                        new Point(new Pose(scorePose.getX() + 6, scorePose.getY())),
-//                        new Point(cycleLeftControlPose),
-//                        new Point(cycleRightControlPose),
-//                        new Point(pickupPose)
-//                ))
-                .addPath(new BezierLine(
-                        new Point(new Pose(scorePose.getX() + 6, scorePose.getY())),
-                        new Point(pickupPose)
-                ))
-                .setConstantHeadingInterpolation(Math.toRadians(-90))
-                .build();
 
 
 
@@ -301,20 +287,12 @@ public class HT_PP extends OpMode {
                     new Sequential(
                             new Parallel(
                                 Outtake.outtakeSpecimen(),
-                                Chassis.followPath(spit1, 1),
+                                Chassis.followPath(spit1, true),
                                 Claw.elbowTo(0.86), // pulls outtake to a salute
 
-                                new Lambda("set-x-offset-preload")
-                                    .setInit(() -> {
-                                        xOffset += 5;
-                                    }),
                                 new Sequential(
                                     new Wait(0.5),
-                                    Outtake.slideTo(0)
-    //                                    new Lambda("reset-encoder").setInit(()->{
-    //                                        Outtake.resetEncoders();
-    //                                        Outtake.slideIn();
-    //                                    })
+                                    Outtake.slideTo(-300)
                                 )
                             )
                     ),
@@ -331,7 +309,6 @@ public class HT_PP extends OpMode {
                         transfer(),
                         Intake.elbowOut(),
                         Intake.slideTo(300)
-    //                    Intake.slideIn()
                     ),
 
                     // Put spec in observation zone (case 420)
@@ -361,7 +338,6 @@ public class HT_PP extends OpMode {
                             Claw.elbowIn(),
                             Intake.sideSpinIn(),
                             Intake.slideOut(),
-    //                        new Wait(0.3),
                             Intake.sideSpinOff(),
                             transfer(),
                             Intake.slideIn(),
@@ -383,7 +359,7 @@ public class HT_PP extends OpMode {
                             new Parallel(
                                 Intake.sideSpinOff(),
                                 Chassis.followPath(scorePickup1, true),
-                                Outtake.slideTo(-1200),
+                                Outtake.slideTo(-1100),
                                 Claw.elbowOut()
                             )
                     ),
@@ -414,7 +390,7 @@ public class HT_PP extends OpMode {
                             Intake.sideSpinOff(),
                             new Parallel(
                                     Chassis.followPath(scorePickup2, true),
-                                    Outtake.slideTo(-1200),
+                                    Outtake.slideTo(-1100),
                                     Claw.elbowOut()
                             )
                     ),
@@ -486,8 +462,8 @@ public class HT_PP extends OpMode {
         public void run(){
 
             while(!Thread.currentThread().isInterrupted() && pathState >= 0){
-                if(outtake.outLimit.isPressed() && (outtake.slideLeft.getTargetPosition() > outtake.slideLeft.getCurrentPosition())){
-                    outtake.resetEncoders();
+                if(Outtake.outLimit.isPressed() && (Outtake.slideLeft.getTargetPosition() > Outtake.slideLeft.getCurrentPosition())){
+                    Outtake.resetEncoders();
                     telemetryA.addLine("Encoders reset");
                 }
 
@@ -499,10 +475,12 @@ public class HT_PP extends OpMode {
         return new Sequential(
                 //set intake slide
                 new Parallel(
-                    Claw.elbowTo(0.9),
-                    Intake.slideTo(350),
-                    Intake.elbowIn(),
-                    Claw.openClaw()
+                        Outtake.slideIn(),
+                        Claw.elbowTo(0.9),
+//                        Claw.elbowIn(),
+                        Intake.slideTo(300),
+                        Intake.elbowIn(),
+                        Claw.openClaw()
                 ),
 
                 Intake.sideSpinOut(),

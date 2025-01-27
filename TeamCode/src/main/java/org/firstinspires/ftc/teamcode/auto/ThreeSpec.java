@@ -59,7 +59,7 @@ public class ThreeSpec extends OpMode {
     private final Pose spit1Pose        = new Pose(118, 25, Math.toRadians(90));
     private final Pose spit2Pose        = new Pose(128, 25, Math.toRadians(90));
     private final Pose pickupPose       = new Pose(116, 9, Math.toRadians(-90));
-    private final Pose scorePose        = new Pose(72 , 27.5, Math.toRadians(-90));
+    private final Pose scorePose        = new Pose(72 , 28, Math.toRadians(-90));
 //    private final Pose chamberClearPose = new Pose(69 , 28, Math.toRadians(270));
 
     // Control Points
@@ -154,7 +154,7 @@ public class ThreeSpec extends OpMode {
                         new Point(pickupPose),
                         new Point(cycleRightControlPose),
                         new Point(cycleLeftControlPose),
-                        new Point(new Pose(scorePose.getX() + 6, scorePose.getY() ))))
+                        new Point(new Pose(scorePose.getX() + 6, scorePose.getY()  + 0.5))))
                 .setConstantHeadingInterpolation(Math.toRadians(-90))
                 .build();
 
@@ -268,7 +268,7 @@ public class ThreeSpec extends OpMode {
                                 Claw.elbowTo(0.86), // pulls outtake to a salute
                                 new Sequential(
                                     new Wait(0.5),
-                                    Outtake.slideTo(-300)
+                                    Outtake.slideTo(-200)
                                 )
                             )
                     ),
@@ -349,7 +349,7 @@ public class ThreeSpec extends OpMode {
                                 Chassis.followPath(grabPickup, true),
                                 new Sequential(
                                         new Wait(0.5),
-                                        Outtake.slideTo(-300)
+                                        Outtake.slideTo(-200)
                                 )
                             )
 
@@ -363,7 +363,7 @@ public class ThreeSpec extends OpMode {
                             Intake.sideSpinOff(),
                             new Parallel(
                                     Chassis.followPath(scorePickup2, true),
-                                    Outtake.slideTo(-1200),
+                                    Outtake.slideTo(-1070),
                                     Claw.elbowOut()
                             )
                     ),

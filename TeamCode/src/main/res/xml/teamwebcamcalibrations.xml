@@ -52,6 +52,22 @@
 -->
 <Calibrations>
 
+
+<!--<Robot type="FirstInspires-FTC">-->
+<!--    <LynxUsbDevice name="Control Hub Portal" serialNumber="(embedded)" parentModuleAddress="173">-->
+<!--&lt;!&ndash;        Control Hub&ndash;&gt;-->
+<!--        <LynxModule name="Control Hub" port="173">-->
+<!--            <goBILDA5203SeriesMotor name="intake" port="0"/>-->
+<!--        </LynxModule>-->
+
+<!--        <LynxModule name="Expansion Hub 2" port="2">-->
+
+<!--        </LynxModule>-->
+
+<!--    </LynxUsbDevice>-->
+
+
+<!--</Robot>-->
     <!-- ======================================================================================= -->
 
     <!-- Microsoft Lifecam HD 3000 v1, Calibrated by PTC using unknown tooling -->

@@ -63,6 +63,7 @@ public class Chassis implements Subsystem {
         telemetry = opMode.getOpMode().telemetry;
         Constants.setConstants(FConstants.class, LConstants.class);
         follower = new Follower(FeatureRegistrar.getActiveOpMode().hardwareMap);
+//        ;
 
 
 
@@ -79,7 +80,9 @@ public class Chassis implements Subsystem {
     public void preUserStartHook(@NonNull Wrapper opMode) {}
 
     @Override
-    public void postUserLoopHook(@NonNull Wrapper opMode) {}
+    public void postUserLoopHook(@NonNull Wrapper opMode) {
+        follower.telemetryDebug(telemetry);
+    }
 
     public static Lambda followPath(Path path, boolean holdEnd) {
         return new Lambda("follow-path")
@@ -180,6 +183,16 @@ public class Chassis implements Subsystem {
                 .addRequirements(INSTANCE)
                 .setInterruptible(true)
                 .setInit(() -> follower.holdPoint(point, heading))
+                .setEnd((interrupted) -> {
+                    if (interrupted) follower.breakFollowing();
+                })
+                ;
+    }
+    public static Lambda breakFollowing(){
+        return new Lambda("break-following")
+                .addRequirements(INSTANCE)
+                .setInterruptible(true)
+                .setInit(() -> follower.breakFollowing())
                 .setEnd((interrupted) -> {
                     if (interrupted) follower.breakFollowing();
                 })

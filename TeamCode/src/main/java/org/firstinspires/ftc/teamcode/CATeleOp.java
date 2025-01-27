@@ -430,8 +430,8 @@ public class CATeleOp extends LinearOpMode {
                         new InstantAction(()->{
                             //set intake slide
                             intakePosition = 300;
-                            intakeSlideLeft.setTargetPosition(300);
-                            intakeSlideRight.setTargetPosition(300);
+                            intakeSlideLeft.setTargetPosition(350);
+                            intakeSlideRight.setTargetPosition(350);
 
 
                             //set outtake slide

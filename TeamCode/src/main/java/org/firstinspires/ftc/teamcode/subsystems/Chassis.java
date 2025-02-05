@@ -165,6 +165,27 @@ public class Chassis implements Subsystem {
                 })
                 ;
     }
+    public static Lambda moveX(double dist) {
+        return new Lambda("strafe-left")
+                .addRequirements(INSTANCE)
+                .setInterruptible(true)
+                .setInit(() -> {
+                    PathChain strafe = follower.pathBuilder()
+                            .addBezierLine(
+                                    new Point(follower.getPose()),
+                                    new Point(follower.getPose().getX() + dist, follower.getPose().getY())
+                            )
+                            .build();
+                    follower.followPath(strafe);
+                })
+                .setFinish(()->{
+                    return !follower.isBusy();
+                })
+                .setEnd((interrupted) -> {
+                    if(interrupted) follower.breakFollowing();
+                })
+                ;
+    }
     public static Lambda turnTo(double heading, double toleranceHeading) {
         return new Lambda("hold-point")
                 .addRequirements(INSTANCE)

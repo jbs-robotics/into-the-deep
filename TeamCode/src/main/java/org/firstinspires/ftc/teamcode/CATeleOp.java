@@ -94,7 +94,7 @@ public class CATeleOp extends LinearOpMode {
 
     //Mecanum Drive Motors
     private DcMotor leftFront, leftBack, rightFront, rightBack, intakeSlideLeft, intakeSlideRight, outtakeSlideLeft, outtakeSlideRight;
-    private Servo outServoL, outServoR, claw, inL, inR;
+    private Servo outServoL, outServoR, claw, inL, inR, wiper;
     private CRServo sideSpinL, sideSpinR;
     private double driveSensitivity = 1 , OSP = 0.94, clawPos = 1, intakePivot = 0, sideSpinPower;
 
@@ -145,6 +145,8 @@ public class CATeleOp extends LinearOpMode {
         claw = hardwareMap.get(Servo.class, "claw");
         outLimit = hardwareMap.get(TouchSensor.class, "outLimit");
         inLimit = hardwareMap.get(TouchSensor.class, "inLimit");
+
+        wiper = hardwareMap.get(Servo.class, "wiper"); // TODO: set to expansion hub 1
 
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
@@ -394,6 +396,16 @@ public class CATeleOp extends LinearOpMode {
 
                     }
                 }.start();
+            }
+            if(gamepad2.touchpad){
+                if(wiper.getPosition() == 1){
+                    wiper.setPosition(0);
+                }
+                else{
+                    wiper.setPosition(1);
+
+                }
+
             }
             if(score){
                 score();

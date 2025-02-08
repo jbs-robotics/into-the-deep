@@ -115,6 +115,7 @@ public class SensorHuskyLens extends LinearOpMode {
          */
         huskyLens.selectAlgorithm(HuskyLens.Algorithm.TAG_RECOGNITION);
 
+
         telemetry.update();
         waitForStart();
 
@@ -143,6 +144,9 @@ public class SensorHuskyLens extends LinearOpMode {
             telemetry.addData("Block count", blocks.length);
             for (int i = 0; i < blocks.length; i++) {
                 telemetry.addData("Block", blocks[i].toString());
+                telemetry.addData("Block X", blocks[i].x);
+                telemetry.addData("Block Y", blocks[i].y);
+                telemetry.addData("Block angle", blocks[i].left);
                 /*
                  * Here inside the FOR loop, you could save or evaluate specific info for the currently recognized Bounding Box:
                  * - blocks[i].width and blocks[i].height   (size of box, in pixels)

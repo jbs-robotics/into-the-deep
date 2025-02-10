@@ -26,7 +26,7 @@ import kotlin.annotation.MustBeDocumented;
 public class Claw implements Subsystem {
     public static final Claw INSTANCE = new Claw();
 
-    public static Servo clawServo, lElbow, rElbow; // declare the claw servos
+    public static Servo clawServo, lElbow, rElbow, wrist; // declare the claw servos
 
     // TODO: adjust to fit
     /// changes how long servo actions should wait until reporting they are complete
@@ -58,6 +58,7 @@ public class Claw implements Subsystem {
         clawServo = hardwareMap.get(Servo.class, "claw");
         lElbow = hardwareMap.get(Servo.class, "outServoL");
         rElbow = hardwareMap.get(Servo.class, "outServoR");
+        wrist = hardwareMap.get(Servo.class, "clawWrist");
     }
 
     @Override

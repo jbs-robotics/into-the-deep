@@ -38,9 +38,9 @@ import kotlin.annotation.MustBeDocumented;
 public class Intake implements Subsystem {
     public static final Intake INSTANCE = new Intake();
 
-    public static DcMotorEx slideLeft, slideRight;
+//    public static DcMotorEx slideLeft, slideRight;
     public static CRServo sideSpinL, sideSpinR;
-    public static Servo lElbow, rElbow;
+    public static Servo lElbow, rElbow, slideLeft, slideRight;
 
     // TODO: adjust to fit
     /// changes how long servo actions should wait until reporting they are complete
@@ -77,17 +77,12 @@ public class Intake implements Subsystem {
 
         HardwareMap hardwareMap = opMode.getOpMode().hardwareMap;
 
-        slideLeft = hardwareMap.get(DcMotorEx.class, "ISL");
-        slideLeft.setDirection(DcMotor.Direction.FORWARD);
-        slideLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        slideLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        slideLeft.setPower(1);
+        slideLeft = hardwareMap.get(Servo.class, "ISL");
+        slideRight = hardwareMap.get(Servo.class, "ISR");
 
-        slideRight = hardwareMap.get(DcMotorEx.class, "ISR");
-        slideRight.setDirection(DcMotor.Direction.REVERSE);
-        slideRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        slideRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        slideLeft.setPower(1);
+        slideLeft.setDirection(Servo.Direction.FORWARD);
+        slideRight.setDirection(Servo.Direction.REVERSE);
+
         lElbow = hardwareMap.get(Servo.class, "inL");
         rElbow = hardwareMap.get(Servo.class, "inR");
 
@@ -99,17 +94,6 @@ public class Intake implements Subsystem {
     public void postUserLoopHook(@NonNull Wrapper opMode) {
     }
 
-    public static void resetEncoders(){
-        setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        slideLeft.setTargetPosition(0);
-        slideRight.setTargetPosition(0);
-        setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-
-    public static void setMode(DcMotor.RunMode runMode){
-        slideLeft.setMode(runMode);
-        slideRight.setMode(runMode);
-    }
 
     public static Lambda sideSpinIn() {
         return new Lambda("side-spin-in")
@@ -141,26 +125,16 @@ public class Intake implements Subsystem {
                 ;
     }
 
-    public static Lambda slideTo(int target) {
+    public static Lambda slideTo(double target) {
         return new Lambda("intake-slide-to")
                 .setInit(() -> {
-
-                    slideLeft.setPower(1);
-                    slideRight.setPower(1);
-                    slideLeft.setTargetPosition(target);
-                    slideRight.setTargetPosition(target);
-//                    if(slideLeft.getMode() == DcMotor.RunMode.RUN_USING_ENCODER)
-                        setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-//                    slideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    slideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    slideLeft.setPosition(target);
+                    slideRight.setPosition(target);
                 })
                 .setExecute(()->{
-//                    telemetry.addData("slideLeft Position", slideLeft.getCurrentPosition());
-//                    slideLeft.getCurrent(CurrentUnit.AMPS)
                 })
                 .setFinish(() -> {
-                    return Math.abs(target - slideLeft.getCurrentPosition()) < SLIDE_TOLERANCE;
+                    return Math.abs(target - slideLeft.getPosition()) < SLIDE_TOLERANCE;
                 })
                 .addRequirements(slideLeft, slideRight)
                 ;
@@ -171,7 +145,7 @@ public class Intake implements Subsystem {
     }
 
     public static Lambda slideOut() {
-        return Lambda.from(slideTo(1000));
+        return Lambda.from(slideTo(1));
     }
 
 

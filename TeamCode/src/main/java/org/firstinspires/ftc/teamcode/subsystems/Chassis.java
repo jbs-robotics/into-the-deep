@@ -64,13 +64,11 @@ public class Chassis implements Subsystem {
         Constants.setConstants(FConstants.class, LConstants.class);
         follower = new Follower(FeatureRegistrar.getActiveOpMode().hardwareMap);
 //        ;
-
-
+        if(follower.getPose() == null){
+            follower.setStartingPose(new Pose(42 , 63, Math.toRadians(180)));
+        }
 
         // TODO: add options for non-spec starting positions
-        follower.setStartingPose(new Pose(81 , 9, Math.toRadians(-90)));
-
-
     }
 
     @Override
@@ -83,7 +81,9 @@ public class Chassis implements Subsystem {
     public void postUserLoopHook(@NonNull Wrapper opMode) {
         follower.telemetryDebug(telemetry);
     }
-
+    public static void setStartPose(Pose startPose){
+        follower.setStartingPose(startPose);
+    }
     public static Lambda followPath(Path path, boolean holdEnd) {
         return new Lambda("follow-path")
                 .addRequirements(INSTANCE)

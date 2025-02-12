@@ -60,6 +60,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.driveClasses.ControlConstants;
 import org.firstinspires.ftc.teamcode.driveClasses.MecanumDrive;
+import org.firstinspires.ftc.teamcode.subsystems.Chassis;
+import org.firstinspires.ftc.teamcode.subsystems.Claw;
+import org.firstinspires.ftc.teamcode.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
@@ -68,6 +72,11 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.List;
 import java.util.*;
 import java.lang.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import dev.frozenmilk.mercurial.Mercurial;
 
 /*
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
@@ -83,6 +92,10 @@ import java.lang.*;
  */
 
 @TeleOp(name="CAT (Computer Aided TeleOp)", group="Linear OpMode")
+@Mercurial.Attach
+@Claw.Attach
+@Intake.Attach
+@Outtake.Attach
 //@Disabled
 public class CATeleOp extends LinearOpMode {
 
@@ -93,14 +106,14 @@ public class CATeleOp extends LinearOpMode {
     private DcMotor leftFront, leftBack, rightFront, rightBack, outtakeSlideLeft, outtakeSlideRight;
     private Servo outServoL, outServoR, claw, inL, inR, wiper, intakeSlideLeft, intakeSlideRight;
     private CRServo sideSpinL, sideSpinR;
-    private double driveSensitivity = 1 , OSP = 0.94, clawPos = 1, intakePivot = 0, sideSpinPower, intakePosition = 0;
+    private double driveSensitivity = ControlConstants.driveSensitivity , OSP = 0.94, clawPos = 1, intakePivot = 0, sideSpinPower, intakePosition = 0;
 
     private int outtakePosition = 0,  outtakeSlidePos = 0, intakeID = 1, outtakeID;
     private TouchSensor outLimit, inLimit;
     private MecanumDrive drive;
 
-    private boolean inReset = false, outReset = false, manualOverride = false, canOverride = true, clawAvailable = true, intakeAvailable = true, clawArmAvailable = true, transferring = false;
-
+    private boolean inReset = false, outReset = false, manualOverride = false, canOverride = true, clawAvailable = true, intakeAvailable = true, clawArmAvailable = true, transferring = false, intakeSlideSnipe = false, intakeSnipeAvailable = true;
+    private boolean wipeAvailable = true;
 
     private VisionPortal visionPortal;
     private AprilTagProcessor aprilTag;
@@ -168,7 +181,6 @@ public class CATeleOp extends LinearOpMode {
         // Wait for the game to start (driver presses START)
         waitForStart();
         runtime.reset();
-
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
@@ -201,18 +213,29 @@ public class CATeleOp extends LinearOpMode {
                         break;
                 }
             }
-
-            intakePosition += (gamepad2.right_bumper? ControlConstants.intakeSlideSensitivity : 0) - (gamepad2.left_bumper? ControlConstants.intakeSlideSensitivity : 0);
-            intakePosition = Range.clip(intakePosition, 0, 1);
+            if(intakeSnipeAvailable && gamepad2.left_trigger > 0.5){
+                intakeSnipeAvailable = false;
+                intakeSlideSnipe = !intakeSlideSnipe;
+                ToggleIntakeSnipeAvailable thread = new ToggleIntakeSnipeAvailable();
+                thread.start();
+            }
+            if(intakeSlideSnipe){
+                intakePosition += (gamepad2.left_bumper? ControlConstants.intakeSlideSensitivity : 0) - (gamepad2.right_bumper? ControlConstants.intakeSlideSensitivity : 0);
+            }
+            else{
+                intakePosition += (gamepad2.left_bumper? ControlConstants.intakeSlideSnipeSens : 0) - (gamepad2.right_bumper? ControlConstants.intakeSlideSnipeSens : 0);
+            }
+            intakePosition = Range.clip(intakePosition, ControlConstants.intakeSlideMin, ControlConstants.intakeSlideMax);
 
             if(gamepad2.left_stick_y < 0 || outtakeSlideLeft.getCurrentPosition() <= -50 || outtakeSlideRight.getCurrentPosition() <= -50 || !outLimit.isPressed()){
                 outtakeSlidePos += (int)(ControlConstants.outtakeSlideSensitivity * gamepad2.left_stick_y);
-                if(!manualOverride) outtakeSlidePos = Range.clip(outtakeSlidePos, -4000, -10);
+                if(!manualOverride) outtakeSlidePos = Range.clip(outtakeSlidePos, ControlConstants.outtakeSlideMin, ControlConstants.outtakeSlideMin);
             }
             //TODO: CHANGE WHEN DRIVING
             sideSpinPower = gamepad2.dpad_down? 1 : (gamepad2.dpad_up)? -1 : 0;
 
             if(manualOverride){
+
                 OSP += (gamepad2.x)? ControlConstants.outtakePivotSensitivity: 0;
                 OSP += (gamepad2.b)? -ControlConstants.outtakePivotSensitivity: 0;
                 if(OSP > 1) OSP = 1;
@@ -294,6 +317,8 @@ public class CATeleOp extends LinearOpMode {
             telemetry.addData("Out Slide Left", outtakeSlideLeft.getCurrentPosition());
             telemetry.addData("Out Slide Right", outtakeSlideRight.getCurrentPosition());
             telemetry.addData("intakePivot Position", intakePivot);
+            telemetry.addData("intake Sniper Mode", intakeSlideSnipe);
+            telemetry.addData("intake Sniper Mode Available", intakeSnipeAvailable);
 
             //TODO: CHANGE WHEN DRIVING
             if (driveSnipeOn) driveSensitivity = 0.3;
@@ -327,13 +352,16 @@ public class CATeleOp extends LinearOpMode {
                     }
                 }.start();
             }
-            if(gamepad2.touchpad){
+            if(wipeAvailable && gamepad2.touchpad){
+                wipeAvailable = false;
                 if(wiper.getPosition() == 1){
                     wiper.setPosition(0);
                 }
                 else{
                     wiper.setPosition(1);
                 }
+                CanWipe thread = new CanWipe();
+                thread.start();
 
             }
             if(score){
@@ -497,6 +525,17 @@ public class CATeleOp extends LinearOpMode {
             canOverride = true;
         }
     }
+    private class ToggleIntakeSnipeAvailable extends Thread {
+        @Override
+        public void run(){
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            intakeSnipeAvailable = true;
+        }
+    }
     private class CanOperateClaw extends TimerTask {
         @Override
         public void run(){
@@ -543,6 +582,17 @@ public class CATeleOp extends LinearOpMode {
             clawArmAvailable = true;
         }
     }
+    private class CanWipe extends Thread {
+        @Override
+        public void run(){
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            wipeAvailable = true;
+        }
+    }
     private class CanPitchIntakeThread extends Thread {
         public void run(){
             try {
@@ -553,16 +603,5 @@ public class CATeleOp extends LinearOpMode {
             intakeAvailable = true;
         }
     }
-    private class CanPitchIntake extends TimerTask {
-        @Override
-        public void run(){
-            try {
-                // code that need to be executed after this delay
-                intakeAvailable = true;
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-    }
+
 }

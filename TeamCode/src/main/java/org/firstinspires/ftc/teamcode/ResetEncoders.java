@@ -67,8 +67,8 @@ public class ResetEncoders extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        intakeSlideLeft = hardwareMap.get(DcMotor.class, "ISL");
-        intakeSlideRight = hardwareMap.get(DcMotor.class, "ISR");
+//        intakeSlideLeft = hardwareMap.get(DcMotor.class, "ISL");
+//        intakeSlideRight = hardwareMap.get(DcMotor.class, "ISR");
         outtakeSlideLeft = hardwareMap.get(DcMotor.class, "OSL");
         outtakeSlideRight = hardwareMap.get(DcMotor.class, "OSR");
 
@@ -78,19 +78,19 @@ public class ResetEncoders extends LinearOpMode {
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
 
-        intakeSlideLeft.setDirection(DcMotor.Direction.FORWARD);
-        intakeSlideRight.setDirection(DcMotor.Direction.REVERSE);
+//        intakeSlideLeft.setDirection(DcMotor.Direction.FORWARD);
+//        intakeSlideRight.setDirection(DcMotor.Direction.REVERSE);
         outtakeSlideLeft.setDirection(DcMotor.Direction.FORWARD);
         outtakeSlideRight.setDirection(DcMotor.Direction.REVERSE);
-
-        intakeSlideLeft.setTargetPosition(0);
-        intakeSlideRight.setTargetPosition(0);
+//
+//        intakeSlideLeft.setTargetPosition(0);
+//        intakeSlideRight.setTargetPosition(0);
         outtakeSlideLeft.setTargetPosition(0);
         outtakeSlideRight.setTargetPosition(0);
 
 
-        intakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        intakeSlideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        intakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        intakeSlideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         outtakeSlideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
@@ -100,9 +100,9 @@ public class ResetEncoders extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            intakeSlideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//            intakeSlideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//            intakeSlideRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             outtakeSlideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            intakeSlideRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             outtakeSlideRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             telemetry.addData("Motors", "Slide Motors Reset");
              telemetry.update();

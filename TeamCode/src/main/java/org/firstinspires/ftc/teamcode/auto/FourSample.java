@@ -206,7 +206,9 @@ public class FourSample extends OpMode {
                     new Sequential(
                             Outtake.outtakeSample(),
                             new Parallel(
+                                Intake.slideOut(),
                                 Chassis.followPath(grabPickup1, 1),
+                                Intake.sideSpinIn(),
                                 new Sequential(
                                     new Wait(0.5),
                                     Outtake.slideTo(-200)
@@ -216,10 +218,8 @@ public class FourSample extends OpMode {
                     // Grab specimen 2
                     new Sequential(
                             /* Grab the Specimen Here */
-                            //TODO: ADD MECHANISMS TO THESE
-                            Claw.elbowIn(),
                             new Wait(0.4),
-                            Claw.closeClaw(),
+
                             new Parallel(
                                 Chassis.followPath(scorePickup1, 1),
                                 Claw.elbowOut()
@@ -305,7 +305,18 @@ public class FourSample extends OpMode {
 
         checkSlides.interrupt();
     }
-
+    public Sequential transfer(){
+        return new Sequential(
+                Intake.slideIn(),
+                new Parallel(
+                    Claw.elbowIn(),
+                    Claw.openClaw()
+                ),
+                Intake.sideSpinOut(),
+                new Wait(0.3),
+                Claw.closeClaw()
+        );
+    }
     public class CheckOuttakeSlides extends Thread {
         @Override
         public void run(){

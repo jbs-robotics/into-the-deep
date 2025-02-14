@@ -14,7 +14,7 @@ public class ControlConstants {
     public static double intakePivotIn = 0.9;
 
     // outtake constants
-    public static double outtakeSlideSensitivity = 100;
+    public static double outtakeSlideSensitivity = 20;
     public static double outtakePivotSensitivity = 0.004;
     public static double outtakePivotIn = 0.94;
     public static double outtakePivotOut = 0;

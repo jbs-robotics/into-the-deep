@@ -40,6 +40,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -65,9 +66,24 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
+import org.firstinspires.ftc.teamcode.subsystems.Chassis;
+import org.firstinspires.ftc.teamcode.subsystems.Claw;
+import org.firstinspires.ftc.teamcode.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.subsystems.Outtake;
+
+import dev.frozenmilk.mercurial.Mercurial;
+import dev.frozenmilk.mercurial.commands.Lambda;
+import dev.frozenmilk.mercurial.commands.groups.Parallel;
+import dev.frozenmilk.mercurial.commands.groups.Sequential;
+import dev.frozenmilk.mercurial.commands.util.Wait;
+import pedroPathing.constants.FConstants;
+import pedroPathing.constants.LConstants;
+
 import java.util.List;
 import java.util.*;
 import java.lang.*;
+
+import dev.frozenmilk.mercurial.Mercurial;
 
 /*
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
@@ -84,6 +100,11 @@ import java.lang.*;
 
 @TeleOp(name="CAT (Computer Aided TeleOp)", group="Linear OpMode")
 //@Disabled
+// Attach Mercurial and all subsystems
+@Mercurial.Attach
+@Claw.Attach
+@Intake.Attach
+@Outtake.Attach
 public class CATeleOp extends LinearOpMode {
 
     // Declare OpMode members.
@@ -153,8 +174,8 @@ public class CATeleOp extends LinearOpMode {
 
         outtakeSlideRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        outtakeSlideLeft.setDirection(DcMotor.Direction.FORWARD);
-        outtakeSlideRight.setDirection(DcMotor.Direction.REVERSE);
+        outtakeSlideLeft.setDirection(DcMotor.Direction.REVERSE);
+//        outtakeSlideRight.setDirection(DcMotor.Direction.REVERSE);
         outtakeSlideLeft.setPower(1);
         outtakeSlideRight.setPower(1);
         outtakeSlideRight.setTargetPosition(0);
@@ -207,7 +228,7 @@ public class CATeleOp extends LinearOpMode {
 
             if(gamepad2.left_stick_y < 0 || outtakeSlideLeft.getCurrentPosition() <= -50 || outtakeSlideRight.getCurrentPosition() <= -50 || !outLimit.isPressed()){
                 outtakeSlidePos += (int)(ControlConstants.outtakeSlideSensitivity * gamepad2.left_stick_y);
-                if(!manualOverride) outtakeSlidePos = Range.clip(outtakeSlidePos, -4000, -10);
+                if(!manualOverride) outtakeSlidePos = Range.clip(outtakeSlidePos, -2500, -10);
             }
             //TODO: CHANGE WHEN DRIVING
             sideSpinPower = gamepad2.dpad_down? 1 : (gamepad2.dpad_up)? -1 : 0;
@@ -232,7 +253,12 @@ public class CATeleOp extends LinearOpMode {
                 }
             }
             if(clawAvailable && gamepad2.b){
-                clawPos = (++clawPos % 2);
+                if(clawPos == 0){
+                    clawPos = 0.7;
+                }
+                else{
+                    clawPos = 0;
+                }
                 clawAvailable = false;
 
                 CanOperateClawThread thread = new CanOperateClawThread();
@@ -520,6 +546,7 @@ public class CATeleOp extends LinearOpMode {
             clawAvailable = true;
         }
     }
+
     private class CanPitchClaw extends TimerTask {
         @Override
         public void run(){

@@ -19,5 +19,9 @@ public class ControlConstants {
     public static double outtakePivotIn = 0.94;
     public static double outtakePivotOut = 0;
     public static double outtakeWristSensitivity = 0.01;
+    public static double highChamberSlidePos = -1150;
+
+
+
 
 }

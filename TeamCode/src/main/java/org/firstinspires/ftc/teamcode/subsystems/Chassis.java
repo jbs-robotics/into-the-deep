@@ -99,7 +99,9 @@ public class Chassis implements Subsystem {
                     if (interrupted) follower.breakFollowing();
                 });
     }
-
+    public static Pose getPose(){
+        return follower.getPose();
+    }
     public static Lambda followPath(PathChain chain, boolean holdEnd) {
         return new Lambda("follow-path-chain")
                 .addRequirements(INSTANCE)

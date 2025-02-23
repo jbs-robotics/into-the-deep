@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.driveClasses.ControlConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Chassis;
 import org.firstinspires.ftc.teamcode.subsystems.Claw;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
@@ -222,12 +223,6 @@ public class FiveSpec extends OpMode {
     @Override
     public void loop() {
         follower = Chassis.follower;
-        // Feedback to Driver Hub
-//        telemetryA.addData("path state", pathState);
-//        telemetryA.addData("x", follower.getPose().getX());
-//        telemetryA.addData("y", follower.getPose().getY());
-//        telemetryA.addData("heading", follower.getPose().getHeading());
-//        follower.telemetryDebug(telemetryA);
     }
 
     /** This method is called once at the init of the OpMode. **/
@@ -264,9 +259,7 @@ public class FiveSpec extends OpMode {
                     telemetryA.addLine("Encoders reset");
                 }
                 telemetryA.update();
-            }).setFinish(()->{
-                return finished;
-            }),
+            }).setFinish(()-> finished),
             new Sequential(
 
                     // Start Movement (case 0)
@@ -416,7 +409,7 @@ public class FiveSpec extends OpMode {
             )
         )
                 .schedule();
-
+                ControlConstants.pose  = Chassis.getPose();
 
     }
 

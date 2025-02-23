@@ -30,24 +30,27 @@
 package org.firstinspires.ftc.teamcode;
 
 import android.annotation.SuppressLint;
-import android.service.controls.Control;
 import android.util.Size;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.SleepAction;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.localization.Pose;
+import com.pedropathing.pathgen.BezierLine;
+import com.pedropathing.pathgen.PathChain;
+import com.pedropathing.pathgen.Point;
+import com.pedropathing.util.Constants;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 // Road Runner Imports
-import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
@@ -75,15 +78,14 @@ import dev.frozenmilk.mercurial.Mercurial;
 import dev.frozenmilk.mercurial.commands.Lambda;
 import dev.frozenmilk.mercurial.commands.groups.Parallel;
 import dev.frozenmilk.mercurial.commands.groups.Sequential;
-import dev.frozenmilk.mercurial.commands.util.Wait;
+import dev.frozenmilk.mercurial.commands.stateful.StatefulLambda;
+import dev.frozenmilk.util.cell.RefCell;
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
 
 import java.util.List;
-import java.util.*;
 import java.lang.*;
-
-import dev.frozenmilk.mercurial.Mercurial;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /*
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
@@ -110,23 +112,29 @@ public class CATeleOp extends LinearOpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
 
+    private Follower follower;
+
     //Mecanum Drive Motors
     private DcMotor leftFront, leftBack, rightFront, rightBack, outtakeSlideLeft, outtakeSlideRight;
-    private Servo outServoL, outServoR, claw, inL, inR, wiper, intakeSlideLeft, intakeSlideRight;
+    private Servo outServoL, outServoR, claw, inL, inR, wiper, intakeSlideLeft, intakeSlideRight, clawWrist;
     private CRServo sideSpinL, sideSpinR;
-    private double driveSensitivity = 1 , OSP = 0.94, clawPos = 1, intakePivot = 0, sideSpinPower, intakePosition = 0;
+    private double driveSensitivity = 1 , clawElbowPos = 1, clawWristPos = 1, clawPos = 1, intakePivot = 0, sideSpinPower, intakePosition = 0;
 
     private int outtakePosition = 0,  outtakeSlidePos = 0, intakeID = 1, outtakeID;
     private TouchSensor outLimit, inLimit;
     private MecanumDrive drive;
 
-    private boolean inReset = false, outReset = false, manualOverride = false, canOverride = true, clawAvailable = true, intakeAvailable = true, clawArmAvailable = true, transferring = false;
-
+//    private boolean outReset = false, manualOverride = false, canOverride = true, clawAvailable = true, intakeAvailable = true, clawArmAvailable = true, transferring = false;
+    private boolean robotCentric = false;
+    private Toggleable robotCentricToggle, outReset, manualOverride, canOverride, clawAvailable, intakeAvailable, clawArmAvailable, transferring;
 
     private VisionPortal visionPortal;
     private AprilTagProcessor aprilTag;
     private Position cameraPosition = new Position(DistanceUnit.INCH, -7.25, -7.25, 5, 0);
     private YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 40, -90, 0, 0);
+
+    private RefCell<Boolean> emergencyStop = new RefCell<>(false);
+
     @Override
     public void runOpMode() {
         initAprilTag();
@@ -158,6 +166,7 @@ public class CATeleOp extends LinearOpMode {
         outServoL = hardwareMap.get(Servo.class, "outServoL");
         outServoR = hardwareMap.get(Servo.class, "outServoR");
         claw = hardwareMap.get(Servo.class, "claw");
+        clawWrist = hardwareMap.get(Servo.class, "clawWrist");
         outLimit = hardwareMap.get(TouchSensor.class, "outLimit");
         inLimit = hardwareMap.get(TouchSensor.class, "inLimit");
 
@@ -175,7 +184,6 @@ public class CATeleOp extends LinearOpMode {
         outtakeSlideRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         outtakeSlideLeft.setDirection(DcMotor.Direction.REVERSE);
-//        outtakeSlideRight.setDirection(DcMotor.Direction.REVERSE);
         outtakeSlideLeft.setPower(1);
         outtakeSlideRight.setPower(1);
         outtakeSlideRight.setTargetPosition(0);
@@ -183,7 +191,11 @@ public class CATeleOp extends LinearOpMode {
         outtakeSlideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-
+        //TODO: Test PedroPathing Constant
+        Constants.setConstants(FConstants.class, LConstants.class);
+        follower = new Follower(hardwareMap);
+        follower.setStartingPose(ControlConstants.pose);
+        
         telemetry.addData("Status", "Initialized");
 
         // Wait for the game to start (driver presses START)
@@ -192,6 +204,18 @@ public class CATeleOp extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            //TODO: TEST THIS
+            follower.startTeleopDrive();
+            if(robotCentricToggle.state && gamepad1.a){
+                robotCentric = !robotCentric;
+
+                robotCentricToggle.state = false;
+                GenericToggleThread thread = new GenericToggleThread(robotCentricToggle);
+                thread.start();
+            }
+            follower.setTeleOpMovementVectors(-gamepad1.left_stick_y * driveSensitivity, -gamepad1.left_stick_x * driveSensitivity, -gamepad1.right_stick_x * driveSensitivity, robotCentric);
+            follower.update();
+
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
             telemetry.addData("# AprilTags Detected", currentDetections.size());
 
@@ -200,14 +224,32 @@ public class CATeleOp extends LinearOpMode {
             double strafePower = gamepad1.left_stick_x;
             boolean driveSnipeOn = gamepad1.left_bumper;
             boolean driveSnipeOff = gamepad1.right_bumper;
-            boolean score = gamepad1.left_trigger > 0.5;
-            if(manualOverride){
+//            TODO: Change if needed
+//            //gamepad 1(drivebase control)
+//            double lfPower = Range.clip(drivePower + turnPower + strafePower, -driveSensitivity, driveSensitivity);
+//            double rfPower = Range.clip(drivePower - turnPower - strafePower, -driveSensitivity, driveSensitivity);
+//            double lbPower = Range.clip(drivePower + turnPower - strafePower, -driveSensitivity, driveSensitivity);
+//            double rbPower = Range.clip(drivePower - turnPower + strafePower, -driveSensitivity, driveSensitivity);
+//
+//            // Send calculated power to wheels
+//            leftFront.setPower(lfPower);
+//            leftBack.setPower(lbPower);
+//            rightFront.setPower(rfPower);
+//            rightBack.setPower(rbPower);
+// Sniper Mode
+            if (driveSnipeOn) driveSensitivity = 0.3;
+            else if (driveSnipeOff) driveSensitivity = 1;
+
+            boolean score = gamepad1.y;
+
+            // Flip the Intake In/Out
+            if(manualOverride.state){
                 intakePivot += Range.clip(gamepad2.right_stick_y, -ControlConstants.intakePivotSensitivity, ControlConstants.intakePivotSensitivity);
             }
             else{
-                if(intakeAvailable && gamepad2.y){
+                if(intakeAvailable.state && gamepad2.dpad_left){
                     intakeID = ++intakeID % 2;
-                    intakeAvailable = false;
+                    intakeAvailable.state = false;
                     CanPitchIntakeThread thread = new CanPitchIntakeThread();
                     thread.start();
                 }
@@ -223,63 +265,68 @@ public class CATeleOp extends LinearOpMode {
                 }
             }
 
+            // Intake Slide Control
             intakePosition += (gamepad2.right_bumper? ControlConstants.intakeSlideSensitivity : 0) - (gamepad2.left_bumper? ControlConstants.intakeSlideSensitivity : 0);
             intakePosition = Range.clip(intakePosition, 0, 1);
 
+            // Outtake Slide Control
+            if(gamepad2.right_trigger > 0.5){
+                outtakeSlidePos = ControlConstants.highChamberSlidePos;
+            }
+            if(gamepad2.left_trigger > 0.5){
+                outtakeSlidePos = ControlConstants.highBasketSlidePos;
+            }
             if(gamepad2.left_stick_y < 0 || outtakeSlideLeft.getCurrentPosition() <= -50 || outtakeSlideRight.getCurrentPosition() <= -50 || !outLimit.isPressed()){
                 outtakeSlidePos += (int)(ControlConstants.outtakeSlideSensitivity * gamepad2.left_stick_y);
-                if(!manualOverride) outtakeSlidePos = Range.clip(outtakeSlidePos, -2500, -10);
+                if(!manualOverride.state) outtakeSlidePos = Range.clip(outtakeSlidePos, ControlConstants.maxOuttakeSlidePos, ControlConstants.minOuttakeSlidePos);
             }
-            //TODO: CHANGE WHEN DRIVING
+
+            // Boot Wheel Control
             sideSpinPower = gamepad2.dpad_down? 1 : (gamepad2.dpad_up)? -1 : 0;
 
-            if(manualOverride){
-                OSP += (gamepad2.x)? ControlConstants.outtakePivotSensitivity: 0;
-                OSP += (gamepad2.b)? -ControlConstants.outtakePivotSensitivity: 0;
-                if(OSP > 1) OSP = 1;
-                if(OSP < 0) OSP = 0.;
+            // Outtake Elbow Control
+            if(manualOverride.state){
+                clawElbowPos += (gamepad2.x)? ControlConstants.outtakePivotSensitivity: 0;
+                clawElbowPos += (gamepad2.b)? -ControlConstants.outtakePivotSensitivity: 0;
+                if(clawElbowPos > 1) clawElbowPos = 1;
+                if(clawElbowPos < 0) clawElbowPos = 0.;
             }
             else{
-                if(clawArmAvailable && gamepad2.right_trigger > 0.5){
-                    if(OSP == 0){
-                        OSP = ControlConstants.outtakePivotIn; // put claw arm in
+                if(clawArmAvailable.state && gamepad2.right_trigger > 0.5){
+                    if(clawElbowPos == 0){
+                        clawElbowPos = ControlConstants.outtakePivotIn; // put claw arm in
                     }
                     else{
-                        OSP = ControlConstants.outtakePivotOut; // put claw arm out
+                        clawElbowPos = ControlConstants.outtakePivotOut; // put claw arm out
                     }
-                    clawArmAvailable = !clawArmAvailable;
-                    CanPitchClawThread thread = new CanPitchClawThread();
+                    clawArmAvailable.state = !clawArmAvailable.state;
+                    GenericToggleThread thread = new GenericToggleThread(clawArmAvailable);
                     thread.start();
                 }
             }
-            if(clawAvailable && gamepad2.b){
+
+            // Outtake Wrist Control
+            clawWristPos += gamepad2.right_stick_y * ControlConstants.outtakeWristSensitivity;
+            clawWristPos = Range.clip(clawWristPos, ControlConstants.outtakeWristIn, ControlConstants.outtakeWristOut);
+
+            // Outtake Claw Control
+            if(clawAvailable.state && gamepad2.b){
                 if(clawPos == 0){
                     clawPos = 0.7;
                 }
                 else{
                     clawPos = 0;
                 }
-                clawAvailable = false;
+                clawAvailable.state = false;
 
-                CanOperateClawThread thread = new CanOperateClawThread();
+                GenericToggleThread thread = new GenericToggleThread(clawAvailable);
                 thread.start();
             }
 
-            //gamepad 1(drivebase control)
-            double lfPower = Range.clip(drivePower + turnPower + strafePower, -driveSensitivity, driveSensitivity);
-            double rfPower = Range.clip(drivePower - turnPower - strafePower, -driveSensitivity, driveSensitivity);
-            double lbPower = Range.clip(drivePower + turnPower - strafePower, -driveSensitivity, driveSensitivity);
-            double rbPower = Range.clip(drivePower - turnPower + strafePower, -driveSensitivity, driveSensitivity);
-
-            // Send calculated power to wheels
-            leftFront.setPower(lfPower);
-            leftBack.setPower(lbPower);
-            rightFront.setPower(rfPower);
-            rightBack.setPower(rbPower);
-
-            if(!transferring){
-                outServoL.setPosition(1 - OSP);
-                outServoR.setPosition(OSP);
+            // Update Motors/Servos
+            if(!transferring.state){
+                outServoL.setPosition(1 - clawElbowPos);
+                outServoR.setPosition(clawElbowPos);
                 claw.setPosition(clawPos);
                 inL.setPosition(intakePivot);
                 inR.setPosition(1 - intakePivot);
@@ -291,10 +338,13 @@ public class CATeleOp extends LinearOpMode {
                 sideSpinR.setPower(sideSpinPower);
                 outtakeSlideRight.setTargetPosition(outtakeSlidePos);
                 outtakeSlideLeft.setTargetPosition(outtakeSlidePos);
+                clawWrist.setPosition(clawWristPos);
             }
-            if(canOverride && gamepad2.left_bumper && gamepad2.right_bumper && gamepad2.right_trigger > 0.5 && gamepad2.left_trigger > 0.5){
-                manualOverride = !manualOverride;
-                if(!manualOverride){
+
+            // Toggle manual override
+            if(canOverride.state && gamepad2.left_bumper && gamepad2.right_bumper && gamepad2.right_trigger > 0.5 && gamepad2.left_trigger > 0.5){
+                manualOverride.state = !manualOverride.state;
+                if(!manualOverride.state){
                     outtakeSlideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     outtakeSlideRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     outtakeSlidePos = 0;
@@ -305,9 +355,9 @@ public class CATeleOp extends LinearOpMode {
                     outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     outtakeSlideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 }
-                canOverride = false;
+                canOverride.state = false;
 
-                ToggleCanOverrideThread thread = new ToggleCanOverrideThread();
+                GenericToggleThread thread = new GenericToggleThread(canOverride);
                 thread.start();
             }
 
@@ -321,34 +371,32 @@ public class CATeleOp extends LinearOpMode {
             telemetry.addData("Out Slide Right", outtakeSlideRight.getCurrentPosition());
             telemetry.addData("intakePivot Position", intakePivot);
 
-            //TODO: CHANGE WHEN DRIVING
-            if (driveSnipeOn) driveSensitivity = 0.3;
-            else if (driveSnipeOff) driveSensitivity = 1;
 
-            if(!outReset && outLimit.isPressed()){
+
+            if(!outReset.state && outLimit.isPressed()){
                 telemetry.addData("Outtake Slides reset", outLimit.isPressed());
                 outtakeSlideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 outtakeSlideRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 outtakeSlideRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 outtakeSlidePos = 0;
-                outReset = true;
+                outReset.state = true;
             }
-            else if(outReset && outLimit.isPressed()){
+            else if(outReset.state && outLimit.isPressed()){
                 if(outtakeSlideLeft.getCurrentPosition() >= -9 || outtakeSlideRight.getCurrentPosition() >= -9){
-                    outReset = true;
+                    outReset.state = true;
                 }
                 else{
-                    outReset = false;
+                    outReset.state = false;
                 }
             }
-            if(!manualOverride && gamepad2.a){
+            if(!manualOverride.state && gamepad2.a){
                 new Thread("transfer"){
                     public void run(){
-                        transferring = true;
+                        transferring.state = true;
                         transfer();
                         intakeID = 1;
-                        transferring = false;
+                        transferring.state = false;
 
                     }
                 }.start();
@@ -412,9 +460,9 @@ public class CATeleOp extends LinearOpMode {
                             inR.setPosition(1-intakePivot);
 
 //                            OSP = 0.87;
-                            OSP = 0.91;
-                            outServoL.setPosition(1-OSP);
-                            outServoR.setPosition(OSP);
+                            clawElbowPos = 0.91;
+                            outServoL.setPosition(1- clawElbowPos);
+                            outServoR.setPosition(clawElbowPos);
 
                             clawPos = 0;
                             claw.setPosition(clawPos);
@@ -448,68 +496,112 @@ public class CATeleOp extends LinearOpMode {
             AprilTagDetection detection = aprilTag.getDetections().get(0);
 
             if (detection.metadata != null) {
+                // If the April tag is detected, store the localized pose of robot
                 x = detection.robotPose.getPosition().x;
                 y = detection.robotPose.getPosition().y;
-                yaw = detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES);
-                drive.pose = new Pose2d(x, y, Math.toRadians(yaw));
-                if(detection.id == 16){
-                    Action red1 = drive.actionBuilder(drive.pose)
-                            .setTangent(Math.toRadians(yaw-180))
-                            .splineToLinearHeading(new Pose2d(-60, -40, Math.toRadians(45)), Math.toRadians(-135))
+                yaw = detection.robotPose.getOrientation().getYaw(AngleUnit.RADIANS);
+                Pose pedroPose = new Pose(x, y, yaw, false).getAsPedroCoordinates();
+
+                if(detection.id == 15){
+                    // Red Spec
+                    Chassis.setStartPose(pedroPose);
+                    PathChain pathChain = Chassis.follower.pathBuilder()
+                            .addPath(new BezierLine(
+                                    new Point(pedroPose),
+                                    new Point(new Pose(105, 69))
+                            ))
+                            .setConstantHeadingInterpolation(Math.toRadians(0))
+                            .addPath(new BezierLine(
+                                    new Point(pedroPose),
+                                    new Point(new Pose(105, 75))
+                            ))
+                            .setConstantHeadingInterpolation(Math.toRadians(0))
+                            .addPath(new BezierLine(
+                                    new Point(pedroPose),
+                                    new Point(new Pose(105, 69))
+                            ))
+                            .setConstantHeadingInterpolation(Math.toRadians(0))
                             .build();
-                    //red side basket
-//                    Actions.runBlocking(
-//                            new SequentialAction(
-//                                    new ParallelAction(
-//                                            red1,
-//                                            Outtake.slideOut(),
-//                                            new InstantAction(() -> {
-//                                                if(!aprilTag.getDetections().isEmpty()){
-//                                                    Pose3D pos1 = aprilTag.getDetections().get(0).robotPose;
-//                                                    drive.pose = new Pose2d(pos1.getPosition().x, pos1.getPosition().y, pos1.getOrientation().getYaw(AngleUnit.RADIANS));
-//                                                }
-//                                            })
-//
-//                                    ),
-//                                    outtake.outtakeSample()
-//                            )
-//                    );
+                    StatefulLambda<RefCell<Boolean>> redSideSpec = new StatefulLambda<>("Red-spec-CAT", emergencyStop)
+                            .setExecute(()->{
+                                Outtake.slideTo(ControlConstants.highChamberSlidePos);
+                                Claw.wristIn();
+                                Claw.elbowOut();
+                                Chassis.followPath(pathChain, true);
+                            })
+                            .setFinish((interrupted)-> interrupted.get() || !Chassis.follower.isBusy())
+                            ;
+                    AtomicBoolean finished = new AtomicBoolean(false);
+                    new Parallel(
+                        new Lambda("e-stop")
+                                .setExecute(()->{
+                                    if(gamepad1.y){
+                                        emergencyStop.update(true);
+                                    }
+                                })
+                                .setFinish(finished::get),
+                        new Sequential(
+                                redSideSpec,
+                                Claw.openClaw(),
+                             new Lambda("finish")
+                                .setInit(()-> finished.set(true))
+                        )
+                    ).schedule();
                 }
-                else if(detection.id == 13){
-                    Action blue1 = drive.actionBuilder(drive.pose)
-                            .setTangent(Math.toRadians(yaw-180))
-                            .splineToLinearHeading(new Pose2d(53, 45, Math.toRadians(-135)), Math.toRadians(45))
+                else if(detection.id == 12){
+                    // Blue Spec
+                    Chassis.setStartPose(pedroPose);
+                    PathChain pathChain = Chassis.follower.pathBuilder()
+                            .addPath(new BezierLine(
+                                    new Point(pedroPose),
+                                    new Point(new Pose(39, 69))
+                            ))
+                            .setConstantHeadingInterpolation(Math.toRadians(180))
+                            .addPath(new BezierLine(
+                                    new Point(pedroPose),
+                                    new Point(new Pose(39, 75))
+                            ))
+                            .setConstantHeadingInterpolation(Math.toRadians(180))
+                            .addPath(new BezierLine(
+                                    new Point(pedroPose),
+                                    new Point(new Pose(39, 69))
+                            ))
+                            .setConstantHeadingInterpolation(Math.toRadians(180))
                             .build();
-//                    Actions.runBlocking(new SequentialAction(
-//                            new ParallelAction(
-//                                    blue1,
-//                                    outtake.slideOut(),
-//                                    new InstantAction(() -> {
-//                                        if(!aprilTag.getDetections().isEmpty()){
-//                                            Pose3D pos1 = aprilTag.getDetections().get(0).robotPose;
-//                                            drive.pose = new Pose2d(pos1.getPosition().x, pos1.getPosition().y, pos1.getOrientation().getYaw(AngleUnit.RADIANS));
-//                                        }
-//                                    })
-//                            ),
-//                            outtake.outtakeSample()
-////                            new SleepAction(1),
-////                            outtake.slideIn()
-//                    ));
+                    StatefulLambda<RefCell<Boolean>> redSideSpec = new StatefulLambda<>("Red-spec-CAT", emergencyStop)
+                            .setExecute(()->{
+                                Outtake.slideTo(ControlConstants.highChamberSlidePos);
+                                Claw.wristIn();
+                                Claw.elbowOut();
+                                Chassis.followPath(pathChain, true);
+                            })
+                            .setFinish((interrupted)-> interrupted.get() || !Chassis.follower.isBusy())
+                            ;
+                    new Sequential(
+                            redSideSpec,
+                            Claw.openClaw()
+                    ).schedule();
+
                 }
 
             }
         }
     }
-    private class ToggleCanOverride extends TimerTask {
-        @Override
+    private class Toggleable {
+        public boolean state = true;
+    }
+    private class GenericToggleThread extends Thread{
+        public Toggleable toggle;
+        public GenericToggleThread(Toggleable toggleVar){
+            toggle = toggleVar;
+        }
         public void run(){
             try {
-                // code that need to be executed after this delay
-                canOverride = true;
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            toggle.state = true;
         }
     }
     private class ToggleCanOverrideThread extends Thread {
@@ -520,19 +612,7 @@ public class CATeleOp extends LinearOpMode {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            canOverride = true;
-        }
-    }
-    private class CanOperateClaw extends TimerTask {
-        @Override
-        public void run(){
-            try {
-                // code that need to be executed after this delay
-                clawAvailable = true;
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            canOverride.state = true;
         }
     }
     private class CanOperateClawThread extends Thread {
@@ -543,22 +623,10 @@ public class CATeleOp extends LinearOpMode {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            clawAvailable = true;
+            clawAvailable.state = true;
         }
     }
 
-    private class CanPitchClaw extends TimerTask {
-        @Override
-        public void run(){
-            try {
-                // code that need to be executed after this delay
-                clawArmAvailable = true;
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-    }
     private class CanPitchClawThread extends Thread {
         @Override
         public void run(){
@@ -567,7 +635,7 @@ public class CATeleOp extends LinearOpMode {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            clawArmAvailable = true;
+            clawArmAvailable.state = true;
         }
     }
     private class CanPitchIntakeThread extends Thread {
@@ -577,19 +645,7 @@ public class CATeleOp extends LinearOpMode {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            intakeAvailable = true;
-        }
-    }
-    private class CanPitchIntake extends TimerTask {
-        @Override
-        public void run(){
-            try {
-                // code that need to be executed after this delay
-                intakeAvailable = true;
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            intakeAvailable.state = true;
         }
     }
 }

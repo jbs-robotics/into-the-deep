@@ -120,4 +120,32 @@ public class Claw implements Subsystem {
                 new Wait(SERVO_DELAY)
         ));
     }
+    public static Lambda wristIn(){
+        return Lambda.from(new Sequential(
+                new Lambda("wrist-to")
+                        .setInit(()->{
+                            wrist.setPosition(0);
+                        })
+                        .addRequirements(wrist)
+        ));
+    }
+    public static Lambda wristOut(){
+        return Lambda.from(new Sequential(
+                new Lambda("wrist-to")
+                        .setInit(()->{
+                            wrist.setPosition(1);
+                        })
+                        .addRequirements(wrist)
+        ));
+    }
+    public static Lambda wristTo(double pos){
+        return Lambda.from(new Sequential(
+                new Lambda("wrist-to")
+                        .setInit(()->{
+                            wrist.setPosition(pos);
+                        })
+                        .addRequirements(wrist)
+        ));
+    }
+
 }

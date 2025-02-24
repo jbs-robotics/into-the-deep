@@ -33,8 +33,6 @@ import android.annotation.SuppressLint;
 import android.util.Size;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.roadrunner.InstantAction;
-import com.acmerobotics.roadrunner.SleepAction;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
 import com.pedropathing.pathgen.BezierLine;
@@ -50,11 +48,6 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-// Road Runner Imports
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.ftc.Actions;
-
 // April Tag Imports
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -63,7 +56,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.driveClasses.ControlConstants;
-import org.firstinspires.ftc.teamcode.driveClasses.MecanumDrive;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
@@ -122,7 +114,6 @@ public class CATeleOp extends LinearOpMode {
 
     private int outtakePosition = 0,  outtakeSlidePos = 0, intakeID = 1, outtakeID;
     private TouchSensor outLimit, inLimit;
-    private MecanumDrive drive;
 
 //    private boolean outReset = false, manualOverride = false, canOverride = true, clawAvailable = true, intakeAvailable = true, clawArmAvailable = true, transferring = false;
     private boolean robotCentric = false;
@@ -141,9 +132,6 @@ public class CATeleOp extends LinearOpMode {
 
         TelemetryPacket packet = new TelemetryPacket();
         telemetry.update();
-        drive = new MecanumDrive(hardwareMap, new Pose2d(0,0,0));
-        // instantiate MecanumDrive at starting position
-
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
@@ -439,52 +427,62 @@ public class CATeleOp extends LinearOpMode {
     }
 
     private void transfer(){
-
-        Actions.runBlocking(
-                new SequentialAction(
-                        new InstantAction(()->{
-                            //set intake slide
-                            intakePosition = 0.3;
-                            intakeSlideLeft.setPosition(0.3);
-                            intakeSlideLeft.setPosition(0.3);
-
-                            //set outtake slide
-                            outtakeSlidePos = 0;
-                            outtakeSlideLeft.setTargetPosition(outtakeSlidePos);
-                            outtakeSlideRight.setTargetPosition(outtakeSlidePos);
-                            outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            outtakeSlideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            //set intake servos
-                            intakePivot = 0.85;
-                            inL.setPosition(intakePivot);
-                            inR.setPosition(1-intakePivot);
-
-//                            OSP = 0.87;
-                            clawElbowPos = 0.91;
-                            outServoL.setPosition(1- clawElbowPos);
-                            outServoR.setPosition(clawElbowPos);
-
-                            clawPos = 0;
-                            claw.setPosition(clawPos);
-                        }),
-                        new SleepAction(0.5),
-                        new InstantAction(()->{
-                            //set spin wheels
-                            sideSpinPower = -1;
-                            sideSpinR.setPower(sideSpinPower);
-                            sideSpinL.setPower(-sideSpinPower);
-                        }),
-                        new SleepAction(0.25),
-                        new InstantAction(()->{
-                            sideSpinR.setPower(0);
-                            sideSpinL.setPower(0);
-                            clawPos = 1;
-                            claw.setPosition(clawPos);
-                        }),
-                        new SleepAction(0.2)
-
-                )
-        );
+        new Sequential(
+                Claw.openClaw(),
+                Intake.slideTo(0.3),
+                Outtake.slideIn(),
+                Intake.elbowTo(0.85),
+                Claw.elbowTo(0.87),
+                Claw.wristIn(),
+                Claw.closeClaw(),
+                Claw.elbowOut()
+        ).schedule();
+//
+//        Actions.runBlocking(
+//                new SequentialAction(
+//                        new InstantAction(()->{
+//                            //set intake slide
+//                            intakePosition = 0.3;
+//                            intakeSlideLeft.setPosition(0.3);
+//                            intakeSlideLeft.setPosition(0.3);
+//
+//                            //set outtake slide
+//                            outtakeSlidePos = 0;
+//                            outtakeSlideLeft.setTargetPosition(outtakeSlidePos);
+//                            outtakeSlideRight.setTargetPosition(outtakeSlidePos);
+//                            outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                            outtakeSlideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                            //set intake servos
+//                            intakePivot = 0.85;
+//                            inL.setPosition(intakePivot);
+//                            inR.setPosition(1-intakePivot);
+//
+////                            OSP = 0.87;
+//                            clawElbowPos = 0.91;
+//                            outServoL.setPosition(1- clawElbowPos);
+//                            outServoR.setPosition(clawElbowPos);
+//
+//                            clawPos = 0;
+//                            claw.setPosition(clawPos);
+//                        }),
+//                        new SleepAction(0.5),
+//                        new InstantAction(()->{
+//                            //set spin wheels
+//                            sideSpinPower = -1;
+//                            sideSpinR.setPower(sideSpinPower);
+//                            sideSpinL.setPower(-sideSpinPower);
+//                        }),
+//                        new SleepAction(0.25),
+//                        new InstantAction(()->{
+//                            sideSpinR.setPower(0);
+//                            sideSpinL.setPower(0);
+//                            clawPos = 1;
+//                            claw.setPosition(clawPos);
+//                        }),
+//                        new SleepAction(0.2)
+//
+//                )
+//        );
     }
 
     @SuppressLint("DefaultLocale")

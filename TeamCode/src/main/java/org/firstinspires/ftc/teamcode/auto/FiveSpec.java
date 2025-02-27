@@ -221,19 +221,21 @@ public class FiveSpec extends OpMode {
     /** This is the main loop of the OpMode, it will run repeatedly after clicking "Play". **/
     @Override
     public void loop() {
-        follower = Chassis.follower;
+
     }
 
     /** This method is called once at the init of the OpMode. **/
     @Override
     public void init() {
+        follower = Chassis.follower;
+        Chassis.setStartPose(startPose);
+
         telemetryA = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
         Constants.setConstants(FConstants.class, LConstants.class);
         Claw.closeClaw().schedule();
-        Chassis.setStartPose(startPose);
         buildPaths();
         checkSlides.start();
     }

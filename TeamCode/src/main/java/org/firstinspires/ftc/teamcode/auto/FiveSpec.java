@@ -57,7 +57,6 @@ public class FiveSpec extends OpMode {
     private final Pose startPose        = new Pose(42 , 63, Math.toRadians(180));
     private final Pose pickupPose       = new Pose(9  , 37, Math.toRadians(180));
     private final Pose scorePose        = new Pose(42 , 78, Math.toRadians(180));
-//    private final Pose chamberClearPose = new Pose(69 , 28, Math.toRadians(270));
 
     // Control Points
     private final Pose grabPickup1ControlPose = new Pose(116 , 16);
@@ -266,7 +265,7 @@ public class FiveSpec extends OpMode {
                     new Sequential(
                             new Parallel(
                                     Claw.closeClaw(),
-                                    Outtake.slideTo(-1050),
+                                    Outtake.slideTo(ControlConstants.highChamberSlidePos),
                                     Claw.elbowOut(),
                                     Chassis.followPath(scorePreload, true)
                             )
@@ -280,7 +279,7 @@ public class FiveSpec extends OpMode {
                                 Claw.elbowTo(0.86), // pulls outtake to a salute
                                 new Sequential(
                                     new Wait(0.5),
-                                    Outtake.slideTo(-200)
+                                    Outtake.slideTo(-10)
                                 )
                             )
                     ),

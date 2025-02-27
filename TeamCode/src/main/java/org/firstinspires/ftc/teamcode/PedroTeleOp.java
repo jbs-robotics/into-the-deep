@@ -92,14 +92,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@TeleOp(name="CAT (Computer Aided TeleOp)", group="Linear OpMode")
+@TeleOp(name="Pedro TeleOp", group="Linear OpMode")
 //@Disabled
 // Attach Mercurial and all subsystems
 @Mercurial.Attach
 @Claw.Attach
 @Intake.Attach
 @Outtake.Attach
-public class CATeleOp extends LinearOpMode {
+public class PedroTeleOp extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -117,7 +117,7 @@ public class CATeleOp extends LinearOpMode {
 
 //    private boolean outReset = false, manualOverride = false, canOverride = true, clawAvailable = true, intakeAvailable = true, clawArmAvailable = true, transferring = false;
     private boolean robotCentric = false;
-    private Toggleable robotCentricToggle = new Toggleable(), outReset = new Toggleable(), manualOverride = new Toggleable(false), canOverride = new Toggleable(), clawAvailable = new Toggleable(), intakeAvailable = new Toggleable(), clawArmAvailable = new Toggleable(), transferring = new Toggleable(false);
+    private Toggleable robotCentricToggle = new Toggleable(), outReset = new Toggleable(), manualOverride = new Toggleable(), canOverride = new Toggleable(), clawAvailable = new Toggleable(), intakeAvailable = new Toggleable(), clawArmAvailable = new Toggleable(), transferring = new Toggleable();
 
     private VisionPortal visionPortal;
     private AprilTagProcessor aprilTag;
@@ -264,10 +264,10 @@ public class CATeleOp extends LinearOpMode {
             if(gamepad2.left_trigger > 0.5){
                 outtakeSlidePos = ControlConstants.highBasketSlidePos;
             }
-
-            outtakeSlidePos += (int)(ControlConstants.outtakeSlideSensitivity * gamepad2.left_stick_y);
-            if(!manualOverride.state) outtakeSlidePos = Range.clip(outtakeSlidePos, ControlConstants.maxOuttakeSlidePos, ControlConstants.minOuttakeSlidePos);
-
+            if(gamepad2.left_stick_y < 0 || outtakeSlideLeft.getCurrentPosition() <= -50 || outtakeSlideRight.getCurrentPosition() <= -50 || !outLimit.isPressed()){
+                outtakeSlidePos += (int)(ControlConstants.outtakeSlideSensitivity * gamepad2.left_stick_y);
+                if(!manualOverride.state) outtakeSlidePos = Range.clip(outtakeSlidePos, ControlConstants.maxOuttakeSlidePos, ControlConstants.minOuttakeSlidePos);
+            }
 
             // Boot Wheel Control
             sideSpinPower = gamepad2.dpad_down? 1 : (gamepad2.dpad_up)? -1 : 0;
@@ -280,7 +280,7 @@ public class CATeleOp extends LinearOpMode {
                 if(clawElbowPos < 0) clawElbowPos = 0.;
             }
             else{
-                if(clawArmAvailable.state && gamepad2.cross){
+                if(clawArmAvailable.state && gamepad2.right_trigger > 0.5){
                     if(clawElbowPos == 0){
                         clawElbowPos = ControlConstants.outtakePivotIn; // put claw arm in
                     }
@@ -299,11 +299,11 @@ public class CATeleOp extends LinearOpMode {
 
             // Outtake Claw Control
             if(clawAvailable.state && gamepad2.b){
-                if(clawPos == ControlConstants.clawClosed){
-                    clawPos = ControlConstants.clawOpen;
+                if(clawPos == 0){
+                    clawPos = 0.7;
                 }
                 else{
-                    clawPos = ControlConstants.clawClosed;
+                    clawPos = 0;
                 }
                 clawAvailable.state = false;
 
@@ -313,7 +313,7 @@ public class CATeleOp extends LinearOpMode {
 
             // Update Motors/Servos
             if(!transferring.state){
-                outServoL.setPosition(1.0 - clawElbowPos);
+                outServoL.setPosition(1 - clawElbowPos);
                 outServoR.setPosition(clawElbowPos);
                 claw.setPosition(clawPos);
                 inL.setPosition(intakePivot);
@@ -349,12 +349,14 @@ public class CATeleOp extends LinearOpMode {
                 thread.start();
             }
 
-            telemetry.addData("Manual Override Status ", manualOverride.state);
-            telemetry.addData("Outtake Elbow Position", clawElbowPos);
-            telemetry.addData("Outtake Wrist Position", clawWristPos);
-            telemetry.addData("Claw Position", clawPos);
-            telemetry.addData("Out Slide Pos", outtakeSlidePos);
+            telemetry.addData("Manual Override Status ", manualOverride);
+            telemetry.addData("Left Elbow Servo Position", outServoL.getPosition());
+            telemetry.addData("Right Elbow Servo Position", outServoR.getPosition());
+            telemetry.addData("Intake Slide Left", intakeSlideLeft.getPosition());
+            telemetry.addData("Intake Slide Right", intakeSlideRight.getPosition());
             telemetry.addData("Intake Slide Position", intakePosition);
+            telemetry.addData("Out Slide Left", outtakeSlideLeft.getCurrentPosition());
+            telemetry.addData("Out Slide Right", outtakeSlideRight.getCurrentPosition());
             telemetry.addData("intakePivot Position", intakePivot);
 
 
@@ -585,12 +587,6 @@ public class CATeleOp extends LinearOpMode {
     }
     private class Toggleable {
         public boolean state = true;
-        public Toggleable(){
-            state = true;
-        }
-        public Toggleable(boolean initial){
-            state = initial;
-        }
     }
     private class GenericToggleThread extends Thread{
         public Toggleable toggle;

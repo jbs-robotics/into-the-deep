@@ -20,9 +20,11 @@ public class ControlConstants {
     public static double outtakePivotSensitivity = 0.004;
     public static double outtakePivotIn = 1;
     public static double outtakePivotOut = 0;
-    public static double outtakeWristSensitivity = 0.01;
+    public static double outtakeWristSensitivity = 0.03;
     public static double outtakeWristOut = 1;
     public static double outtakeWristIn = 0;
+    public static double clawClosed = 0.9;
+    public static double clawOpen = 0.5;
 
     public static int maxOuttakeSlidePos = -2500;
     public static int minOuttakeSlidePos = -10;

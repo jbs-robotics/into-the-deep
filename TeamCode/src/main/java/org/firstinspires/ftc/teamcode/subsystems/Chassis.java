@@ -132,7 +132,7 @@ public class Chassis implements Subsystem {
                 })
                 .setFinish(() -> {
 //                    return
-                    return chain.getPath(chain.size()-1).getLastControlPoint().getX() - follower.getPose().getX() < tolerance && chain.getPath(chain.size()-1).getLastControlPoint().getY() - follower.getPose().getY() < tolerance;
+                    return Math.abs(chain.getPath(chain.size()-1).getLastControlPoint().getX() - follower.getPose().getX()) < tolerance && Math.abs(chain.getPath(chain.size()-1).getLastControlPoint().getY() - follower.getPose().getY()) < tolerance;
                 })
                 .setEnd((interrupted) -> {
                     if (interrupted) follower.breakFollowing();

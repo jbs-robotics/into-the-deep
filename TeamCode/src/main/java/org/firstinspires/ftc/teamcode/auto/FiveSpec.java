@@ -54,7 +54,7 @@ public class FiveSpec extends OpMode {
      * Lets assume the Robot is facing the human player and we want to score in the bucket */
 
     // Target Points
-    private final Pose startPose        = new Pose(42 , 63, Math.toRadians(180));
+    private final Pose startPose        = new Pose(9 , 63, Math.toRadians(180));
     private final Pose pickupPose       = new Pose(9  , 37, Math.toRadians(180));
     private final Pose scorePose        = new Pose(42 , 78, Math.toRadians(180));
 
@@ -126,7 +126,7 @@ public class FiveSpec extends OpMode {
                 .addPath(new BezierCurve(
                         new Point(10, 15),
                         new Point(69, 18),
-                        new Point(62, 9)
+                        new Point(62, 14)
 
                 ))
                 .setConstantHeadingInterpolation(scorePose.getHeading())
@@ -134,15 +134,15 @@ public class FiveSpec extends OpMode {
         plow3 = follower.pathBuilder()
                 // First spike Mark
                 .addPath(new BezierLine(
-                        new Point(62, 9),
-                        new Point(9, 9)
+                        new Point(62, 14),
+                        new Point(10, 14)
                 ))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
 
         grabPickup1 = follower.pathBuilder()
                 .addPath(new BezierCurve(
-                        new Point(9, 9),
+                        new Point(10, 14),
                         new Point(43,9),
                         new Point(9, 37)
                 ))

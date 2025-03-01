@@ -71,7 +71,7 @@ public class Outtake implements Subsystem {
         slideRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
-        slideLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        slideLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         slideRight.setDirection(DcMotorSimple.Direction.REVERSE);
         slideLeft.setPower(1);
         slideRight.setPower(1);

@@ -171,11 +171,16 @@ public class CATeleOp extends LinearOpMode {
 
         outtakeSlideRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         outtakeSlideLeft.setDirection(DcMotor.Direction.REVERSE);
+        outtakeSlideRight.setDirection(DcMotor.Direction.REVERSE);
+
         outtakeSlideLeft.setPower(1);
         outtakeSlideRight.setPower(1);
+
         outtakeSlideRight.setTargetPosition(0);
         outtakeSlideLeft.setTargetPosition(0);
+
         outtakeSlideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
@@ -356,6 +361,9 @@ public class CATeleOp extends LinearOpMode {
             telemetry.addData("Out Slide Pos", outtakeSlidePos);
             telemetry.addData("Intake Slide Position", intakePosition);
             telemetry.addData("intakePivot Position", intakePivot);
+            telemetry.addLine();
+            telemetry.addData("Out Slide Right Pos", outtakeSlideRight.getCurrentPosition());
+            telemetry.addData("Out Slide Left Pos", outtakeSlideLeft.getCurrentPosition());
 
 
 

@@ -111,7 +111,6 @@ public class PedroTeleOp extends LinearOpMode {
     private Servo outServoL, outServoR, claw, inL, inR, wiper, intakeSlideLeft, intakeSlideRight, clawWrist;
     private CRServo sideSpinL, sideSpinR;
     private double driveSensitivity = 1 , clawElbowPos = 1, clawWristPos = 1, clawPos = 1, intakePivot = 0, sideSpinPower, intakePosition = 0;
-
     private int outtakePosition = 0,  outtakeSlidePos = 0, intakeID = 1, outtakeID;
     private TouchSensor outLimit, inLimit;
 
@@ -212,8 +211,8 @@ public class PedroTeleOp extends LinearOpMode {
             double strafePower = gamepad1.left_stick_x;
             boolean driveSnipeOn = gamepad1.left_bumper;
             boolean driveSnipeOff = gamepad1.right_bumper;
-//            TODO: Change if needed
-//            //gamepad 1(drivebase control)
+
+            // TODO: Change if needed
             double lfPower = Range.clip(drivePower + turnPower + strafePower, -driveSensitivity, driveSensitivity);
             double rfPower = Range.clip(drivePower - turnPower - strafePower, -driveSensitivity, driveSensitivity);
             double lbPower = Range.clip(drivePower + turnPower - strafePower, -driveSensitivity, driveSensitivity);
@@ -224,7 +223,8 @@ public class PedroTeleOp extends LinearOpMode {
             leftBack.setPower(lbPower);
             rightFront.setPower(rfPower);
             rightBack.setPower(rbPower);
-// Sniper Mode
+
+            // Sniper Mode
             if (driveSnipeOn) driveSensitivity = 0.3;
             else if (driveSnipeOff) driveSensitivity = 1;
 

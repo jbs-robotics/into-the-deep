@@ -110,7 +110,7 @@ public class CATeleOp extends LinearOpMode {
     private DcMotor leftFront, leftBack, rightFront, rightBack, outtakeSlideLeft, outtakeSlideRight;
     private Servo outServoL, outServoR, claw, inL, inR, wiper, intakeSlideLeft, intakeSlideRight, clawWrist;
     private CRServo sideSpinL, sideSpinR;
-    private double driveSensitivity = 1 , clawElbowPos = 1, clawWristPos = 1, clawPos = 1, intakePivot = 0, sideSpinPower, intakePosition = 0;
+    private double driveSensitivity = 1 , clawElbowPos = 1, clawWristPos = 1, clawPos = ControlConstants.clawClosed, intakePivot = ControlConstants.intakePivotIn, sideSpinPower, intakePosition = ControlConstants.intakeSlideIn;
 
     private int outtakePosition = 0,  outtakeSlidePos = 0, intakeID = 1, outtakeID;
     private TouchSensor outLimit, inLimit;
@@ -184,11 +184,6 @@ public class CATeleOp extends LinearOpMode {
         outtakeSlideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        //TODO: Test PedroPathing Constant
-//        Constants.setConstants(FConstants.class, LConstants.class);
-//        follower = new Follower(hardwareMap);
-//        follower.setStartingPose(ControlConstants.pose);
-        
         telemetry.addData("Status", "Initialized");
 
         // Wait for the game to start (driver presses START)
@@ -197,17 +192,7 @@ public class CATeleOp extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            //TODO: TEST THIS
-//            follower.startTeleopDrive();
-//            if(robotCentricToggle.state && gamepad1.a){
-//                robotCentric = !robotCentric;
-//
-//                robotCentricToggle.state = false;
-//                GenericToggleThread thread = new GenericToggleThread(robotCentricToggle);
-//                thread.start();
-//            }
-//            follower.setTeleOpMovementVectors(-gamepad1.left_stick_y * driveSensitivity, -gamepad1.left_stick_x * driveSensitivity, -gamepad1.right_stick_x * driveSensitivity, robotCentric);
-//            follower.update();
+
 
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
             telemetry.addData("# AprilTags Detected", currentDetections.size());
@@ -241,26 +226,21 @@ public class CATeleOp extends LinearOpMode {
             }
             else{
                 if(intakeAvailable.state && gamepad2.dpad_left){
-                    intakeID = ++intakeID % 2;
-                    intakeAvailable.state = false;
-                    CanPitchIntakeThread thread = new CanPitchIntakeThread();
-                    thread.start();
-                }
-                switch(intakeID){
-                    case 0:
+                    if(intakePivot != ControlConstants.intakePivotOut){
                         intakePivot = ControlConstants.intakePivotOut; // set intake out
-                        break;
-                    case 1:
+                    }
+                    else{
                         intakePivot = ControlConstants.intakePivotIn; // set intake in
-                        break;
-                    default:
-                        break;
+                    }
+                    intakeAvailable.state = false;
+                    GenericToggleThread thread = new GenericToggleThread(intakeAvailable);
+                    thread.start();
                 }
             }
 
             // Intake Slide Control
             intakePosition += (gamepad2.right_bumper? ControlConstants.intakeSlideSensitivity : 0) - (gamepad2.left_bumper? ControlConstants.intakeSlideSensitivity : 0);
-            intakePosition = Range.clip(intakePosition, 0, 1);
+            intakePosition = Range.clip(intakePosition, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
 
             // Outtake Slide Control
             if(gamepad2.right_trigger > 0.5){

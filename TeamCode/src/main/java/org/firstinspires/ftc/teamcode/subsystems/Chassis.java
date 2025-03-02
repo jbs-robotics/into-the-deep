@@ -16,6 +16,7 @@ import dev.frozenmilk.mercurial.commands.stateful.StatefulLambda;
 import dev.frozenmilk.util.cell.RefCell;
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
+
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -43,20 +44,28 @@ public class Chassis implements Subsystem {
 
     public static Telemetry telemetry;
 
-    public Chassis() {}
+    public Chassis() {
+    }
 
-    @Retention(RetentionPolicy.RUNTIME) @Target(ElementType.TYPE) @MustBeDocumented
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    @MustBeDocumented
     @Inherited
-    public @interface Attach { }
+    public @interface Attach {
+    }
 
     private Dependency<?> dependency = Subsystem.DEFAULT_DEPENDENCY.and(new SingleAnnotation<>(Attach.class));
 
     @NonNull
     @Override
-    public Dependency<?> getDependency() { return dependency; }
+    public Dependency<?> getDependency() {
+        return dependency;
+    }
 
     @Override
-    public void setDependency(@NonNull Dependency<?> dependency) { this.dependency = dependency; }
+    public void setDependency(@NonNull Dependency<?> dependency) {
+        this.dependency = dependency;
+    }
 
     @Override
     public void preUserInitHook(@NonNull Wrapper opMode) {
@@ -64,26 +73,30 @@ public class Chassis implements Subsystem {
         Constants.setConstants(FConstants.class, LConstants.class);
         follower = new Follower(FeatureRegistrar.getActiveOpMode().hardwareMap);
 //        ;
-        if(follower.getPose() == null){
-            follower.setStartingPose(new Pose(42 , 63, Math.toRadians(180)));
+        if (follower.getPose() == null) {
+            follower.setStartingPose(new Pose(42, 63, Math.toRadians(180)));
         }
 
         // TODO: add options for non-spec starting positions
     }
 
     @Override
-    public void postUserInitHook(@NonNull Wrapper opMode) {}
+    public void postUserInitHook(@NonNull Wrapper opMode) {
+    }
 
     @Override
-    public void preUserStartHook(@NonNull Wrapper opMode) {}
+    public void preUserStartHook(@NonNull Wrapper opMode) {
+    }
 
     @Override
     public void postUserLoopHook(@NonNull Wrapper opMode) {
         follower.telemetryDebug(telemetry);
     }
-    public static void setStartPose(Pose startPose){
+
+    public static void setStartPose(Pose startPose) {
         follower.setStartingPose(startPose);
     }
+
     public static Lambda followPath(Path path, boolean holdEnd) {
         return new Lambda("follow-path")
                 .addRequirements(INSTANCE)
@@ -99,9 +112,11 @@ public class Chassis implements Subsystem {
                     if (interrupted) follower.breakFollowing();
                 });
     }
-    public static Pose getPose(){
+
+    public static Pose getPose() {
         return follower.getPose();
     }
+
     public static Lambda followPath(PathChain chain, boolean holdEnd) {
         return new Lambda("follow-path-chain")
                 .addRequirements(INSTANCE)
@@ -120,6 +135,7 @@ public class Chassis implements Subsystem {
                     if (interrupted) follower.breakFollowing();
                 });
     }
+
     public static Lambda followPath(PathChain chain, double tolerance) {
         return new Lambda("follow-path-chain")
                 .addRequirements(INSTANCE)
@@ -132,7 +148,7 @@ public class Chassis implements Subsystem {
                 })
                 .setFinish(() -> {
 //                    return
-                    return Math.abs(chain.getPath(chain.size()-1).getLastControlPoint().getX() - follower.getPose().getX()) < tolerance && Math.abs(chain.getPath(chain.size()-1).getLastControlPoint().getY() - follower.getPose().getY()) < tolerance;
+                    return Math.abs(chain.getPath(chain.size() - 1).getLastControlPoint().getX() - follower.getPose().getX()) < tolerance && Math.abs(chain.getPath(chain.size() - 1).getLastControlPoint().getY() - follower.getPose().getY()) < tolerance;
                 })
                 .setEnd((interrupted) -> {
                     if (interrupted) follower.breakFollowing();
@@ -167,6 +183,7 @@ public class Chassis implements Subsystem {
                 })
                 ;
     }
+
     public static Lambda moveX(double dist) {
         return new Lambda("strafe-left")
                 .addRequirements(INSTANCE)
@@ -180,28 +197,30 @@ public class Chassis implements Subsystem {
                             .build();
                     follower.followPath(strafe);
                 })
-                .setFinish(()->{
+                .setFinish(() -> {
                     return !follower.isBusy();
                 })
                 .setEnd((interrupted) -> {
-                    if(interrupted) follower.breakFollowing();
+                    if (interrupted) follower.breakFollowing();
                 })
                 ;
     }
+
     public static Lambda turnTo(double heading, double toleranceHeading) {
         return new Lambda("hold-point")
                 .addRequirements(INSTANCE)
                 .setInterruptible(true)
                 .setInit(() -> follower.holdPoint(new Pose(follower.getPose().getX(), follower.getPose().getY(), heading)))
-                .setFinish(()->{
+                .setFinish(() -> {
                     return Math.abs(follower.getPose().getHeading() - heading) < toleranceHeading;
                 })
                 .setEnd((interrupted) -> {
-                    if(interrupted) follower.breakFollowing();
+                    if (interrupted) follower.breakFollowing();
                 })
                 ;
     }
-    public static Lambda holdPoint(BezierPoint point, double heading){
+
+    public static Lambda holdPoint(BezierPoint point, double heading) {
         return new Lambda("hold-point")
                 .addRequirements(INSTANCE)
                 .setInterruptible(true)
@@ -211,7 +230,8 @@ public class Chassis implements Subsystem {
                 })
                 ;
     }
-    public static Lambda breakFollowing(){
+
+    public static Lambda breakFollowing() {
         return new Lambda("break-following")
                 .addRequirements(INSTANCE)
                 .setInterruptible(true)

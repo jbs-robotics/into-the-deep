@@ -20,7 +20,7 @@ public class FConstants {
         FollowerConstants.localizers = Localizers.THREE_WHEEL;
 
         // We can change the value of any variable/constant of FollowerConstants.
-        FollowerConstants.mass = 13.245; // In kg
+        FollowerConstants.mass = 13.744; // In kg
 
         FollowerConstants.leftFrontMotorName = "leftFront";
         FollowerConstants.leftRearMotorName = "leftBack";
@@ -40,7 +40,7 @@ public class FConstants {
         FollowerConstants.translationalPIDFCoefficients.setCoefficients(0.4, 0.0, 0.04, 0.0);
         FollowerConstants.headingPIDFCoefficients.setCoefficients(2, 0.0,0.09, 0.0);
         FollowerConstants.zeroPowerAccelerationMultiplier= 6;
-        FollowerConstants.drivePIDFCoefficients.setCoefficients(0.010, 0.0, 0.0001, 0.6, 0.0);
+        FollowerConstants.drivePIDFCoefficients.setCoefficients(0.010, 0.0, 0.001, 0.6, 0.0);
 
 //        FollowerConstants.
         FollowerConstants.centripetalScaling = 0.0006;

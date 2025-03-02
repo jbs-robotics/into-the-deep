@@ -33,6 +33,7 @@ public class Outtake implements Subsystem {
     public static final Outtake INSTANCE = new Outtake();
 
     public static DcMotor slideLeft, slideRight;
+    public static Servo elbowLeft, elbowRight, wrist, claw;
 
     public static TouchSensor outLimit;
     public static final int SLIDE_TOLERANCE = 50;
@@ -70,7 +71,6 @@ public class Outtake implements Subsystem {
         slideLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slideRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-
         slideLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         slideRight.setDirection(DcMotorSimple.Direction.REVERSE);
         slideLeft.setPower(1);
@@ -101,7 +101,6 @@ public class Outtake implements Subsystem {
         slideLeft.setPower(speed);
         slideRight.setPower(speed);
     }
-
     public static Lambda outtakeSample() {
         return Lambda.from(new Sequential(
                         Claw.closeClaw(),

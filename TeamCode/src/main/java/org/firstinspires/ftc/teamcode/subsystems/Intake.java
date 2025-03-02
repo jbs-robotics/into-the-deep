@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.auto.HT_PP;
+import org.firstinspires.ftc.teamcode.driveClasses.ControlConstants;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -46,7 +47,7 @@ public class Intake implements Subsystem {
     /// changes how long servo actions should wait until reporting they are complete
     public static Telemetry telemetry;
     public static final double SERVO_DELAY = 0.4;
-    public static final int SLIDE_TOLERANCE = 50;
+    public static final double SLIDE_TOLERANCE = 0.005;
 
     private Intake() {
     }
@@ -129,7 +130,7 @@ public class Intake implements Subsystem {
         return new Lambda("intake-slide-to")
                 .setInit(() -> {
                     slideLeft.setPosition(target);
-                    slideRight.setPosition(target);
+                    slideRight.setPosition(1-target);
                 })
                 .setExecute(()->{
                 })
@@ -141,11 +142,11 @@ public class Intake implements Subsystem {
     }
 
     public static Lambda slideIn() {
-        return Lambda.from(slideTo(0));
+        return Lambda.from(slideTo(ControlConstants.intakeSlideIn));
     }
 
     public static Lambda slideOut() {
-        return Lambda.from(slideTo(1));
+        return Lambda.from(slideTo(ControlConstants.intakeSlideOut));
     }
 
 

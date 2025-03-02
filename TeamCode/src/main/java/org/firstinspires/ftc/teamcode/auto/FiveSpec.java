@@ -56,7 +56,7 @@ public class FiveSpec extends OpMode {
     // Target Points
     private final Pose startPose = new Pose(9, 63, Math.toRadians(180));
     private final Pose pickupPose = new Pose(9, 37, Math.toRadians(180));
-    private final Pose scorePose = new Pose(42, 78, Math.toRadians(180));
+    private final Pose scorePose = new Pose(40, 78, Math.toRadians(180));
 
     // Control Points
     private final Pose grabPickup1ControlPose = new Pose(116, 16);
@@ -78,18 +78,18 @@ public class FiveSpec extends OpMode {
         follower = Chassis.follower;
 
         scorePreload = follower.pathBuilder()
-//                .addPath(new BezierLine(
-//                        new Point(startPose),
-//                        new Point(scorePose)))
-//                .setConstantHeadingInterpolation(scorePose.getHeading())
-
-                .addPath(new BezierCurve(
+                .addPath(new BezierLine(
                         new Point(startPose),
-                        new Point(16, 63),
-                        new Point(16, 78),
                         new Point(scorePose)))
-                .setTangentHeadingInterpolation()
-                .setReversed(true)
+                .setConstantHeadingInterpolation(scorePose.getHeading())
+//
+//                .addPath(new BezierCurve(
+//                        new Point(startPose),
+//                        new Point(16, 63),
+//                        new Point(16, 78),
+//                        new Point(scorePose)))
+//                .setTangentHeadingInterpolation()
+//                .setReversed(true)
 
                 .setPathEndTimeoutConstraint(100) //TODO: Test what this does
                 .build();
@@ -106,6 +106,7 @@ public class FiveSpec extends OpMode {
                 ))
                 .setConstantHeadingInterpolation(scorePose.getHeading())
                 .setZeroPowerAccelerationMultiplier(4) // TODO: See how high I can make this without going into the other half of the field
+                .setPathEndTimeoutConstraint(100)
                 .build();
 
         plow1 = follower.pathBuilder()
@@ -113,58 +114,65 @@ public class FiveSpec extends OpMode {
                 .addPath(new BezierCurve(
                         new Point(63, 36),
                         new Point(69, 22),
-                        new Point(10, 23)
+                        new Point(14, 23)
                 ))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
                 .setZeroPowerAccelerationMultiplier(7)
+                .setPathEndTimeoutConstraint(100)
                 .build();
 
         toPlow2 = follower.pathBuilder()
                 // First spike Mark
                 .addPath(new BezierCurve(
-                        new Point(10, 23),
-                        new Point(72, 31),
+                        new Point(14, 23),
+                        new Point(69, 31),
                         new Point(62, 15)
                 ))
                 .setConstantHeadingInterpolation(scorePose.getHeading())
+                .setPathEndTimeoutConstraint(100)
                 .build();
         plow2 = follower.pathBuilder()
                 // First spike Mark
                 .addPath(new BezierLine(
-                        new Point(63, 36),
-                        new Point(10, 15)
+                        new Point(63, 15),
+                        new Point(14, 15)
                 ))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
                 .setZeroPowerAccelerationMultiplier(7)
+                .setPathEndTimeoutConstraint(100)
+
                 .build();
 
         toPlow3 = follower.pathBuilder()
                 // First spike Mark
                 .addPath(new BezierCurve(
-                        new Point(10, 15),
+                        new Point(14, 15),
                         new Point(69, 18),
-                        new Point(62, 14)
+                        new Point(62, 12)
 
                 ))
                 .setConstantHeadingInterpolation(scorePose.getHeading())
+                .setPathEndTimeoutConstraint(100)
                 .build();
         plow3 = follower.pathBuilder()
                 // First spike Mark
                 .addPath(new BezierLine(
-                        new Point(62, 14),
-                        new Point(10, 14)
+                        new Point(62, 12),
+                        new Point(14, 12)
                 ))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
                 .setZeroPowerAccelerationMultiplier(7)
+                .setPathEndTimeoutConstraint(100)
                 .build();
 
         grabPickup1 = follower.pathBuilder()
                 .addPath(new BezierLine(
-                        new Point(10, 14),
-                        new Point(9, 37)
+                        new Point(14, 12),
+                        new Point(10, 12)
                 ))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
                 .setZeroPowerAccelerationMultiplier(2.5)
+//                .setPathEndTimeoutConstraint(100)
                 .build();
 
 
@@ -174,121 +182,129 @@ public class FiveSpec extends OpMode {
 //                        new Point(pickupPose),
 //                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 2))))
 //                .setConstantHeadingInterpolation(Math.toRadians(180))
+
                 .addPath(new BezierCurve(
-                        new Point(pickupPose),
-                        new Point(40, 35),
-                        new Point(9, 77.5),
-                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 2))))
+                        new Point(10, 12),
+                        new Point(35, 10),
+                        new Point(12, 79.4598),
+                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 3))))
                 .setTangentHeadingInterpolation()
                 .setReversed(true)
+
                 .setZeroPowerAccelerationMultiplier(7)
+                .setPathEndTimeoutConstraint(100)
 
                 .build();
 
         grabPickup2 = follower.pathBuilder()
-//                .addPath(new BezierLine(
-//                        new Point(scorePose.getX(), scorePose.getY() - 2),
-//                        new Point(pickupPose)))
-//                .setConstantHeadingInterpolation(Math.toRadians(180))
-
-                .addPath(new BezierCurve(
-                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 2)),
-                        new Point(9, 77.5),
-                        new Point(40, 35),
-                        new Point(pickupPose)
-                ))
-                .setTangentHeadingInterpolation()
+                .addPath(new BezierLine(
+                        new Point(scorePose.getX(), scorePose.getY() - 2),
+                        new Point(pickupPose)))
+                .setConstantHeadingInterpolation(Math.toRadians(180))
+//
+//                .addPath(new BezierCurve(
+//                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 2)),
+//                        new Point(9, 77.5),
+//                        new Point(40, 35),
+//                        new Point(pickupPose)
+//                ))
+//                .setTangentHeadingInterpolation()
 
                 .setZeroPowerAccelerationMultiplier(2.5)
+//                .setPathEndTimeoutConstraint(100)
                 .build();
 
 
         scorePickup2 = follower.pathBuilder()
-//                .addPath(new BezierLine(
-//                        new Point(pickupPose),
-//                        new Point(scorePose.getX(), scorePose.getY() - 4)))
-//                .setConstantHeadingInterpolation(Math.toRadians(180))
-
-                .addPath(new BezierCurve(
+                .addPath(new BezierLine(
                         new Point(pickupPose),
-                        new Point(40, 35),
-                        new Point(9, 74.5),
-                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 4))))
-                .setTangentHeadingInterpolation()
-                .setReversed(true)
+                        new Point(scorePose.getX(), scorePose.getY() - 4)))
+                .setConstantHeadingInterpolation(Math.toRadians(180))
+//
+//                .addPath(new BezierCurve(
+//                        new Point(pickupPose),
+//                        new Point(40, 35),
+//                        new Point(9, 74.5),
+//                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 4))))
+//                .setTangentHeadingInterpolation()
+//                .setReversed(true)
+
                 .setPathEndTimeoutConstraint(100)
                 .setZeroPowerAccelerationMultiplier(7)
-
+                .setPathEndTimeoutConstraint(100)
                 .build();
 
         grabPickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(
-//                        new Point(scorePose.getX(), scorePose.getY() - 4),
-//                        new Point(pickupPose)))
-//                .setConstantHeadingInterpolation(Math.toRadians(180))
-//
-                .addPath(new BezierCurve(
-                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 4)),
-                        new Point(9, 74.5),
-                        new Point(40, 35),
-                        new Point(pickupPose)
-                ))
-                .setTangentHeadingInterpolation()
+                .addPath(new BezierLine(
+                        new Point(scorePose.getX(), scorePose.getY() - 4),
+                        new Point(pickupPose)))
+                .setConstantHeadingInterpolation(Math.toRadians(180))
 
+//                .addPath(new BezierCurve(
+//                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 4)),
+//                        new Point(9, 74.5),
+//                        new Point(40, 35),
+//                        new Point(pickupPose)
+//                ))
+//                .setTangentHeadingInterpolation()
 
                 .setZeroPowerAccelerationMultiplier(2.5)
+//                .setPathEndTimeoutConstraint(100)
                 .build();
 
 
         scorePickup3 = follower.pathBuilder()
-//                .addPath(new BezierLine(
-//                        new Point(pickupPose),
-//                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 6))))
-//                .setConstantHeadingInterpolation(Math.toRadians(180))
-
-                .addPath(new BezierCurve(
+                .addPath(new BezierLine(
                         new Point(pickupPose),
-                        new Point(40, 35),
-                        new Point(9, 72.5),
                         new Point(new Pose(scorePose.getX(), scorePose.getY() - 6))))
-                .setTangentHeadingInterpolation()
-                .setReversed(true)
-                .setZeroPowerAccelerationMultiplier(7)
+                .setConstantHeadingInterpolation(Math.toRadians(180))
+//
+//                .addPath(new BezierCurve(
+//                        new Point(pickupPose),
+//                        new Point(40, 35),
+//                        new Point(9, 72.5),
+//                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 6))))
+//                .setTangentHeadingInterpolation()
+//                .setReversed(true)
 
+                .setZeroPowerAccelerationMultiplier(7)
+                .setPathEndTimeoutConstraint(100)
                 .build();
 
         grabPickup4 = follower.pathBuilder()
-//                .addPath(new BezierLine(
-//                        new Point(scorePose.getX(), scorePose.getY() - 6),
-//                        new Point(pickupPose)))
-//                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .addPath(new BezierLine(
+                        new Point(scorePose.getX(), scorePose.getY() - 6),
+                        new Point(pickupPose)))
+                .setConstantHeadingInterpolation(Math.toRadians(180))
+//
+//                .addPath(new BezierCurve(
+//                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 6)),
+//                        new Point(9, 72.5),
+//                        new Point(40, 35),
+//                        new Point(pickupPose)
+//                ))
+//                .setTangentHeadingInterpolation()
 
-                .addPath(new BezierCurve(
-                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 6)),
-                        new Point(9, 72.5),
-                        new Point(40, 35),
-                        new Point(pickupPose)
-                ))
-                .setTangentHeadingInterpolation()
                 .setZeroPowerAccelerationMultiplier(2.5)
-
+//                .setPathEndTimeoutConstraint(100)
                 .build();
 
         scorePickup4 = follower.pathBuilder()
-//                .addPath(new BezierLine(
-//                        new Point(pickupPose),
-//                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 8))))
-//                .setConstantHeadingInterpolation(Math.toRadians(180))
-
-                .addPath(new BezierCurve(
+                .addPath(new BezierLine(
                         new Point(pickupPose),
-                        new Point(40, 35),
-                        new Point(9, 70.5),
                         new Point(new Pose(scorePose.getX(), scorePose.getY() - 8))))
-                .setTangentHeadingInterpolation()
-                .setReversed(true)
-                .setZeroPowerAccelerationMultiplier(7)
+                .setConstantHeadingInterpolation(Math.toRadians(180))
 
+//                .addPath(new BezierCurve(
+//                        new Point(pickupPose),
+//                        new Point(40, 35),
+//                        new Point(9, 70.5),
+//                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 8))))
+//                .setTangentHeadingInterpolation()
+//                .setReversed(true)
+
+                .setZeroPowerAccelerationMultiplier(7)
+                .setPathEndTimeoutConstraint(100)
                 .build();
 
 
@@ -337,6 +353,7 @@ public class FiveSpec extends OpMode {
         opmodeTimer.resetTimer();
         Constants.setConstants(FConstants.class, LConstants.class);
         Claw.closeClaw().schedule();
+        Intake.slideIn().schedule();
         buildPaths();
         checkSlides.start();
     }
@@ -374,9 +391,11 @@ public class FiveSpec extends OpMode {
                         // Start Movement (case 0)
                         new Sequential(
                                 new Parallel(
+                                        Intake.slideIn(),
                                         Claw.closeClaw(),
                                         Outtake.slideTo(ControlConstants.highChamberSlidePos),
                                         Claw.elbowOut(),
+                                        Claw.wristIn(),
                                         Chassis.followPath(scorePreload, true)
                                 )
                         ),
@@ -389,7 +408,7 @@ public class FiveSpec extends OpMode {
                                         Claw.elbowTo(0.86), // pulls outtake to a salute
                                         new Sequential(
                                                 new Wait(0.5),
-                                                Outtake.slideTo(-10)
+                                                Outtake.slideTo(ControlConstants.minOuttakeSlidePos)
                                         )
                                 )
                         ),
@@ -408,6 +427,7 @@ public class FiveSpec extends OpMode {
                         new Sequential(
                                 /* Grab the Specimen Here */
                                 Claw.elbowIn(),
+                                Claw.wristTo(0.94),
                                 new Wait(0.4),
                                 Claw.closeClaw(),
                                 new Parallel(
@@ -419,13 +439,13 @@ public class FiveSpec extends OpMode {
                         // Score specimen 2 and move to pickup (case 5)
                         new Sequential(
                                 new Parallel(
-                                        Claw.openClaw(), // pulls outtake down
-                                        Claw.elbowIn(), // pulls outtake down
-                                        Chassis.followPath(grabPickup2, true),
-                                        new Sequential(
-                                                new Wait(0.5),
-                                                Outtake.slideTo(-200)
-                                        )
+//                                        Claw.openClaw(), // pulls outtake down
+//                                        Claw.elbowIn(), // pulls outtake down
+                                        Chassis.followPath(grabPickup2, true)
+//                                        new Sequential(
+//                                                new Wait(0.5),
+//                                                Outtake.slideTo(-200)
+//                                        )
                                 )
 
 
@@ -433,26 +453,26 @@ public class FiveSpec extends OpMode {
 
                         // Grab specimen 3 (case 6)
                         new Sequential(
-                                new Wait(0.4),
-                                Claw.closeClaw(),
-                                Intake.sideSpinOff(),
+//                                new Wait(0.4),
+//                                Claw.closeClaw(),
+//                                Intake.sideSpinOff(),
                                 new Parallel(
-                                        Chassis.followPath(scorePickup2, true),
-                                        Outtake.slideTo(-1070),
-                                        Claw.elbowOut()
+                                        Chassis.followPath(scorePickup2, true)
+//                                        Outtake.slideTo(-1070),
+//                                        Claw.elbowOut()
                                 )
                         ),
 
                         // Score specimen 3 and move to pickup (case 5)
                         new Sequential(
                                 new Parallel(
-                                        Claw.openClaw(), // pulls outtake down
-                                        Claw.elbowIn(), // pulls outtake down
-                                        Chassis.followPath(grabPickup3, 1),
-                                        new Sequential(
-                                                new Wait(0.5),
-                                                Outtake.slideTo(-200)
-                                        )
+//                                        Claw.openClaw(), // pulls outtake down
+//                                        Claw.elbowIn(), // pulls outtake down
+                                        Chassis.followPath(grabPickup3, 1)
+//                                        new Sequential(
+//                                                new Wait(0.5),
+//                                                Outtake.slideTo(-200)
+//                                        )
                                 )
 
 
@@ -460,26 +480,26 @@ public class FiveSpec extends OpMode {
 
                         // Grab specimen 4 (case 6)
                         new Sequential(
-                                new Wait(0.4),
-                                Claw.closeClaw(),
-                                Intake.sideSpinOff(),
+//                                new Wait(0.4),
+//                                Claw.closeClaw(),
+//                                Intake.sideSpinOff(),
                                 new Parallel(
-                                        Chassis.followPath(scorePickup3, 1),
-                                        Outtake.slideTo(-1070),
-                                        Claw.elbowOut()
+                                        Chassis.followPath(scorePickup3, 1)
+//                                        Outtake.slideTo(-1070),
+//                                        Claw.elbowOut()
                                 )
                         ),
 
                         // Score specimen 3 and move to pickup (case 5)
                         new Sequential(
                                 new Parallel(
-                                        Claw.openClaw(), // pulls outtake down
-                                        Claw.elbowIn(), // pulls outtake down
-                                        Chassis.followPath(grabPickup4, 1),
-                                        new Sequential(
-                                                new Wait(0.5),
-                                                Outtake.slideTo(-200)
-                                        )
+//                                        Claw.openClaw(), // pulls outtake down
+//                                        Claw.elbowIn(), // pulls outtake down
+                                        Chassis.followPath(grabPickup4, 1)
+//                                        new Sequential(
+//                                                new Wait(0.5),
+//                                                Outtake.slideTo(-200)
+//                                        )
                                 )
 
 
@@ -487,27 +507,27 @@ public class FiveSpec extends OpMode {
 
                         // Grab specimen 4 (case 6)
                         new Sequential(
-                                new Wait(0.4),
-                                Claw.closeClaw(),
-                                Intake.sideSpinOff(),
+//                                new Wait(0.4),
+//                                Claw.closeClaw(),
+//                                Intake.sideSpinOff(),
                                 new Parallel(
-                                        Chassis.followPath(scorePickup4, 1),
-                                        Outtake.slideTo(-1070),
-                                        Claw.elbowOut()
+                                        Chassis.followPath(scorePickup4, 1)
+//                                        Outtake.slideTo(-1070),
+//                                        Claw.elbowOut()
                                 )
                         ),
 
                         // Score specimen 4 (case 7)
                         new Sequential(
-                                Outtake.slowOuttakeSpecimen(),
+//                                Outtake.slowOuttakeSpecimen(),
                                 new Parallel(
 //                                    Claw.elbowTo(0.86), // pulls outtake to a salute
-                                        Claw.elbowIn(), // pulls outtake down
-                                        Chassis.followPath(park, true),
-                                        new Sequential(
-                                                new Wait(0.5),
-                                                Outtake.slideTo(-300)
-                                        )
+//                                        Claw.elbowIn(), // pulls outtake down
+                                        Chassis.followPath(park, true)
+//                                        new Sequential(
+//                                                new Wait(0.5),
+//                                                Outtake.slideTo(-300)
+//                                        )
                                 ),
                                 new Lambda("finish").setInit(() -> {
                                     finished = true;

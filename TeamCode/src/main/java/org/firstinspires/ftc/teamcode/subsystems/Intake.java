@@ -86,7 +86,7 @@ public class Intake implements Subsystem {
 
         lElbow = hardwareMap.get(Servo.class, "inL");
         rElbow = hardwareMap.get(Servo.class, "inR");
-
+        lElbow.setDirection(Servo.Direction.REVERSE);
         sideSpinL = hardwareMap.get(CRServo.class, "sideSpinL");
         sideSpinR = hardwareMap.get(CRServo.class, "sideSpinR");
     }
@@ -95,7 +95,15 @@ public class Intake implements Subsystem {
     public void postUserLoopHook(@NonNull Wrapper opMode) {
     }
 
-
+    public static Lambda sideSpinTo(double pos){
+        return new Lambda("side-spin-in")
+                .addInit(() -> {
+                    sideSpinL.setPower(-pos);
+                    sideSpinR.setPower(pos);
+                })
+                .addRequirements(sideSpinL, sideSpinR)
+                ;
+    }
     public static Lambda sideSpinIn() {
         return new Lambda("side-spin-in")
                 .addInit(() -> {
@@ -130,7 +138,7 @@ public class Intake implements Subsystem {
         return new Lambda("intake-slide-to")
                 .setInit(() -> {
                     slideLeft.setPosition(target);
-                    slideRight.setPosition(1-target);
+                    slideRight.setPosition(target);
                 })
                 .setExecute(()->{
                 })
@@ -148,9 +156,6 @@ public class Intake implements Subsystem {
     public static Lambda slideOut() {
         return Lambda.from(slideTo(ControlConstants.intakeSlideOut));
     }
-
-
-
     public static Lambda elbowTo(double pos) {
         return Lambda.from(new Sequential(
                 new Lambda("intake-elbow-to")
@@ -159,12 +164,7 @@ public class Intake implements Subsystem {
                     rElbow.setPosition(1-pos);
                 })
                 .addRequirements(lElbow, rElbow)
-//                .setFinish(()->{
-//                    return Math.abs(lElbow.getPosition() - pos) < 0.001;
-//                })
-//                new Wait(SERVO_DELAY)
-        ))
-                ;
+        ));
     }
 
     public static Lambda elbowOut() {

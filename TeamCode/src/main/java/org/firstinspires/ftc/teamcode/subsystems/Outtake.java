@@ -11,6 +11,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.teamcode.driveClasses.ControlConstants;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -37,6 +40,7 @@ public class Outtake implements Subsystem {
 
     public static TouchSensor outLimit;
     public static final int SLIDE_TOLERANCE = 50;
+    public static int slidePos = ControlConstants.minOuttakeSlidePos;
 
     private Outtake() {}
 
@@ -92,15 +96,15 @@ public class Outtake implements Subsystem {
         setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
     }
-    public static void setMode(DcMotor.RunMode runMode){
+    public static void setMode(DcMotor.RunMode runMode) {
         slideLeft.setMode(runMode);
         slideRight.setMode(runMode);
     }
-
     public static void setSpeed(double speed) {
         slideLeft.setPower(speed);
         slideRight.setPower(speed);
     }
+
     public static Lambda outtakeSample() {
         return Lambda.from(new Sequential(
                         Claw.closeClaw(),
@@ -171,7 +175,11 @@ public class Outtake implements Subsystem {
                 ;
 
     }
-
+    public static Lambda incrementSlides(double amt){
+        slidePos += amt;
+        slidePos =  Range.clip(slidePos, ControlConstants.maxOuttakeSlidePos, ControlConstants.minOuttakeSlidePos);
+        return slideTo(slidePos);
+    }
     public static Lambda slideOut() {
         return slideTo(-4000);
     }

@@ -38,7 +38,6 @@ import com.pedropathing.localization.Pose;
 import com.pedropathing.pathgen.BezierLine;
 import com.pedropathing.pathgen.PathChain;
 import com.pedropathing.pathgen.Point;
-import com.pedropathing.util.Constants;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -72,8 +71,6 @@ import dev.frozenmilk.mercurial.commands.groups.Parallel;
 import dev.frozenmilk.mercurial.commands.groups.Sequential;
 import dev.frozenmilk.mercurial.commands.stateful.StatefulLambda;
 import dev.frozenmilk.util.cell.RefCell;
-import pedroPathing.constants.FConstants;
-import pedroPathing.constants.LConstants;
 
 import java.util.List;
 import java.lang.*;
@@ -295,7 +292,7 @@ public class PedroTeleOp extends LinearOpMode {
 
             // Outtake Wrist Control
             clawWristPos += gamepad2.right_stick_y * ControlConstants.outtakeWristSensitivity;
-            clawWristPos = Range.clip(clawWristPos, ControlConstants.outtakeWristIn, ControlConstants.outtakeWristOut);
+            clawWristPos = Range.clip(clawWristPos, ControlConstants.outtakeWristBack, ControlConstants.outtakeWristForward);
 
             // Outtake Claw Control
             if(clawAvailable.state && gamepad2.b){
@@ -433,7 +430,7 @@ public class PedroTeleOp extends LinearOpMode {
                 Outtake.slideIn(),
                 Intake.elbowTo(0.85),
                 Claw.elbowTo(0.87),
-                Claw.wristIn(),
+                Claw.wristBack(),
                 Claw.closeClaw(),
                 Claw.elbowOut()
         ).schedule();
@@ -523,7 +520,7 @@ public class PedroTeleOp extends LinearOpMode {
                     StatefulLambda<RefCell<Boolean>> redSideSpec = new StatefulLambda<>("Red-spec-CAT", emergencyStop)
                             .setExecute(()->{
                                 Outtake.slideTo(ControlConstants.highChamberSlidePos);
-                                Claw.wristIn();
+                                Claw.wristBack();
                                 Claw.elbowOut();
                                 Chassis.followPath(pathChain, true);
                             })
@@ -569,7 +566,7 @@ public class PedroTeleOp extends LinearOpMode {
                     StatefulLambda<RefCell<Boolean>> redSideSpec = new StatefulLambda<>("Red-spec-CAT", emergencyStop)
                             .setExecute(()->{
                                 Outtake.slideTo(ControlConstants.highChamberSlidePos);
-                                Claw.wristIn();
+                                Claw.wristBack();
                                 Claw.elbowOut();
                                 Chassis.followPath(pathChain, true);
                             })

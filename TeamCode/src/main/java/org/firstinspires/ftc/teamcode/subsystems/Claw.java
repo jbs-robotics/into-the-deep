@@ -58,12 +58,19 @@ public class Claw implements Subsystem {
         clawServo = hardwareMap.get(Servo.class, "claw");
         lElbow = hardwareMap.get(Servo.class, "outServoL");
         rElbow = hardwareMap.get(Servo.class, "outServoR");
+        lElbow.setDirection(Servo.Direction.REVERSE);
         wrist = hardwareMap.get(Servo.class, "clawWrist");
     }
 
     @Override
     public void postUserLoopHook(@NonNull Wrapper opMode) {}
-
+    public static Lambda clawTo(double pos){
+        return Lambda.from(new Sequential(
+                new Lambda("open-claw")
+                        .setInit(() -> clawServo.setPosition(pos))
+                        .addRequirements(clawServo)
+        ));
+    }
     public static Lambda openClaw() {
         return Lambda.from(new Sequential(
                 new Lambda("open-claw")
@@ -112,7 +119,7 @@ public class Claw implements Subsystem {
         return Lambda.from(new Sequential(
             new Lambda("elbow-to")
                 .setInit(() -> {
-                    lElbow.setPosition(1-pos);
+                    lElbow.setPosition(pos);
                     rElbow.setPosition(pos);
                 })
                 .addRequirements(rElbow, lElbow)
@@ -120,7 +127,7 @@ public class Claw implements Subsystem {
                 new Wait(SERVO_DELAY)
         ));
     }
-    public static Lambda wristIn(){
+    public static Lambda wristBack(){
         return Lambda.from(new Sequential(
                 new Lambda("wrist-to")
                         .setInit(()->{
@@ -129,7 +136,7 @@ public class Claw implements Subsystem {
                         .addRequirements(wrist)
         ));
     }
-    public static Lambda wristOut(){
+    public static Lambda wristForward(){
         return Lambda.from(new Sequential(
                 new Lambda("wrist-to")
                         .setInit(()->{

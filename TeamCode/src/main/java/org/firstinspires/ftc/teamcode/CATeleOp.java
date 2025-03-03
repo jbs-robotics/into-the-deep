@@ -128,12 +128,11 @@ public class CATeleOp extends OpMode {
     private Claw clawMercurial;
     private Intake intakeMercurial;
     private Outtake outtakeMercurial;
-//    private BoundGamepad mechs;
+    private BoundGamepad mechs;
 
     @Override
     public void init() {
         initAprilTag();
-//        BoundGamepad boundGamepad = new BoundGamepad(new SDKGamepad(gamepad2));
 //        mechs = Mercurial.gamepad2();
 //        mechs.square()
 //                .onTrue(transferLambda());
@@ -143,6 +142,14 @@ public class CATeleOp extends OpMode {
 //                .whileTrue(
 //                        Outtake.incrementSlides(mechs.leftStickY().state() * ControlConstants.outtakeSlideSensitivity)
 //                );
+//        mechs.circle().toggleTrue(
+//                Claw.toggleClaw()
+//        );
+//        mechs.dpadLeft().toggleTrue(Intake.toggleElbow());
+//        mechs.rightStickY().conditionalBindState().bind().whileTrue(Claw.incrementWrist(mechs.rightStickY().state() * ControlConstants.outtakeWristSensitivity));
+//        mechs.dpadDown().whileTrue(Intake.sideSpinIn());
+//        mechs.dpadUp().whileTrue(Intake.sideSpinOut());
+
 
         TelemetryPacket packet = new TelemetryPacket();
         telemetry.update();
@@ -168,8 +175,6 @@ public class CATeleOp extends OpMode {
         outServoL = hardwareMap.get(Servo.class, "outServoL");
         outServoR = hardwareMap.get(Servo.class, "outServoR");
 
-        outServoL.setDirection(Servo.Direction.FORWARD);
-        outServoR.setDirection(Servo.Direction.REVERSE);
 
         claw = hardwareMap.get(Servo.class, "claw");
         clawWrist = hardwareMap.get(Servo.class, "clawWrist");
@@ -181,16 +186,8 @@ public class CATeleOp extends OpMode {
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
 
-
-        intakeSlideLeft.setDirection(Servo.Direction.FORWARD);
-        intakeSlideRight.setDirection(Servo.Direction.REVERSE);
-
-
         outtakeSlideRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        outtakeSlideLeft.setDirection(DcMotor.Direction.REVERSE);
-        outtakeSlideRight.setDirection(DcMotor.Direction.REVERSE);
 
         outtakeSlideLeft.setPower(1);
         outtakeSlideRight.setPower(1);
@@ -200,6 +197,15 @@ public class CATeleOp extends OpMode {
 
         outtakeSlideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
+        intakeSlideLeft.setDirection(Servo.Direction.FORWARD);
+        intakeSlideRight.setDirection(Servo.Direction.REVERSE);
+        inR.setDirection(Servo.Direction.REVERSE);
+        outServoL.setDirection(Servo.Direction.REVERSE);
+        outServoR.setDirection(Servo.Direction.FORWARD);
+        outtakeSlideRight.setDirection(DcMotor.Direction.REVERSE);
+        outtakeSlideLeft.setDirection(DcMotor.Direction.REVERSE);
 
         telemetry.addData("Status", "Initialized");
         // Wait for the game to start (driver presses START)
@@ -312,14 +318,25 @@ public class CATeleOp extends OpMode {
         else Intake.sideSpinOff().schedule();
         // Update Motors/Servos
         if (!transferring.state) {
+            outServoL.setPosition(clawElbowPos);
+            outServoR.setPosition(clawElbowPos);
+            claw.setPosition(clawPos);
+            inL.setPosition(intakePivot);
+            inR.setPosition(intakePivot);
+            intakeSlideLeft.setPosition(intakePosition);
+            intakeSlideRight.setPosition(intakePosition);
+            sideSpinL.setPower(sideSpinPower);
+            sideSpinR.setPower(sideSpinPower);
 
-            Claw.elbowTo(clawElbowPos).schedule();
-            Claw.clawTo(clawPos).schedule();
-            Claw.wristTo(clawWristPos);
-            Intake.elbowTo(intakePivot).schedule();
-            Intake.slideTo(intakePosition).schedule();
-            Intake.sideSpinTo(sideSpinPower);
-//            Outtake.slideTo(outtakeSlidePos).schedule();
+//            Claw.elbowTo(clawElbowPos).schedule();
+//            Claw.clawTo(clawPos).schedule();
+//            Claw.wristTo(clawWristPos).schedule();
+//            Intake.elbowTo(intakePivot).schedule();
+//            Intake.slideTo(intakePosition).schedule();
+//            Intake.sideSpinTo(sideSpinPower).schedule();
+//
+            Outtake.slideTo(outtakeSlidePos).schedule();
+
             clawWrist.setPosition(clawWristPos);
         }
 
@@ -329,6 +346,7 @@ public class CATeleOp extends OpMode {
             if (!manualOverride.state) {
                 outtakeSlideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 outtakeSlideRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
                 outtakeSlidePos = 0;
 
                 outtakeSlideLeft.setTargetPosition(0);
@@ -372,8 +390,8 @@ public class CATeleOp extends OpMode {
         }
 
         if (!manualOverride.state && gamepad2.square) {
-            transferring.state = true;
-            transfer();
+//            transferring.state = true;
+//            transfer();
 //            transferring.state = false;
 
 //            new Thread("transfer") {
@@ -425,7 +443,6 @@ public class CATeleOp extends OpMode {
     }
 
     private void transfer() {
-
         new Sequential(
                 Outtake.slideTo(ControlConstants.transferOuttakeSlidePos - 100),
                 Claw.openClaw(),
@@ -437,15 +454,9 @@ public class CATeleOp extends OpMode {
                 new Wait(0.5),
                 Outtake.slideTo(ControlConstants.transferOuttakeSlidePos),
                 Claw.closeClaw(),
-                new Lambda("transfer-finish")
-                        .setInit(()->{
-                            intakePivot = ControlConstants.transferIntakePivotPos;
-                            intakePosition = ControlConstants.intakeSlideIn;
-                            clawWristPos = ControlConstants.transferOuttakeWristPos;
-                            clawElbowPos = ControlConstants.transferOuttakePivotPos;
-                            outtakeSlidePos = ControlConstants.transferOuttakeSlidePos;
-                            transferring.state = false;
-                        })
+                new Lambda("finish").setInit(()->{
+
+                })
         ).schedule();
 //        clawPos = ControlConstants.clawClosed;
 

@@ -7,6 +7,8 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.driveClasses.ControlConstants;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -25,6 +27,7 @@ import kotlin.annotation.MustBeDocumented;
 @Config
 public class Claw implements Subsystem {
     public static final Claw INSTANCE = new Claw();
+    public static double elbowPosition = 0, wristPosition = 0;
 
     public static Servo clawServo, lElbow, rElbow, wrist; // declare the claw servos
 
@@ -71,6 +74,14 @@ public class Claw implements Subsystem {
                         .addRequirements(clawServo)
         ));
     }
+    public static Lambda toggleClaw(){
+        if(clawServo.getPosition() == ControlConstants.clawClosed){
+            return openClaw();
+        }
+        else{
+            return closeClaw();
+        }
+    }
     public static Lambda openClaw() {
         return Lambda.from(new Sequential(
                 new Lambda("open-claw")
@@ -91,31 +102,34 @@ public class Claw implements Subsystem {
     }
 
     public static Lambda elbowOut() {
-        return Lambda.from(new Sequential(
-        new Lambda("elbow-out")
-                .setInit(() -> {
-                    lElbow.setPosition(1);
-                    rElbow.setPosition(0);
-                })
-                .addRequirements(rElbow, lElbow)
-                ,
-                new Wait(SERVO_DELAY)
-        ));
+        return elbowTo(ControlConstants.outtakePivotOut);
+//        return Lambda.from(new Sequential(
+//        new Lambda("elbow-out")
+//                .setInit(() -> {
+//                    lElbow.setPosition(1);
+//                    rElbow.setPosition(0);
+//                })
+//                .addRequirements(rElbow, lElbow)
+//                ,
+//                new Wait(SERVO_DELAY)
+//        ));
     }
     public static Lambda elbowIn() {
-        return Lambda.from(new Sequential(
-            new Lambda("elbow-in")
-                .setInit(() -> {
-                    lElbow.setPosition(0);
-                    rElbow.setPosition(1);
-                })
-                .addRequirements(rElbow, lElbow)
-                ,
-                new Wait(SERVO_DELAY)
-        ));
+        return elbowTo(ControlConstants.outtakePivotIn);
+//        return Lambda.from(new Sequential(
+//            new Lambda("elbow-in")
+//                .setInit(() -> {
+//                    lElbow.setPosition(0);
+//                    rElbow.setPosition(1);
+//                })
+//                .addRequirements(rElbow, lElbow)
+//                ,
+//                new Wait(SERVO_DELAY)
+//        ));
     }
 
     public static Lambda elbowTo(double pos) {
+        elbowPosition = pos;
         return Lambda.from(new Sequential(
             new Lambda("elbow-to")
                 .setInit(() -> {
@@ -128,24 +142,31 @@ public class Claw implements Subsystem {
         ));
     }
     public static Lambda wristBack(){
-        return Lambda.from(new Sequential(
-                new Lambda("wrist-to")
-                        .setInit(()->{
-                            wrist.setPosition(0);
-                        })
-                        .addRequirements(wrist)
-        ));
+        return wristTo(ControlConstants.outtakeWristBack);
+
+//        return Lambda.from(new Sequential(
+//                new Lambda("wrist-to")
+//                        .setInit(()->{
+//                            wrist.setPosition(0);
+//                        })
+//                        .addRequirements(wrist)
+//        ));
     }
     public static Lambda wristForward(){
-        return Lambda.from(new Sequential(
-                new Lambda("wrist-to")
-                        .setInit(()->{
-                            wrist.setPosition(1);
-                        })
-                        .addRequirements(wrist)
-        ));
+        return wristTo(ControlConstants.outtakeWristForward);
+//        return Lambda.from(new Sequential(
+//                new Lambda("wrist-to")
+//                        .setInit(()->{
+//                            wrist.setPosition(1);
+//                        })
+//                        .addRequirements(wrist)
+//        ));
+    }
+    public static Lambda incrementWrist(double amt){
+        return wristTo(wristPosition + amt);
     }
     public static Lambda wristTo(double pos){
+        wristPosition = pos;
         return Lambda.from(new Sequential(
                 new Lambda("wrist-to")
                         .setInit(()->{

@@ -39,7 +39,7 @@ import kotlin.annotation.MustBeDocumented;
 public class Intake implements Subsystem {
     public static final Intake INSTANCE = new Intake();
 
-//    public static DcMotorEx slideLeft, slideRight;
+    //    public static DcMotorEx slideLeft, slideRight;
     public static CRServo sideSpinL, sideSpinR;
     public static Servo lElbow, rElbow, slideLeft, slideRight;
 
@@ -47,6 +47,7 @@ public class Intake implements Subsystem {
     /// changes how long servo actions should wait until reporting they are complete
     public static Telemetry telemetry;
     public static final double SERVO_DELAY = 0.4;
+    public static double elbowPosition = 0;
     public static final double SLIDE_TOLERANCE = 0.005;
 
     private Intake() {
@@ -95,7 +96,7 @@ public class Intake implements Subsystem {
     public void postUserLoopHook(@NonNull Wrapper opMode) {
     }
 
-    public static Lambda sideSpinTo(double pos){
+    public static Lambda sideSpinTo(double pos) {
         return new Lambda("side-spin-in")
                 .addInit(() -> {
                     sideSpinL.setPower(-pos);
@@ -104,6 +105,7 @@ public class Intake implements Subsystem {
                 .addRequirements(sideSpinL, sideSpinR)
                 ;
     }
+
     public static Lambda sideSpinIn() {
         return new Lambda("side-spin-in")
                 .addInit(() -> {
@@ -140,7 +142,7 @@ public class Intake implements Subsystem {
                     slideLeft.setPosition(target);
                     slideRight.setPosition(target);
                 })
-                .setExecute(()->{
+                .setExecute(() -> {
                 })
                 .setFinish(() -> {
                     return Math.abs(target - slideLeft.getPosition()) < SLIDE_TOLERANCE;
@@ -156,14 +158,24 @@ public class Intake implements Subsystem {
     public static Lambda slideOut() {
         return Lambda.from(slideTo(ControlConstants.intakeSlideOut));
     }
+
+    public static Lambda toggleElbow() {
+        if (lElbow.getPosition() == ControlConstants.intakePivotIn) {
+            return elbowOut();
+        } else {
+            return elbowIn();
+        }
+    }
+
     public static Lambda elbowTo(double pos) {
+        elbowPosition = pos;
         return Lambda.from(new Sequential(
                 new Lambda("intake-elbow-to")
-                .setInit(() -> {
-                    lElbow.setPosition(pos);
-                    rElbow.setPosition(1-pos);
-                })
-                .addRequirements(lElbow, rElbow)
+                        .setInit(() -> {
+                            lElbow.setPosition(pos);
+                            rElbow.setPosition(1 - pos);
+                        })
+                        .addRequirements(lElbow, rElbow)
         ));
     }
 

@@ -163,9 +163,10 @@ public class FiveSpec extends OpMode {
                 .build();
 //
         grabPickup1 = follower.pathBuilder()
-                .addPath(new BezierLine(
+                .addPath(new BezierCurve(
                         Paths.specPlow3Control1,
-                        new Point(10, 12)
+                        Paths.specGrabPickup1Pose,
+                        new Point(Paths.pickupPose)
                 ))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
                 .setZeroPowerAccelerationMultiplier(2.5)
@@ -188,8 +189,8 @@ public class FiveSpec extends OpMode {
 //                .setConstantHeadingInterpolation(Math.toRadians(180))
 
                 .addPath(new BezierLine(
-                        new Point(new Pose(Paths.specScorePose.getX()-4, Paths.specScorePose.getY() - 3)),
-                        new Point(new Pose(Paths.specScorePose.getX()-1, Paths.specScorePose.getY() - 3))))
+                        new Point(new Pose(Paths.specScorePose.getX()-6, Paths.specScorePose.getY() - 3)),
+                        new Point(new Pose(Paths.specScorePose.getX()-3, Paths.specScorePose.getY() - 3))))
 //                .setTangentHeadingInterpolation()
 //                .setReversed(true)
                 .setConstantHeadingInterpolation(Paths.specScorePose.getHeading())

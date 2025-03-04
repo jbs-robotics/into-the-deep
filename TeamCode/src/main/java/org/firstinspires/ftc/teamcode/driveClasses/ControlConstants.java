@@ -32,7 +32,7 @@ public class ControlConstants {
 
     public static int maxOuttakeSlidePos = -2500;
     public static int minOuttakeSlidePos = -10;
-    public static int highChamberSlidePos = -895;
+    public static int highChamberSlidePos = -688;
     public static int highBasketSlidePos = -2500;
 
     // Transfer Constants

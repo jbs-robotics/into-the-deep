@@ -327,8 +327,8 @@ public class CATeleOp extends OpMode {
             claw.setPosition(clawPos);
             inL.setPosition(intakePivot);
             inR.setPosition(intakePivot);
-//            intakeSlideLeft.setPosition(intakePosition);
-//            intakeSlideRight.setPosition(intakePosition);
+            intakeSlideLeft.setPosition(intakePosition);
+            intakeSlideRight.setPosition(intakePosition);
             sideSpinL.setPower(sideSpinPower);
             sideSpinR.setPower(sideSpinPower);
 

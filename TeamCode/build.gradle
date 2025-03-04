@@ -40,5 +40,7 @@ dependencies {
     implementation "com.acmerobotics.dashboard:dashboard:0.4.16"
     implementation "dev.frozenmilk.dairy:Core:1.0.1"
     implementation "dev.frozenmilk.mercurial:Mercurial:1.0.2"
+    implementation "dev.frozenmilk.dairy:Pasteurized:1.0.0"
+    implementation "dev.frozenmilk.dairy:CachingHardware:1.0.0"
 }
 

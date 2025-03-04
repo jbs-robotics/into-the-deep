@@ -257,8 +257,8 @@ public class CATeleOp extends OpMode {
         }
 
         // Intake Slide Control
-        intakePosition += (gamepad2.left_bumper ? ControlConstants.intakeSlideSensitivity : 0) - (gamepad2.right_bumper ? ControlConstants.intakeSlideSensitivity : 0);
-        intakePosition = Range.clip(intakePosition, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
+//        intakePosition += (gamepad2.left_bumper ? ControlConstants.intakeSlideSensitivity : 0) - (gamepad2.right_bumper ? ControlConstants.intakeSlideSensitivity : 0);
+//        intakePosition = Range.clip(intakePosition, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
 
         // Outtake Slide Control
         if (gamepad2.right_trigger > 0.5) {

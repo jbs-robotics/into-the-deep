@@ -165,6 +165,10 @@ public class CATeleOp extends OpMode {
         intakeSlideRight = hardwareMap.get(Servo.class, "ISR");
 
 
+        // Intake Slides
+//        Mercurial.gamepad2().rightBumper().whileTrue(Intake.pushSlidesOut());
+//        Mercurial.gamepad2().leftBumper().whileTrue(Intake.pushSlidesIn());
+
         inL = hardwareMap.get(Servo.class, "inL");
         inR = hardwareMap.get(Servo.class, "inR");
         sideSpinL = hardwareMap.get(CRServo.class, "sideSpinL");
@@ -198,9 +202,6 @@ public class CATeleOp extends OpMode {
         outtakeSlideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-
-        intakeSlideLeft.setDirection(Servo.Direction.FORWARD);
-        intakeSlideRight.setDirection(Servo.Direction.REVERSE);
         inR.setDirection(Servo.Direction.REVERSE);
         outServoL.setDirection(Servo.Direction.REVERSE);
         outServoR.setDirection(Servo.Direction.FORWARD);
@@ -257,8 +258,8 @@ public class CATeleOp extends OpMode {
         }
 
         // Intake Slide Control
-//        intakePosition += (gamepad2.left_bumper ? ControlConstants.intakeSlideSensitivity : 0) - (gamepad2.right_bumper ? ControlConstants.intakeSlideSensitivity : 0);
-//        intakePosition = Range.clip(intakePosition, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
+        intakePosition += (gamepad2.left_bumper ? ControlConstants.intakeSlideSensitivity : 0) - (gamepad2.right_bumper ? ControlConstants.intakeSlideSensitivity : 0);
+        intakePosition = Range.clip(intakePosition, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
 
         // Outtake Slide Control
         if (gamepad2.right_trigger > 0.5) {

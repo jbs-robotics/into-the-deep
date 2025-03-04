@@ -4,9 +4,12 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.config.Config;
 
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.driveClasses.ControlConstants;
 
 import java.lang.annotation.ElementType;
@@ -15,6 +18,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import dev.frozenmilk.dairy.core.FeatureRegistrar;
 import dev.frozenmilk.dairy.core.dependency.Dependency;
 import dev.frozenmilk.dairy.core.dependency.annotation.SingleAnnotation;
 import dev.frozenmilk.dairy.core.wrapper.Wrapper;
@@ -101,6 +105,14 @@ public class Claw implements Subsystem {
         ));
     }
 
+    public static Lambda toggleElbow() {
+        if (elbowPosition == ControlConstants.outtakePivotOut) {
+            return elbowIn();
+        } else {
+            return elbowOut();
+        }
+    }
+
     public static Lambda elbowOut() {
         return elbowTo(ControlConstants.outtakePivotOut);
 //        return Lambda.from(new Sequential(
@@ -167,13 +179,31 @@ public class Claw implements Subsystem {
     }
     public static Lambda wristTo(double pos){
         wristPosition = pos;
-        return Lambda.from(new Sequential(
-                new Lambda("wrist-to")
+                return new Lambda("wrist-to")
                         .setInit(()->{
                             wrist.setPosition(pos);
                         })
-                        .addRequirements(wrist)
-        ));
+                        .setExecute(() -> {
+                        })
+                        .setFinish(() ->
+                             Math.abs(pos - wrist.getPosition()) < 0.1
+                        )
+                        .addRequirements(wrist);
+    }
+
+    public static Lambda gamepadWristMove(double modifier) {
+        return new Lambda("gamepad-wrist-move")
+                .setExecute(() -> {
+                    double target = Range.clip(wristPosition + ControlConstants.outtakeWristSensitivity * modifier, ControlConstants.outtakeWristBack, ControlConstants.outtakeWristForward);
+                    wristPosition = target;
+                    FeatureRegistrar.getActiveOpMode().telemetry.addData("outtake target", target);
+                    FeatureRegistrar.getActiveOpMode().telemetry.update();
+
+                    wrist.setPosition(target);
+                })
+                .addRequirements(wrist)
+                .setInterruptible(true)
+                ;
     }
 
 }

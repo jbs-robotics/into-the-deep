@@ -25,6 +25,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import dev.frozenmilk.dairy.core.FeatureRegistrar;
 import dev.frozenmilk.dairy.core.dependency.Dependency;
 import dev.frozenmilk.dairy.core.dependency.annotation.SingleAnnotation;
 import dev.frozenmilk.dairy.core.util.controller.calculation.pid.DoubleComponent;
@@ -100,7 +101,7 @@ public class Intake implements Subsystem {
     }
 
     public static Lambda sideSpinTo(double pos) {
-        return new Lambda("side-spin-in")
+        return new Lambda("side-spin-to")
                 .addInit(() -> {
                     sideSpinL.setPower(-pos);
                     sideSpinR.setPower(pos);
@@ -163,23 +164,32 @@ public class Intake implements Subsystem {
     }
 
     public static Lambda toggleElbow() {
-        if (lElbow.getPosition() == ControlConstants.intakePivotIn) {
+        FeatureRegistrar.getActiveOpMode().telemetry.addData("elbowPos", elbowPosition);
+        if (elbowPosition == ControlConstants.intakePivotIn) {
+            FeatureRegistrar.getActiveOpMode().telemetry.addLine("fish");
+            FeatureRegistrar.getActiveOpMode().telemetry.update();
+
             return elbowOut();
         } else {
+            FeatureRegistrar.getActiveOpMode().telemetry.addLine("cake");
+            FeatureRegistrar.getActiveOpMode().telemetry.update();
+
             return elbowIn();
         }
     }
 
     public static Lambda elbowTo(double pos) {
         elbowPosition = pos;
-        return Lambda.from(new Sequential(
-                new Lambda("intake-elbow-to")
-                        .setInit(() -> {
-                            lElbow.setPosition(pos);
+
+                return new Lambda("intake-elbow-to")
+                        .setExecute(() -> {
+//                            lElbow.setPosition(pos);
                             rElbow.setPosition(1 - pos);
                         })
                         .addRequirements(lElbow, rElbow)
-        ));
+                        .setFinish(() -> true)
+                        .setInterruptible(true)
+                ;
     }
     public static Lambda pushSlidesIn() {
         return new Lambda("push-intake-slides-in")
@@ -206,11 +216,11 @@ public class Intake implements Subsystem {
     }
 
     public static Lambda elbowOut() {
-        return elbowTo(0.09);
+        return elbowTo(ControlConstants.intakePivotOut);
     }
 
     public static Lambda elbowIn() {
-        return elbowTo(0.85);
+        return elbowTo(ControlConstants.intakePivotIn);
     }
 
 

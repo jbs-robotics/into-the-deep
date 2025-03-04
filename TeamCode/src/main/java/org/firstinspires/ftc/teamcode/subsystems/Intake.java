@@ -32,6 +32,7 @@ import dev.frozenmilk.mercurial.commands.Lambda;
 import dev.frozenmilk.mercurial.commands.groups.Race;
 import dev.frozenmilk.mercurial.commands.groups.Sequential;
 import dev.frozenmilk.mercurial.commands.util.Wait;
+import dev.frozenmilk.mercurial.subsystems.SDKSubsystem;
 import dev.frozenmilk.mercurial.subsystems.Subsystem;
 import kotlin.annotation.MustBeDocumented;
 
@@ -177,6 +178,27 @@ public class Intake implements Subsystem {
                         })
                         .addRequirements(lElbow, rElbow)
         ));
+    }
+
+    public static Lambda pushSlidesIn() {
+        return new Lambda("push-intake-slides-in")
+                .setExecute(() -> {
+                    telemetry.addLine("pushing slides in");
+                })
+                .setFinish(() -> false)
+                .setInterruptible(true)
+                ;
+    }
+
+    public static Lambda randFunc() {
+//        return new Lambda("rand")
+//                .setExecute(() -> {
+//                    elbowOut()
+//                })
+//                .setFinish(() -> false)
+//                .setInterruptible(true)
+//                ;
+        return elbowOut();
     }
 
     public static Lambda elbowOut() {

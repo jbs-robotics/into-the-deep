@@ -264,16 +264,18 @@ public class CATeleOp extends OpMode {
         // Outtake Slide Control
         if (gamepad2.right_trigger > 0.5) {
             outtakeSlidePos = ControlConstants.highChamberSlidePos;
-            clawWristPos = ControlConstants.outtakeWristBack;
-            Claw.wristBack().schedule();
+            clawWristPos = ControlConstants.outtakeWristForward;
+            Claw.elbowOut().schedule();
+            Claw.wristForward().schedule();
         }
         if (gamepad2.left_trigger > 0.5) {
             outtakeSlidePos = ControlConstants.highBasketSlidePos;
-            clawWristPos = ControlConstants.outtakeWristBack;
-            Claw.wristBack().schedule();
+            clawWristPos = ControlConstants.outtakeWristForward;
+            Claw.elbowOut().schedule();
+            Claw.wristForward().schedule();
         }
 
-        outtakeSlidePos += (int) (ControlConstants.outtakeSlideSensitivity * gamepad2.left_stick_y);
+        outtakeSlidePos += (int) (ControlConstants.outtakeSlideSensitivity * gamepad2.right_stick_y);
         if (!manualOverride.state)
             outtakeSlidePos = Range.clip(outtakeSlidePos, ControlConstants.maxOuttakeSlidePos, ControlConstants.minOuttakeSlidePos);
 
@@ -301,9 +303,12 @@ public class CATeleOp extends OpMode {
         }
 
         // Outtake Wrist Control
-        clawWristPos += gamepad2.right_stick_y * ControlConstants.outtakeWristSensitivity;
+        clawWristPos += -gamepad2.left_stick_y * ControlConstants.outtakeWristSensitivity;
+        if(gamepad2.dpad_right){
+            clawWristPos = ControlConstants.pickupOuttakeWrist;
+            outtakeSlidePos = ControlConstants.minOuttakeSlidePos;
+        }
         clawWristPos = Range.clip(clawWristPos, ControlConstants.outtakeWristBack, ControlConstants.outtakeWristForward);
-
         // Outtake Claw Control
         if (clawAvailable.state && gamepad2.b) {
             if (clawPos == ControlConstants.clawOpen) {

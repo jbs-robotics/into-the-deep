@@ -179,17 +179,14 @@ public class Intake implements Subsystem {
                         .addRequirements(lElbow, rElbow)
         ));
     }
-
     public static Lambda pushSlidesIn() {
         return new Lambda("push-intake-slides-in")
                 .setExecute(() -> {
                     telemetry.addLine("pushing slides in");
                 })
                 .setFinish(() -> false)
-                .setInterruptible(true)
-                ;
+                .setInterruptible(true);
     }
-
     public static Lambda randFunc() {
 //        return new Lambda("rand")
 //                .setExecute(() -> {

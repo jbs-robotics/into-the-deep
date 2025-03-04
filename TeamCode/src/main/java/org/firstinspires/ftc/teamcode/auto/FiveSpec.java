@@ -55,7 +55,7 @@ public class FiveSpec extends OpMode {
      * Lets assume the Robot is facing the human player and we want to score in the bucket */
 
     // Target Points
-    private final Pose scorePose = new Pose(40, 78, Math.toRadians(180));
+    private final Pose scorePose = Paths.specScorePose;
 
     // Control Points
     private final Pose grabPickup1ControlPose = new Pose(116, 16);
@@ -79,8 +79,8 @@ public class FiveSpec extends OpMode {
         scorePreload = follower.pathBuilder()
                 .addPath(new BezierLine(
                         new Point(Paths.specimenStartPose),
-                        new Point(Paths.scorePose)))
-                .setConstantHeadingInterpolation(Paths.scorePose.getHeading())
+                        new Point(Paths.specScorePose)))
+                .setConstantHeadingInterpolation(Paths.specScorePose.getHeading())
 //
 //                .addPath(new BezierCurve(
 //                        new Point(startPose),
@@ -184,7 +184,7 @@ public class FiveSpec extends OpMode {
                         Paths.specPlow3Control1,
                         Paths.specScorePickup1Control1,
                         Paths.specScorePickup1Control2,
-                        new Point(new Pose(Paths.scorePose.getX(), Paths.scorePose.getY() - 3))))
+                        new Point(new Pose(Paths.specScorePose.getX(), Paths.specScorePose.getY() - 3))))
                 .setTangentHeadingInterpolation()
                 .setReversed(true)
 
@@ -195,7 +195,7 @@ public class FiveSpec extends OpMode {
 
         grabPickup2 = follower.pathBuilder()
                 .addPath(new BezierLine(
-                        new Point(Paths.scorePose.getX(), Paths.scorePose.getY() - 2),
+                        new Point(Paths.specScorePose.getX(), Paths.specScorePose.getY() - 2),
                         new Point(Paths.pickupPose)))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
 //
@@ -215,7 +215,7 @@ public class FiveSpec extends OpMode {
         scorePickup2 = follower.pathBuilder()
                 .addPath(new BezierLine(
                         new Point(Paths.pickupPose),
-                        new Point(Paths.scorePose.getX(), Paths.scorePose.getY() - 4)))
+                        new Point(Paths.specScorePose.getX(), Paths.specScorePose.getY() - 4)))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
 //
 //                .addPath(new BezierCurve(
@@ -253,7 +253,7 @@ public class FiveSpec extends OpMode {
         scorePickup3 = follower.pathBuilder()
                 .addPath(new BezierLine(
                         new Point(Paths.pickupPose),
-                        new Point(new Pose(Paths.scorePose.getX(), Paths.scorePose.getY() - 6))))
+                        new Point(new Pose(Paths.specScorePose.getX(), Paths.specScorePose.getY() - 6))))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
 //
 //                .addPath(new BezierCurve(
@@ -270,7 +270,7 @@ public class FiveSpec extends OpMode {
 
         grabPickup4 = follower.pathBuilder()
                 .addPath(new BezierLine(
-                        new Point(Paths.scorePose.getX(), Paths.scorePose.getY() - 6),
+                        new Point(Paths.specScorePose.getX(), Paths.specScorePose.getY() - 6),
                         new Point(Paths.pickupPose)))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
 //
@@ -289,7 +289,7 @@ public class FiveSpec extends OpMode {
         scorePickup4 = follower.pathBuilder()
                 .addPath(new BezierLine(
                         new Point(Paths.pickupPose),
-                        new Point(new Pose(Paths.scorePose.getX(), Paths.scorePose.getY() - 8))))
+                        new Point(new Pose(Paths.specScorePose.getX(), Paths.specScorePose.getY() - 8))))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
 
 //                .addPath(new BezierCurve(
@@ -306,27 +306,13 @@ public class FiveSpec extends OpMode {
 
 
         park = new Path(new BezierLine(
-                new Point(new Pose(Paths.scorePose.getX(), Paths.scorePose.getY() - 8)),
+                new Point(new Pose(Paths.specScorePose.getX(), Paths.specScorePose.getY() - 8)),
                 new Point(Paths.pickupPose)));
         park.setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(-135));
 
 
     }
 
-
-    /** This switch is called continuously and runs the pathing, at certain points, it triggers the action state.
-     * Everytime the switch changes case, it will reset the timer. (This is because of the setPathState() method)
-     * The followPath() function sets the follower to run the specific path, but does NOT wait for it to finish before moving on. */
-
-
-    /**
-     * These change the states of the paths and actions
-     * It will also reset the timers of the individual switches
-     **/
-    public void setPathState(int pState) {
-        pathState = pState;
-        pathTimer.resetTimer();
-    }
 
     /**
      * This is the main loop of the OpMode, it will run repeatedly after clicking "Play".
@@ -372,25 +358,24 @@ public class FiveSpec extends OpMode {
     @Override
     public void start() {
         opmodeTimer.resetTimer();
-        setPathState(0);
         new Parallel(
                 new Lambda("checkSlides").setInit(() -> {
                 }).setExecute(() -> {
                     if (Outtake.outLimit.isPressed() && (Outtake.slideLeft.getTargetPosition() > Outtake.slideLeft.getCurrentPosition())) {
                         Outtake.resetEncoders();
-                        Outtake.slideTo(-300);
+                        Outtake.slideTo(-100);
                         telemetryA.addLine("Encoders reset");
                     }
                     telemetryA.update();
                 }).setFinish(() -> finished),
-                new Sequential(
 
+                new Sequential(
                         // Start Movement (case 0)
                         new Sequential(
+                                Intake.slideIn(),
+                                Intake.elbowIn(),
+                                Claw.closeClaw(),
                                 new Parallel(
-                                        Intake.slideIn(),
-                                        Intake.elbowIn(),
-                                        Claw.closeClaw(),
                                         Outtake.slideTo(ControlConstants.highChamberSlidePos),
                                         Claw.elbowOut(),
                                         Claw.wristBack(),

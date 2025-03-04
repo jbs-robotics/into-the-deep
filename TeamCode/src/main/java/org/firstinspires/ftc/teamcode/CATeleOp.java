@@ -263,11 +263,13 @@ public class CATeleOp extends OpMode {
         // Outtake Slide Control
         if (gamepad2.right_trigger > 0.5) {
             outtakeSlidePos = ControlConstants.highChamberSlidePos;
+            clawWristPos = ControlConstants.outtakeWristBack;
+            Claw.wristBack().schedule();
         }
         if (gamepad2.left_trigger > 0.5) {
             outtakeSlidePos = ControlConstants.highBasketSlidePos;
-            clawWristPos = ControlConstants.outtakeWristForward;
-            Claw.wristForward().schedule();
+            clawWristPos = ControlConstants.outtakeWristBack;
+            Claw.wristBack().schedule();
         }
 
         outtakeSlidePos += (int) (ControlConstants.outtakeSlideSensitivity * gamepad2.left_stick_y);

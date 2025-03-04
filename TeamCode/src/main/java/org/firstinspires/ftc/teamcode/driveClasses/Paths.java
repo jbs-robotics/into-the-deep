@@ -14,7 +14,7 @@ public class Paths {
     public static final Pose specimenStartPose = new Pose(9, 63, Math.toRadians(180));
 //    public static final PosePoint specimenStartPose = new PosePoint(9, 63);
     public static final Pose pickupPose = new Pose(9, 37, Math.toRadians(180));
-    public static final Pose scorePose = new Pose(40, 78, Math.toRadians(180));
+    public static final Pose specScorePose = new Pose(40, 78, Math.toRadians(180));
     public static final Point specToPlowControl1 = new Point(17, 55)    ;
     public static final Pose specToPlowControl2 = new Pose(36, 27, Math.toRadians(180));
     public static final Pose specToPlowControl3 = new Pose(24, 37, Math.toRadians(180));

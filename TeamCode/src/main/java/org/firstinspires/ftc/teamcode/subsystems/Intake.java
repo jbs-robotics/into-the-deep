@@ -199,11 +199,11 @@ public class Intake implements Subsystem {
     }
 
     public static Lambda elbowOut() {
-        return elbowTo(0.09);
+        return elbowTo(ControlConstants.intakePivotIn);
     }
 
     public static Lambda elbowIn() {
-        return elbowTo(0.85);
+        return elbowTo(ControlConstants.intakePivotIn);
     }
 
 

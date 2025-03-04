@@ -12,7 +12,7 @@ public class FConstants {
         // Turn on voltage compensation
         FollowerConstants.useVoltageCompensationInAuto = true;
         FollowerConstants.useVoltageCompensationInTeleOp = true;
-        FollowerConstants.nominalVoltage = 14; // TODO: Change this when tuning
+        FollowerConstants.nominalVoltage = 13.66; // TODO: Change this when tuning
         FollowerConstants.cacheInvalidateSeconds = 0.5;
 
 
@@ -20,7 +20,7 @@ public class FConstants {
         FollowerConstants.localizers = Localizers.THREE_WHEEL;
 
         // We can change the value of any variable/constant of FollowerConstants.
-        FollowerConstants.mass = 13.744; // In kg
+        FollowerConstants.mass = 13.88; // In kg
 
         FollowerConstants.leftFrontMotorName = "leftFront";
         FollowerConstants.leftRearMotorName = "leftBack";
@@ -32,11 +32,11 @@ public class FConstants {
         FollowerConstants.rightFrontMotorDirection = DcMotorSimple.Direction.FORWARD;
         FollowerConstants.rightRearMotorDirection = DcMotorSimple.Direction.FORWARD;
 
-        FollowerConstants.xMovement = (75.3031 + 77.2486 + 77.7825) / 3;
-        FollowerConstants.yMovement = (51.14711 + 51.0865 + 50.086) / 3;
+        FollowerConstants.xMovement = (77.5594 + 79.4115 + 78.6386) / 3;
+        FollowerConstants.yMovement = (57.8008 + 57.4123 + 583105) / 3;
 
-        FollowerConstants.forwardZeroPowerAcceleration = -49.51443333;
-        FollowerConstants.lateralZeroPowerAcceleration = -90.93603333;
+        FollowerConstants.forwardZeroPowerAcceleration = -32.8564;
+        FollowerConstants.lateralZeroPowerAcceleration = -77.3571;
         FollowerConstants.translationalPIDFCoefficients.setCoefficients(0.4, 0.0, 0.04, 0.0);
         FollowerConstants.headingPIDFCoefficients.setCoefficients(2, 0.0,0.09, 0.0);
         FollowerConstants.zeroPowerAccelerationMultiplier= 6;

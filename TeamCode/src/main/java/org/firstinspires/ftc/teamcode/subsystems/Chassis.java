@@ -90,7 +90,7 @@ public class Chassis implements Subsystem {
 
     @Override
     public void postUserLoopHook(@NonNull Wrapper opMode) {
-        follower.telemetryDebug(telemetry);
+//        follower.telemetryDebug(telemetry);
     }
 
     public static void setStartPose(Pose startPose) {

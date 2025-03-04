@@ -150,8 +150,8 @@ public class CATeleOp extends OpMode {
 //        mechs.dpadDown().whileTrue(Intake.sideSpinIn());
 //        mechs.dpadUp().whileTrue(Intake.sideSpinOut());
 
-        Mercurial.gamepad2().rightBumper().whileTrue(Intake.pushSlidesOut());
-        Mercurial.gamepad2().leftBumper().whileTrue(Intake.pushSlidesIn());
+//        Mercurial.gamepad2().rightBumper().whileTrue(Intake.pushSlidesOut());
+//        Mercurial.gamepad2().leftBumper().whileTrue(Intake.pushSlidesIn());
 
         TelemetryPacket packet = new TelemetryPacket();
         telemetry.update();

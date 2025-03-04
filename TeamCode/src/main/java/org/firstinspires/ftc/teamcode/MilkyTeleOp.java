@@ -25,7 +25,8 @@ public class MilkyTeleOp extends OpMode {
         TeleopChassis.INSTANCE.setDefaultCommand(TeleopChassis.INSTANCE.defaultDriveCommand());
 
 
-        Mercurial.gamepad2().rightBumper().whileTrue(Intake.randFunc());
+        Mercurial.gamepad2().rightBumper().whileTrue(Intake.pushSlidesOut());
+        Mercurial.gamepad2().leftBumper().whileTrue(Intake.pushSlidesIn());
     }
 
     @Override

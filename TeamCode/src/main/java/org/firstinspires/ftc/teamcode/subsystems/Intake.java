@@ -11,13 +11,14 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.auto.HT_PP;
 import org.firstinspires.ftc.teamcode.driveClasses.ControlConstants;
 
+import java.awt.font.NumericShaper;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -49,6 +50,7 @@ public class Intake implements Subsystem {
     public static Telemetry telemetry;
     public static final double SERVO_DELAY = 0.4;
     public static double elbowPosition = 0;
+    public static double slidePosition = ControlConstants.intakeSlideIn;
     public static final double SLIDE_TOLERANCE = 0.005;
 
     private Intake() {
@@ -182,20 +184,25 @@ public class Intake implements Subsystem {
     public static Lambda pushSlidesIn() {
         return new Lambda("push-intake-slides-in")
                 .setExecute(() -> {
-                    telemetry.addLine("pushing slides in");
+                    double target = Range.clip(slidePosition + ControlConstants.intakeSlideSensitivity, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
+                    slidePosition = target;
+                    slideLeft.setPosition(target);
+                    slideRight.setPosition(target);
                 })
                 .setFinish(() -> false)
                 .setInterruptible(true);
     }
-    public static Lambda randFunc() {
-//        return new Lambda("rand")
-//                .setExecute(() -> {
-//                    elbowOut()
-//                })
-//                .setFinish(() -> false)
-//                .setInterruptible(true)
-//                ;
-        return elbowOut();
+
+    public static Lambda pushSlidesOut() {
+        return new Lambda("push-intake-slides-out")
+                .setExecute(() -> {
+                    double target = Range.clip(slidePosition - ControlConstants.intakeSlideSensitivity, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
+                    slidePosition = target;
+                    slideLeft.setPosition(target);
+                    slideRight.setPosition(target);
+                })
+                .setFinish(() -> false)
+                .setInterruptible(true);
     }
 
     public static Lambda elbowOut() {

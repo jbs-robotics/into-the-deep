@@ -455,9 +455,9 @@ public class CATeleOp extends OpMode {
                 Outtake.slideTo(ControlConstants.transferOuttakeSlidePos - 100),
                 Claw.openClaw(),
                 new Parallel(
-                    Intake.slideTo(ControlConstants.transferIntakeSlidePos),
-                    Intake.elbowTo(ControlConstants.transferIntakePivotPos),
-                    Claw.elbowTo(ControlConstants.transferOuttakeWristPos)
+                        Intake.slideTo(ControlConstants.transferIntakeSlidePos),
+                        Intake.elbowTo(ControlConstants.transferIntakePivotPos),
+                        Claw.elbowTo(ControlConstants.transferOuttakeWristPos)
                 ),
                 new Wait(0.5),
                 Outtake.slideTo(ControlConstants.transferOuttakeSlidePos),

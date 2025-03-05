@@ -253,8 +253,6 @@ public class Intake implements Subsystem {
                 .setFinish(() -> false)
                 .setInterruptible(true);
     }
-<<<<<<< HEAD
-=======
     public static Lambda pushSlidesOut(double sens) {
         return new Lambda("push-intake-slides-out")
                 .setExecute(() -> {
@@ -266,17 +264,7 @@ public class Intake implements Subsystem {
                 .setFinish(() -> slidePosition <= ControlConstants.intakeSlideOut || slidePosition >= ControlConstants.intakeSlideIn)
                 .setInterruptible(true);
     }
-    public static Lambda randFunc() {
-//        return new Lambda("rand")
-//                .setExecute(() -> {
-//                    elbowOut()
-//                })
-//                .setFinish(() -> false)
-//                .setInterruptible(true)
-//                ;
-        return elbowOut();
-    }
->>>>>>> five-spec-testing
+
 
     public static Lambda elbowOut() {
         return elbowTo(ControlConstants.intakePivotOut);

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.auto;
 
+import android.service.controls.Control;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -16,6 +18,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.driveClasses.ControlConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Chassis;
 import org.firstinspires.ftc.teamcode.subsystems.Claw;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
@@ -53,21 +56,24 @@ public class FourSample extends OpMode {
      * Lets assume the Robot is facing the human player and we want to score in the bucket */
 
     // Target Points
-    private final Pose startPose        = new Pose(9  , 81, Math.toRadians(0));
-    private final Pose scorePose        = new Pose(15 , 128, Math.toRadians(-45));
+    private final Pose startPose = new Pose(9, 81, Math.toRadians(0));
+    private final Pose scorePose = new Pose(15, 128, Math.toRadians(-45));
 
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
     private Path park, clearChamber;
     private PathChain scorePreload, grabPickup1, grabPickup2, grabPickup3, scorePickup1, scorePickup2, scorePickup3;
 
-    /** This is the variable where we store the state of our auto.
-     * It is used by the pathUpdate method. */
+    /**
+     * This is the variable where we store the state of our auto.
+     * It is used by the pathUpdate method.
+     */
     private int pathState = -1;
     private Claw claw;
     private Intake intake;
     private Outtake outtake;
-    public void buildPaths(){
+
+    public void buildPaths() {
         follower = Chassis.follower;
 
         scorePreload = follower.pathBuilder()
@@ -140,20 +146,26 @@ public class FourSample extends OpMode {
      * The followPath() function sets the follower to run the specific path, but does NOT wait for it to finish before moving on. */
 
 
-    /** These change the states of the paths and actions
-     * It will also reset the timers of the individual switches **/
+    /**
+     * These change the states of the paths and actions
+     * It will also reset the timers of the individual switches
+     **/
     public void setPathState(int pState) {
         pathState = pState;
         pathTimer.resetTimer();
     }
 
-    /** This is the main loop of the OpMode, it will run repeatedly after clicking "Play". **/
+    /**
+     * This is the main loop of the OpMode, it will run repeatedly after clicking "Play".
+     **/
     @Override
     public void loop() {
         follower = Chassis.follower;
     }
 
-    /** This method is called once at the init of the OpMode. **/
+    /**
+     * This method is called once at the init of the OpMode.
+     **/
     @Override
     public void init() {
         telemetryA = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -167,161 +179,181 @@ public class FourSample extends OpMode {
         checkSlides.start();
     }
 
-    /** This method is called continuously after Init while waiting for "play". **/
+    /**
+     * This method is called continuously after Init while waiting for "play".
+     **/
     @Override
-    public void init_loop() {}
+    public void init_loop() {
+    }
 
 
-            /** This method is called once at the start of the OpMode.
-             * It runs all the setup actions, including building paths and starting the path system **/
+    /**
+     * This method is called once at the start of the OpMode.
+     * It runs all the setup actions, including building paths and starting the path system
+     **/
     boolean finished = false;
-            @Override
+
+    @Override
     public void start() {
         opmodeTimer.resetTimer();
         setPathState(0);
         new Parallel(
-            new Lambda("checkSlides").setInit(()->{}).setExecute(()->{
-                if (Outtake.outLimit.isPressed() && (Outtake.slideLeft.getTargetPosition() > Outtake.slideLeft.getCurrentPosition())) {
-                    Outtake.resetEncoders();
-                    Outtake.slideTo(-300);
-                    telemetryA.addLine("Encoders reset");
-                }
-                telemetryA.update();
-            }).setFinish(()->{
-                return finished;
-            }),
-            new Sequential(
+                new Lambda("checkSlides").setInit(() -> {
+                }).setExecute(() -> {
+                    if (Outtake.outLimit.isPressed() && (Outtake.slideLeft.getTargetPosition() > Outtake.slideLeft.getCurrentPosition())) {
+                        Outtake.resetEncoders();
+                        Outtake.slideTo(-300);
+                        telemetryA.addLine("Encoders reset");
+                    }
+                    telemetryA.update();
+                }).setFinish(() -> {
+                    return finished;
+                }),
+                new Sequential(
 
-                    // Start Movement (case 0)
-                    new Sequential(
-                            new Parallel(
-                                    Claw.closeClaw(),
-                                    Outtake.slideTo(-1050),
-                                    Claw.elbowOut(),
-                                    Chassis.followPath(scorePreload, true)
-                            )
-                    ),
-
-                    // Score Preload (case 1)
-                    new Sequential(
-                            Outtake.outtakeSample(),
-                            new Parallel(
-                                Intake.slideOut(),
-                                Chassis.followPath(grabPickup1, 1),
-                                Intake.sideSpinIn(),
-                                new Sequential(
-                                    new Wait(0.5),
-                                    Outtake.slideTo(-200)
+                        // Start Movement (case 0)
+                        new Sequential(
+                                new Parallel(
+                                        Claw.closeClaw(),
+                                        Outtake.slideTo(ControlConstants.highBasketSlidePos),
+                                        Claw.elbowOut(),
+                                        Chassis.followPath(scorePreload, true)
                                 )
-                            )
-                    ),
-                    // Grab specimen 2
-                    new Sequential(
-                            /* Grab the Specimen Here */
-                            new Wait(0.4),
+                        ),
 
-                            new Parallel(
-                                Chassis.followPath(scorePickup1, 1),
-                                Claw.elbowOut()
-                            )
-                    ),
+                        // Score Preload (case 1)
+                        new Sequential(
+                                new Parallel(
+                                        Chassis.followPath(grabPickup1, 1),
+                                        new Parallel(
+                                                Intake.pushSlidesOut(ControlConstants.autoIntakeSlideSens),
+                                                Intake.sideSpinIn()
+                                        ),
+                                        new Wait(0.5),
+                                        //Transfer here
+                                        new Sequential(
+                                                Intake.slideIn(),
+                                                Intake.elbowTo(ControlConstants.transferIntakePivotPos),
+                                                Claw.elbowTo(ControlConstants.transferOuttakePivotPos),
+                                                Claw.wristTo(ControlConstants.transferOuttakeWristPos),
+                                                Outtake.slideTo(ControlConstants.transferOuttakeSlidePos),
+                                                Outtake.slideTo(ControlConstants.transferOuttakeSlidePos),
+                                                Claw.closeClaw()
+                                        )
+                                )
+                        ),
+                        // Grab specimen 2
+                        new Sequential(
+                                /* Grab the Specimen Here */
+                                new Parallel(
+                                        Chassis.followPath(scorePickup1, 1),
+                                        new Parallel(
+                                                Outtake.slideTo(ControlConstants.highBasketSlidePos),
+                                                Claw.elbowOut()
+                                        )
+                                )
+                        ),
 
-                    // Score specimen 2 and move to pickup (case 5)
-                    new Sequential(
-                            Outtake.outtakeSample(),
-                            new Parallel(
-                                    Chassis.followPath(grabPickup2, 1),
-                                    new Sequential(
-                                            new Wait(0.5),
-                                            Outtake.slideTo(-200)
-                                    )
-                            )
-                    ),
+                        // Score specimen 2 and move to pickup (case 5)
+                        new Sequential(
+                                Outtake.outtakeSample(),
+                                new Parallel(
+                                        Chassis.followPath(grabPickup2, 1),
+                                        new Sequential(
+                                                new Wait(0.5),
+                                                Outtake.slideTo(-200)
+                                        )
+                                )
+                        ),
 
-                    // Grab specimen 3 (case 6)
-                    new Sequential(
-                            new Wait(0.4),
-                            Claw.closeClaw(),
-                            Intake.sideSpinOff(),
-                            new Parallel(
-                                    Chassis.followPath(scorePickup2, true),
-                                    Outtake.slideTo(-1070),
-                                    Claw.elbowOut()
-                            )
-                    ),
+                        // Grab specimen 3 (case 6)
+                        new Sequential(
+                                new Wait(0.4),
+                                Claw.closeClaw(),
+                                Intake.sideSpinOff(),
+                                new Parallel(
+                                        Chassis.followPath(scorePickup2, true),
+                                        Outtake.slideTo(-1070),
+                                        Claw.elbowOut()
+                                )
+                        ),
 
-                    // Score specimen 3 and move to pickup (case 5)
-                    new Sequential(
-                            Outtake.outtakeSample(),
-                            new Parallel(
-                                    Chassis.followPath(grabPickup3, 1),
-                                    new Sequential(
-                                            new Wait(0.5),
-                                            Outtake.slideTo(-200)
-                                    )
-                            )
-                    ),
+                        // Score specimen 3 and move to pickup (case 5)
+                        new Sequential(
+                                Outtake.outtakeSample(),
+                                new Parallel(
+                                        Chassis.followPath(grabPickup3, 1),
+                                        new Sequential(
+                                                new Wait(0.5),
+                                                Outtake.slideTo(-200)
+                                        )
+                                )
+                        ),
 
-                    // Grab specimen 4 (case 6)
-                    new Sequential(
-                            new Wait(0.4),
-                            Claw.closeClaw(),
-                            Intake.sideSpinOff(),
-                            new Parallel(
-                                    Chassis.followPath(scorePickup3, 1),
-                                    Outtake.slideTo(-1070),
-                                    Claw.elbowOut()
-                            )
-                    ),
+                        // Grab specimen 4 (case 6)
+                        new Sequential(
+                                new Wait(0.4),
+                                Claw.closeClaw(),
+                                Intake.sideSpinOff(),
+                                new Parallel(
+                                        Chassis.followPath(scorePickup3, 1),
+                                        Outtake.slideTo(-1070),
+                                        Claw.elbowOut()
+                                )
+                        ),
 
-                    // Score specimen 4 (case 7)
-                    new Sequential(
-                            Outtake.outtakeSample(),
-                            new Parallel(
+                        // Score specimen 4 (case 7)
+                        new Sequential(
+                                Outtake.outtakeSample(),
+                                new Parallel(
 //                                    Claw.elbowTo(0.86), // pulls outtake to a salute
-                                    Claw.elbowIn(), // pulls outtake down
-                                    Chassis.followPath(park, true),
-                                    new Sequential(
-                                            new Wait(0.5),
-                                            Outtake.slideTo(-300)
-                                    )
-                            ),
-                            new Lambda("finish").setInit(()->{
-                                finished = true;
-                            })
+                                        Claw.elbowIn(), // pulls outtake down
+                                        Chassis.followPath(park, true),
+                                        new Sequential(
+                                                new Wait(0.5),
+                                                Outtake.slideTo(-300)
+                                        )
+                                ),
+                                new Lambda("finish").setInit(() -> {
+                                    finished = true;
+                                })
 
 
-                    )
-            )
+                        )
+                )
         )
                 .schedule();
 
 
     }
 
-    /** We do not use this because everything should automatically disable **/
+    /**
+     * We do not use this because everything should automatically disable
+     **/
     @Override
     public void stop() {
 
         checkSlides.interrupt();
     }
-    public Sequential transfer(){
+
+    public Sequential transfer() {
         return new Sequential(
                 Intake.slideIn(),
                 new Parallel(
-                    Claw.elbowIn(),
-                    Claw.openClaw()
+                        Claw.elbowIn(),
+                        Claw.openClaw()
                 ),
                 Intake.sideSpinOut(),
                 new Wait(0.3),
                 Claw.closeClaw()
         );
     }
+
     public class CheckOuttakeSlides extends Thread {
         @Override
-        public void run(){
+        public void run() {
 
-            while(!Thread.currentThread().isInterrupted() && pathState >= 0){
+            while (!Thread.currentThread().isInterrupted() && pathState >= 0) {
                 if (Outtake.outLimit.isPressed() && (Outtake.slideLeft.getTargetPosition() > Outtake.slideLeft.getCurrentPosition())) {
                     Outtake.resetEncoders();
                     Outtake.slideTo(-300);

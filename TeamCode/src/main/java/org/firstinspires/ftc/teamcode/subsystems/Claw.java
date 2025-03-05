@@ -103,29 +103,9 @@ public class Claw implements Subsystem {
 
     public static Lambda elbowOut() {
         return elbowTo(ControlConstants.outtakePivotOut);
-//        return Lambda.from(new Sequential(
-//        new Lambda("elbow-out")
-//                .setInit(() -> {
-//                    lElbow.setPosition(1);
-//                    rElbow.setPosition(0);
-//                })
-//                .addRequirements(rElbow, lElbow)
-//                ,
-//                new Wait(SERVO_DELAY)
-//        ));
     }
     public static Lambda elbowIn() {
         return elbowTo(ControlConstants.outtakePivotIn);
-//        return Lambda.from(new Sequential(
-//            new Lambda("elbow-in")
-//                .setInit(() -> {
-//                    lElbow.setPosition(0);
-//                    rElbow.setPosition(1);
-//                })
-//                .addRequirements(rElbow, lElbow)
-//                ,
-//                new Wait(SERVO_DELAY)
-//        ));
     }
 
     public static Lambda elbowTo(double pos) {

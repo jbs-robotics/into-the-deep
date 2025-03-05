@@ -204,6 +204,17 @@ public class Intake implements Subsystem {
                 .setFinish(() -> slidePosition <= ControlConstants.intakeSlideOut || slidePosition >= ControlConstants.intakeSlideIn)
                 .setInterruptible(true);
     }
+    public static Lambda pushSlidesOut(double sens) {
+        return new Lambda("push-intake-slides-out")
+                .setExecute(() -> {
+                    double target = Range.clip(slidePosition - sens, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
+                    slidePosition = target;
+                    slideLeft.setPosition(target);
+                    slideRight.setPosition(target);
+                })
+                .setFinish(() -> slidePosition <= ControlConstants.intakeSlideOut || slidePosition >= ControlConstants.intakeSlideIn)
+                .setInterruptible(true);
+    }
     public static Lambda randFunc() {
 //        return new Lambda("rand")
 //                .setExecute(() -> {

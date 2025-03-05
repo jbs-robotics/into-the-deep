@@ -12,7 +12,7 @@ public class ControlConstants {
 
 
     // intake constants
-    public static double intakeSlideSensitivity = 0.01;
+    public static double intakeSlideSensitivity = 0.02;
     public static double intakePivotSensitivity = 0.025;
     public static double intakePivotOut = 0.99;
     public static double intakePivotIn = 0;
@@ -31,11 +31,11 @@ public class ControlConstants {
     public static double outtakeWristForward = 1;
     public static double outtakeWristBack = 0;
     public static double clawOpen = 0.95;
-    public static double clawClosed = 0.5;
+    public static double clawClosed = 0.525;
 
     public static int maxOuttakeSlidePos = -2500;
     public static int minOuttakeSlidePos = -10;
-    public static int highChamberSlidePos = -895;
+    public static int highChamberSlidePos = -688;
     public static int highBasketSlidePos = -2500;
 
     // Transfer Constants
@@ -45,9 +45,7 @@ public class ControlConstants {
     public static double transferOuttakeWristPos = 0.99;
     public static int transferOuttakeSlidePos = -150;
 
-
-
-
+    public static double pickupOuttakeWrist = 0.4526;
 
 
 }

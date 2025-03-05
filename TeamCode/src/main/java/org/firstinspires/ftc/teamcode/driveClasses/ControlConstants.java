@@ -43,6 +43,9 @@ public class ControlConstants {
     public static int transferOuttakeSlidePos = -150;
 
 
+    public static double pickupOuttakeWrist = 0.64;
+
+
 
 
 }

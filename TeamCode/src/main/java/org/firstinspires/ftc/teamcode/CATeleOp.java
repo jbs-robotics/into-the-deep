@@ -150,8 +150,6 @@ public class CATeleOp extends OpMode {
 //        mechs.dpadDown().whileTrue(Intake.sideSpinIn());
 //        mechs.dpadUp().whileTrue(Intake.sideSpinOut());
 
-//        Mercurial.gamepad2().rightBumper().whileTrue(Intake.pushSlidesOut());
-//        Mercurial.gamepad2().leftBumper().whileTrue(Intake.pushSlidesIn());
 
         TelemetryPacket packet = new TelemetryPacket();
         telemetry.update();
@@ -166,6 +164,10 @@ public class CATeleOp extends OpMode {
         intakeSlideLeft = hardwareMap.get(Servo.class, "ISL");
         intakeSlideRight = hardwareMap.get(Servo.class, "ISR");
 
+
+        // Intake Slides
+//        Mercurial.gamepad2().rightBumper().whileTrue(Intake.pushSlidesOut());
+//        Mercurial.gamepad2().leftBumper().whileTrue(Intake.pushSlidesIn());
 
         inL = hardwareMap.get(Servo.class, "inL");
         inR = hardwareMap.get(Servo.class, "inR");
@@ -200,9 +202,6 @@ public class CATeleOp extends OpMode {
         outtakeSlideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-
-        intakeSlideLeft.setDirection(Servo.Direction.FORWARD);
-        intakeSlideRight.setDirection(Servo.Direction.REVERSE);
         inR.setDirection(Servo.Direction.REVERSE);
         outServoL.setDirection(Servo.Direction.REVERSE);
         outServoR.setDirection(Servo.Direction.FORWARD);
@@ -259,22 +258,24 @@ public class CATeleOp extends OpMode {
         }
 
         // Intake Slide Control
-//        intakePosition += (gamepad2.left_bumper ? ControlConstants.intakeSlideSensitivity : 0) - (gamepad2.right_bumper ? ControlConstants.intakeSlideSensitivity : 0);
-//        intakePosition = Range.clip(intakePosition, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
+        intakePosition += (gamepad2.left_bumper ? ControlConstants.intakeSlideSensitivity : 0) - (gamepad2.right_bumper ? ControlConstants.intakeSlideSensitivity : 0);
+        intakePosition = Range.clip(intakePosition, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
 
         // Outtake Slide Control
         if (gamepad2.right_trigger > 0.5) {
             outtakeSlidePos = ControlConstants.highChamberSlidePos;
-            clawWristPos = ControlConstants.outtakeWristBack;
-            Claw.wristBack().schedule();
+            clawWristPos = ControlConstants.outtakeWristForward;
+            Claw.elbowOut().schedule();
+            Claw.wristForward().schedule();
         }
         if (gamepad2.left_trigger > 0.5) {
             outtakeSlidePos = ControlConstants.highBasketSlidePos;
-            clawWristPos = ControlConstants.outtakeWristBack;
-            Claw.wristBack().schedule();
+            clawWristPos = ControlConstants.outtakeWristForward;
+            Claw.elbowOut().schedule();
+            Claw.wristForward().schedule();
         }
 
-        outtakeSlidePos += (int) (ControlConstants.outtakeSlideSensitivity * gamepad2.left_stick_y);
+        outtakeSlidePos += (int) (ControlConstants.outtakeSlideSensitivity * gamepad2.right_stick_y);
         if (!manualOverride.state)
             outtakeSlidePos = Range.clip(outtakeSlidePos, ControlConstants.maxOuttakeSlidePos, ControlConstants.minOuttakeSlidePos);
 
@@ -302,9 +303,12 @@ public class CATeleOp extends OpMode {
         }
 
         // Outtake Wrist Control
-        clawWristPos += gamepad2.right_stick_y * ControlConstants.outtakeWristSensitivity;
+        clawWristPos += -gamepad2.left_stick_y * ControlConstants.outtakeWristSensitivity;
+        if(gamepad2.dpad_right){
+            clawWristPos = ControlConstants.pickupOuttakeWrist;
+            outtakeSlidePos = ControlConstants.minOuttakeSlidePos;
+        }
         clawWristPos = Range.clip(clawWristPos, ControlConstants.outtakeWristBack, ControlConstants.outtakeWristForward);
-
         // Outtake Claw Control
         if (clawAvailable.state && gamepad2.b) {
             if (clawPos == ControlConstants.clawOpen) {
@@ -451,9 +455,9 @@ public class CATeleOp extends OpMode {
                 Outtake.slideTo(ControlConstants.transferOuttakeSlidePos - 100),
                 Claw.openClaw(),
                 new Parallel(
-                    Intake.slideTo(ControlConstants.transferIntakeSlidePos),
-                    Intake.elbowTo(ControlConstants.transferIntakePivotPos),
-                    Claw.elbowTo(ControlConstants.transferOuttakeWristPos)
+                        Intake.slideTo(ControlConstants.transferIntakeSlidePos),
+                        Intake.elbowTo(ControlConstants.transferIntakePivotPos),
+                        Claw.elbowTo(ControlConstants.transferOuttakeWristPos)
                 ),
                 new Wait(0.5),
                 Outtake.slideTo(ControlConstants.transferOuttakeSlidePos),

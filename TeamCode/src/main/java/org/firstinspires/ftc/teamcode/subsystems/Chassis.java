@@ -71,8 +71,7 @@ public class Chassis implements Subsystem {
     public void preUserInitHook(@NonNull Wrapper opMode) {
         telemetry = opMode.getOpMode().telemetry;
         Constants.setConstants(FConstants.class, LConstants.class);
-        follower = new Follower(FeatureRegistrar.getActiveOpMode().hardwareMap);
-//        ;
+        follower = new Follower(FeatureRegistrar.getActiveOpMode().hardwareMap, FConstants.class, LConstants.class);
         if (follower.getPose() == null) {
             follower.setStartingPose(new Pose(42, 63, Math.toRadians(180)));
         }
@@ -116,7 +115,20 @@ public class Chassis implements Subsystem {
     public static Pose getPose() {
         return follower.getPose();
     }
-
+    public static Lambda turn(double turnRadians, boolean isLeft){
+        return new Lambda("turn")
+                .setInit(()->follower.turn(turnRadians, isLeft))
+                .setFinish(()->{
+                    return !follower.isTurning();
+                });
+    }
+    public static Lambda turnTo(double turnRadians){
+        return new Lambda("turn")
+                .setInit(()->follower.turnTo(turnRadians))
+                .setFinish(()->{
+                    return !follower.isTurning();
+                });
+    }
     public static Lambda followPath(PathChain chain, boolean holdEnd) {
         return new Lambda("follow-path-chain")
                 .addRequirements(INSTANCE)

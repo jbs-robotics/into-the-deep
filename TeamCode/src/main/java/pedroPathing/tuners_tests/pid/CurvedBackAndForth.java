@@ -51,8 +51,8 @@ public class CurvedBackAndForth extends OpMode {
      */
     @Override
     public void init() {
-        Constants.setConstants(FConstants.class, LConstants.class);
-        follower = new Follower(hardwareMap);
+//        Constants.setConstants(FConstants.class, LConstants.class);
+        follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
 
         forwards = new Path(
                 new BezierCurve(

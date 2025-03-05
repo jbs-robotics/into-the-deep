@@ -31,8 +31,12 @@ public class Paths {
     public static Point specToPlow3Control2 = new Point(58, 11);
     public static Point specPlow3Control1 = new Point(14, 11);
     public static Point specGrabPickup1Pose = new Point(25, 11);
+    
     public static Point specScorePickup1Control2 = new Point(10, 79.4598);
     public static Point specScorePickup1Control1 = new Point(35, 10);
+    public static Point specToSpitControl1 = new Point(15, 78.5);
+    public static Point specToSpit1Pose = new Point(38, 34);
+    public static Point specToSpit2Pose = new Point(40, 25.14551804);
 
 
 }

@@ -364,18 +364,15 @@ public class FiveSpecSpit extends OpMode {
                         ),
                         new Sequential(
                                 new Parallel(
-                                        Intake.pushSlidesOut(),
-//                                        Intake.slideOut(),
+                                        Intake.pushSlidesOut(ControlConstants.autoIntakeSlideSens),
                                         Chassis.followPath(spit1TurnToObs, true)
-//                                        Chassis.turn(Math.toRadians(100), false)
                                 ),
                                 Intake.sideSpinOut(),
                                 new Wait(1),
                                 Intake.slideIn(),
                                 Chassis.followPath(spit1TurnToSpike, true),
-//                                Chassis.turn(Math.toRadians(100), true),
                                 new Parallel(
-                                        Intake.pushSlidesOut(),
+                                        Intake.pushSlidesOut(ControlConstants.autoIntakeSlideSens),
                                         Intake.sideSpinIn()
                                 ),
                                 new Wait(0.5),

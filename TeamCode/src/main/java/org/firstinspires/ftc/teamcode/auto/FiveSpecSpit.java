@@ -364,7 +364,8 @@ public class FiveSpecSpit extends OpMode {
                         ),
                         new Sequential(
                                 new Parallel(
-                                        Intake.slideOut(),
+                                        Intake.pushSlidesOut(),
+//                                        Intake.slideOut(),
                                         Chassis.followPath(spit1TurnToObs, true)
 //                                        Chassis.turn(Math.toRadians(100), false)
                                 ),
@@ -374,8 +375,8 @@ public class FiveSpecSpit extends OpMode {
                                 Chassis.followPath(spit1TurnToSpike, true),
 //                                Chassis.turn(Math.toRadians(100), true),
                                 new Parallel(
-                                    Intake.slideOut(),
-                                    Intake.sideSpinIn()
+                                        Intake.pushSlidesOut(),
+                                        Intake.sideSpinIn()
                                 ),
                                 new Wait(0.5),
                                 new Parallel(
@@ -534,9 +535,9 @@ public class FiveSpecSpit extends OpMode {
 
         checkSlides.interrupt();
     }
-    public void slideOutSlow(){
-        new Sequential()
-    }
+//    public void slideOutSlow(){
+//        new Sequential()
+//    }
     public class CheckOuttakeSlides extends Thread {
         @Override
         public void run() {

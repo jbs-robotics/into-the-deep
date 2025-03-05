@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
@@ -48,7 +49,7 @@ public class Intake implements Subsystem {
     /// changes how long servo actions should wait until reporting they are complete
     public static Telemetry telemetry;
     public static final double SERVO_DELAY = 0.4;
-    public static double elbowPosition = 0;
+    public static double elbowPosition = 0, slidePosition = 0;
     public static final double SLIDE_TOLERANCE = 0.005;
 
     private Intake() {
@@ -140,6 +141,7 @@ public class Intake implements Subsystem {
     public static Lambda slideTo(double target) {
         return new Lambda("intake-slide-to")
                 .setInit(() -> {
+                    slidePosition = target;
                     slideLeft.setPosition(target);
                     slideRight.setPosition(target);
                 })
@@ -182,9 +184,24 @@ public class Intake implements Subsystem {
     public static Lambda pushSlidesIn() {
         return new Lambda("push-intake-slides-in")
                 .setExecute(() -> {
-                    telemetry.addLine("pushing slides in");
+                    double target = Range.clip(slidePosition + ControlConstants.intakeSlideSensitivity, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
+                    slidePosition = target;
+                    slideLeft.setPosition(target);
+                    slideRight.setPosition(target);
                 })
                 .setFinish(() -> false)
+                .setInterruptible(true);
+    }
+
+    public static Lambda pushSlidesOut() {
+        return new Lambda("push-intake-slides-out")
+                .setExecute(() -> {
+                    double target = Range.clip(slidePosition - ControlConstants.intakeSlideSensitivity, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
+                    slidePosition = target;
+                    slideLeft.setPosition(target);
+                    slideRight.setPosition(target);
+                })
+                .setFinish(() -> slidePosition <= ControlConstants.intakeSlideOut || slidePosition >= ControlConstants.intakeSlideIn)
                 .setInterruptible(true);
     }
     public static Lambda randFunc() {

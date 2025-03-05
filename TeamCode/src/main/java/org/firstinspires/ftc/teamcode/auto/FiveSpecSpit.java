@@ -117,7 +117,7 @@ public class FiveSpecSpit extends OpMode {
                         new Point(Paths.specToSpit1Pose.getX() - 5, Paths.specToSpit1Pose.getY()),
                         Paths.specToSpit1Pose
                 ))
-                .setConstantHeadingInterpolation(Math.toRadians(290))
+                .setConstantHeadingInterpolation(Math.toRadians(-80))
 //                .setTangentHeadingInterpolation()
                 .setZeroPowerAccelerationMultiplier(7) // TODO: See how high I can make this without going into the other half of the field
 //                .setPathEndTimeoutConstraint(100)
@@ -363,30 +363,35 @@ public class FiveSpecSpit extends OpMode {
                                 )
                         ),
                         new Sequential(
+                                // spit it into the obs zone
                                 new Parallel(
-                                        Intake.pushSlidesOut(ControlConstants.autoIntakeSlideSens),
-                                        Chassis.followPath(spit1TurnToObs, true)
+                                        Chassis.followPath(spit1TurnToObs, true),
+                                        new Sequential(
+                                                new Wait(0.5),
+                                                Intake.slideOut()
+                                        )
                                 ),
                                 Intake.sideSpinOut(),
-                                new Wait(1),
+                                new Wait(0.5),
                                 Intake.slideIn(),
                                 Chassis.followPath(spit1TurnToSpike, true),
                                 new Parallel(
+//                                        Intake.pushSlidesOut(),
                                         Intake.pushSlidesOut(ControlConstants.autoIntakeSlideSens),
                                         Intake.sideSpinIn()
                                 ),
                                 new Wait(0.5),
-                                new Parallel(
-                                        Intake.slideOut(),
-                                        Chassis.followPath(spit1TurnToObs, true)
-                                ),
+//                                new Parallel(
+//                                        Intake.slideOut(),
+                                Chassis.followPath(spit1TurnToObs, true),
+//                                ),
                                 Intake.sideSpinOut(),
                                 new Wait(0.5),
                                 new Parallel(
                                         Chassis.followPath(toSpit2, true),
 //                                        new Sequential(
 //                                                new Wait(0.5),
-                                                Intake.sideSpinIn()
+                                        Intake.sideSpinIn()
 //                                        )
                                 )
                         ),
@@ -400,7 +405,9 @@ public class FiveSpecSpit extends OpMode {
                                                 new Wait(0.5),
                                                 Intake.elbowIn()
                                         ),
-                                    Chassis.followPath(grabPickup1, 1)
+                                        Chassis.followPath(grabPickup1, 1),
+                                        Claw.wristTo(ControlConstants.pickupOuttakeWrist),
+                                        Claw.elbowIn()
                                 )
                         ),
 
@@ -414,23 +421,23 @@ public class FiveSpecSpit extends OpMode {
                                 Claw.closeClaw(),
                                 new Parallel(
                                         Chassis.followPath(scorePickup1, 1),
-                                        Claw.elbowOut()
+                                        Claw.elbowOut(),
+                                        Outtake.slideTo(ControlConstants.highChamberSlidePos),
+                                        Claw.wristBack()
                                 )
                         ),
 
                         // Score specimen 2 and move to pickup (case 5)
                         new Sequential(
                                 new Parallel(
-//                                        Claw.openClaw(), // pulls outtake down
-//                                        Claw.elbowIn(), // pulls outtake down
-                                        Chassis.followPath(grabPickup2, true)
-//                                        new Sequential(
-//                                                new Wait(0.5),
-//                                                Outtake.slideTo(-200)
-//                                        )
+                                        Claw.openClaw(), // pulls outtake down
+                                        Chassis.followPath(grabPickup2, true),
+                                        new Sequential(
+                                                new Wait(0.5),
+                                                Claw.elbowIn(), // pulls outtake down
+                                                Outtake.slideTo(-200)
+                                        )
                                 )
-
-
                         ),
 
                         // Grab specimen 3 (case 6)
@@ -532,7 +539,8 @@ public class FiveSpecSpit extends OpMode {
 
         checkSlides.interrupt();
     }
-//    public void slideOutSlow(){
+
+    //    public void slideOutSlow(){
 //        new Sequential()
 //    }
     public class CheckOuttakeSlides extends Thread {

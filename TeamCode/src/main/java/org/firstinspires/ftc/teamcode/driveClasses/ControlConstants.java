@@ -18,8 +18,8 @@ public class ControlConstants {
     public static double intakePivotIn = 0;
     public static double intakeSlideIn = 0.64;
     public static double intakeSlideOut = 0.19;
-    public static double wiperIn = 0;
-    public static double wiperOut = 1;
+    public static double wiperIn = 1;
+    public static double wiperOut = 0;
 
 
     // outtake constants
@@ -48,7 +48,7 @@ public class ControlConstants {
 
     public static double pickupOuttakeWrist = 0.64;
 
-    public static double autoIntakeSlideSens = 0.005;
+    public static double autoIntakeSlideSens = 0.004;
 
 
 }

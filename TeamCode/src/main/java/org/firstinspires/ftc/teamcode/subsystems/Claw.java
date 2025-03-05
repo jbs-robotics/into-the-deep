@@ -154,7 +154,8 @@ public class Claw implements Subsystem {
                     rElbow.setPosition(pos);
                 })
                 .addRequirements(rElbow, lElbow)
-                .setFinish(() -> Math.abs(lElbow.getPosition()) <= 0.1)
+//                .setFinish(() -> Math.abs(lElbow.getPosition()) <= 0.1)
+                .setFinish(() -> true) //TODO: FIX THIS WHEN THE AXONS GET PUT IN
                 ;
     }
     public static Lambda wristBack(){

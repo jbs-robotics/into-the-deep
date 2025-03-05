@@ -55,7 +55,7 @@ public class Intake implements Subsystem {
     /// changes how long servo actions should wait until reporting they are complete
     public static Telemetry telemetry;
     public static final double SERVO_DELAY = 0.4;
-    public static RefCell<Double> elbowPosition = new RefCell<Double>(0.0);
+    public static RefCell<Double> elbowPosition = new RefCell<Double>(ControlConstants.intakePivotIn);
     public static RefCell<Double> wiperPosition = new RefCell<Double>(ControlConstants.wiperIn);
 
     public static double slidePosition = ControlConstants.intakeSlideIn;
@@ -250,7 +250,7 @@ public class Intake implements Subsystem {
                     slideLeft.setPosition(target);
                     slideRight.setPosition(target);
                 })
-                .setFinish(() -> false)
+                .setFinish(() -> slidePosition <= ControlConstants.intakeSlideOut || slidePosition >= ControlConstants.intakeSlideIn)
                 .setInterruptible(true);
     }
     public static Lambda pushSlidesOut(double sens) {
@@ -260,6 +260,7 @@ public class Intake implements Subsystem {
                     slidePosition = target;
                     slideLeft.setPosition(target);
                     slideRight.setPosition(target);
+                    FeatureRegistrar.getActiveOpMode().telemetry.addData("slide pos", slidePosition);
                 })
                 .setFinish(() -> slidePosition <= ControlConstants.intakeSlideOut || slidePosition >= ControlConstants.intakeSlideIn)
                 .setInterruptible(true);

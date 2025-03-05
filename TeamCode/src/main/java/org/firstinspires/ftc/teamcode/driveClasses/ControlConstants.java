@@ -18,13 +18,16 @@ public class ControlConstants {
     public static double intakePivotIn = 0;
     public static double intakeSlideIn = 0.64;
     public static double intakeSlideOut = 0.19;
+    public static double wiperIn = 0;
+    public static double wiperOut = 1;
+
 
     // outtake constants
     public static double outtakeSlideSensitivity = 20;
     public static double outtakePivotSensitivity = 0.004;
     public static double outtakePivotIn = 0.896;
     public static double outtakePivotOut = 0;
-    public static double outtakeWristSensitivity = 0.3;
+    public static double outtakeWristSensitivity = 0.006;
     public static double outtakeWristForward = 1;
     public static double outtakeWristBack = 0;
     public static double clawOpen = 0.95;
@@ -41,6 +44,8 @@ public class ControlConstants {
     public static double transferOuttakePivotPos = 0.95;
     public static double transferOuttakeWristPos = 0.99;
     public static int transferOuttakeSlidePos = -150;
+
+
 
 
 

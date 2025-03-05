@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 
+import android.service.controls.Control;
+
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -13,6 +15,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.driveClasses.ControlConstants;
 
 import java.lang.annotation.ElementType;
@@ -21,14 +24,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import dev.frozenmilk.dairy.core.FeatureRegistrar;
 import dev.frozenmilk.dairy.core.dependency.Dependency;
 import dev.frozenmilk.dairy.core.dependency.annotation.SingleAnnotation;
 import dev.frozenmilk.dairy.core.wrapper.Wrapper;
+import dev.frozenmilk.mercurial.bindings.BoundDoubleSupplier;
 import dev.frozenmilk.mercurial.commands.Lambda;
 import dev.frozenmilk.mercurial.commands.groups.Parallel;
 import dev.frozenmilk.mercurial.commands.groups.Sequential;
 import dev.frozenmilk.mercurial.commands.util.Wait;
 import dev.frozenmilk.mercurial.subsystems.Subsystem;
+import dev.frozenmilk.util.cell.RefCell;
 import kotlin.annotation.MustBeDocumented;
 
 @Config
@@ -40,7 +46,7 @@ public class Outtake implements Subsystem {
 
     public static TouchSensor outLimit;
     public static final int SLIDE_TOLERANCE = 50;
-    public static int slidePos = ControlConstants.minOuttakeSlidePos;
+    public static RefCell<Integer> slidePos = new RefCell<Integer>(ControlConstants.minOuttakeSlidePos);
 
     private Outtake() {}
 
@@ -79,8 +85,8 @@ public class Outtake implements Subsystem {
         slideRight.setDirection(DcMotorSimple.Direction.REVERSE);
         slideLeft.setPower(1);
         slideRight.setPower(1);
-        slideLeft.setTargetPosition(0);
-        slideRight.setTargetPosition(0);
+        slideLeft.setTargetPosition(ControlConstants.minOuttakeSlidePos);
+        slideRight.setTargetPosition(ControlConstants.minOuttakeSlidePos);
         setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //        servo = hardwareMap.get(Servo.class, "outServo");
     }
@@ -176,10 +182,39 @@ public class Outtake implements Subsystem {
 
     }
     public static Lambda incrementSlides(double amt){
-        slidePos += amt;
-        slidePos =  Range.clip(slidePos, ControlConstants.maxOuttakeSlidePos, ControlConstants.minOuttakeSlidePos);
-        return slideTo(slidePos);
+        slidePos.accept(slidePos.get() + (int)amt);
+        slidePos.accept(Range.clip(slidePos.get(), ControlConstants.maxOuttakeSlidePos, ControlConstants.minOuttakeSlidePos));
+        return slideTo(slidePos.get());
     }
+
+    public static Lambda gamepadSlides(BoundDoubleSupplier modifier) {
+        return new Lambda("gamepad-slides")
+                .setRequirements(slideLeft, slideRight)
+//                .setFinish(() -> {
+//                    return Math.abs(slideLeft.getTargetPosition() - slideLeft.getCurrentPosition()) < SLIDE_TOLERANCE || (outLimit.isPressed() && slideLeft.getTargetPosition() > slideLeft.getCurrentPosition());
+//                })
+                .setExecute(() -> {
+                    Telemetry tel = FeatureRegistrar.getActiveOpMode().telemetry;
+                    int target;
+                    target = Range.clip(slidePos.get() - (int)(ControlConstants.outtakeSlideSensitivity * modifier.state()), ControlConstants.maxOuttakeSlidePos, ControlConstants.minOuttakeSlidePos);
+                    slidePos.accept(target);
+                    slideLeft.setTargetPosition(target);
+                    slideRight.setTargetPosition(target);
+                    tel.addData("Target", target);
+                    tel.addData("SlidePos", slidePos.get());
+                    tel.addData("Slide Left pos", slideLeft.getCurrentPosition());
+                    tel.addData("Slide Right pos", slideRight.getCurrentPosition());
+                    tel.update();
+                })
+                .setInit(() -> {
+                    slideLeft.setPower(1);
+                    slideRight.setPower(1);
+                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                })
+                .setFinish(() -> Math.abs(modifier.state()) <= 0.05)
+                ;
+    }
+
     public static Lambda slideOut() {
         return slideTo(-4000);
     }

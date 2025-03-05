@@ -30,12 +30,17 @@ import dev.frozenmilk.dairy.core.dependency.Dependency;
 import dev.frozenmilk.dairy.core.dependency.annotation.SingleAnnotation;
 import dev.frozenmilk.dairy.core.util.controller.calculation.pid.DoubleComponent;
 import dev.frozenmilk.dairy.core.wrapper.Wrapper;
+import dev.frozenmilk.mercurial.bindings.BoundDoubleSupplier;
+import dev.frozenmilk.mercurial.commands.Command;
 import dev.frozenmilk.mercurial.commands.Lambda;
 import dev.frozenmilk.mercurial.commands.groups.Race;
 import dev.frozenmilk.mercurial.commands.groups.Sequential;
+import dev.frozenmilk.mercurial.commands.stateful.StatefulLambda;
+import dev.frozenmilk.mercurial.commands.util.IfElse;
 import dev.frozenmilk.mercurial.commands.util.Wait;
 import dev.frozenmilk.mercurial.subsystems.SDKSubsystem;
 import dev.frozenmilk.mercurial.subsystems.Subsystem;
+import dev.frozenmilk.util.cell.RefCell;
 import kotlin.annotation.MustBeDocumented;
 
 @Config
@@ -44,13 +49,15 @@ public class Intake implements Subsystem {
 
     //    public static DcMotorEx slideLeft, slideRight;
     public static CRServo sideSpinL, sideSpinR;
-    public static Servo lElbow, rElbow, slideLeft, slideRight;
+    public static Servo lElbow, rElbow, slideLeft, slideRight, wiper;
 
     // TODO: adjust to fit
     /// changes how long servo actions should wait until reporting they are complete
     public static Telemetry telemetry;
     public static final double SERVO_DELAY = 0.4;
-    public static double elbowPosition = 0;
+    public static RefCell<Double> elbowPosition = new RefCell<Double>(0.0);
+    public static RefCell<Double> wiperPosition = new RefCell<Double>(ControlConstants.wiperIn);
+
     public static double slidePosition = ControlConstants.intakeSlideIn;
     public static final double SLIDE_TOLERANCE = 0.005;
 
@@ -94,6 +101,8 @@ public class Intake implements Subsystem {
         lElbow.setDirection(Servo.Direction.REVERSE);
         sideSpinL = hardwareMap.get(CRServo.class, "sideSpinL");
         sideSpinR = hardwareMap.get(CRServo.class, "sideSpinR");
+        wiper = hardwareMap.get(Servo.class, "wiper");
+        wiper.setPosition(wiperPosition.get());
     }
 
     @Override
@@ -117,6 +126,12 @@ public class Intake implements Subsystem {
                     sideSpinR.setPower(1);
                 })
                 .addRequirements(sideSpinL, sideSpinR)
+                .setEnd(interrupted -> {
+                    if (interrupted) {
+                        sideSpinR.setPower(0);
+                        sideSpinL.setPower(0);
+                    }
+                })
                 ;
     }
 
@@ -127,6 +142,12 @@ public class Intake implements Subsystem {
                     sideSpinR.setPower(-1);
                 })
                 .addRequirements(sideSpinL, sideSpinR)
+                .setEnd(interrupted -> {
+                    if (interrupted) {
+                        sideSpinR.setPower(0);
+                        sideSpinL.setPower(0);
+                    }
+                })
                 ;
     }
 
@@ -163,23 +184,41 @@ public class Intake implements Subsystem {
         return Lambda.from(slideTo(ControlConstants.intakeSlideOut));
     }
 
-    public static Lambda toggleElbow() {
-        FeatureRegistrar.getActiveOpMode().telemetry.addData("elbowPos", elbowPosition);
-        if (elbowPosition == ControlConstants.intakePivotIn) {
-            FeatureRegistrar.getActiveOpMode().telemetry.addLine("fish");
-            FeatureRegistrar.getActiveOpMode().telemetry.update();
 
-            return elbowOut();
-        } else {
-            FeatureRegistrar.getActiveOpMode().telemetry.addLine("cake");
-            FeatureRegistrar.getActiveOpMode().telemetry.update();
+    public static Command toggleElbow() {
+        return new StatefulLambda<RefCell<Double>>("toggle-elbow", new RefCell<Double>(ControlConstants.intakePivotIn))
+                .setExecute(refState -> {
 
-            return elbowIn();
-        }
+                    double target;
+                    if (refState.get() == ControlConstants.intakePivotIn) {
+                        target = ControlConstants.intakePivotOut;
+                    } else {
+                        target = ControlConstants.intakePivotIn;
+                    }
+                    refState.accept(target);
+                    elbowPosition.accept(target);
+                    lElbow.setPosition(target);
+                    rElbow.setPosition(1-target);
+//                    FeatureRegistrar.getActiveOpMode().telemetry.addData("elbowPosition", elbowPosition.get());
+//                    FeatureRegistrar.getActiveOpMode().telemetry.addData("refstate", refState.get());
+//                    FeatureRegistrar.getActiveOpMode().telemetry.addData("Relbo position", rElbow.getPosition());
+//                    FeatureRegistrar.getActiveOpMode().telemetry.update();
+//                    elbowPosition = new RefCell<Double>(target);
+                })
+                .setRequirements(lElbow, rElbow)
+                .setInit(() -> {
+                    elbowPosition.accept(ControlConstants.intakePivotIn);
+//                    elbowPosition = ControlConstants.intakePivotIn;
+                    lElbow.setPosition(ControlConstants.intakePivotIn);
+                    rElbow.setPosition(1-ControlConstants.intakePivotIn);
+                })
+
+                ;
     }
 
     public static Lambda elbowTo(double pos) {
-        elbowPosition = pos;
+        elbowPosition.accept(pos);
+//        elbowPosition = pos;
 
                 return new Lambda("intake-elbow-to")
                         .setExecute(() -> {
@@ -223,5 +262,30 @@ public class Intake implements Subsystem {
         return elbowTo(ControlConstants.intakePivotIn);
     }
 
+    public static Lambda toggleWiper() {
+        return new Lambda("toggle-wiper")
+                .setExecute(() -> {
+                    double target;
+                    if (wiperPosition.get() == ControlConstants.wiperIn) {
+                        target = ControlConstants.wiperOut;
+                    } else {
+                        target = ControlConstants.wiperIn;
+                    }
+                    wiperPosition.accept(target);
+                    wiper.setPosition(target);
+                })
+                .setRequirements(wiper)
+                ;
+    }
+    public static Lambda wiperToPos(BoundDoubleSupplier supplier) {
+        return new Lambda("wiper-to-pos")
+                .setExecute(() -> {
+                    wiperPosition.accept(supplier.state());
+                    wiper.setPosition(wiperPosition.get());
+                })
+                .setFinish(() -> false)
+                .setRequirements(wiper)
+                ;
+    }
 
 }

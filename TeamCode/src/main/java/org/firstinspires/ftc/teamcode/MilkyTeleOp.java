@@ -20,6 +20,7 @@ import dev.frozenmilk.mercurial.commands.groups.Sequential;
 @TeleopChassis.Attach
 @Intake.Attach
 @Outtake.Attach
+@Claw.Attach
 public class MilkyTeleOp extends OpMode {
 
 
@@ -36,15 +37,24 @@ public class MilkyTeleOp extends OpMode {
         // Intake Spinning
         Mercurial.gamepad2().dpadUp().onTrue(Intake.sideSpinOut()).onFalse(Intake.sideSpinOff());
         Mercurial.gamepad2().dpadDown().onTrue(Intake.sideSpinIn()).onFalse(Intake.sideSpinOff());
+        // Windshield Wiper
+        Mercurial.gamepad2().touchpad().onTrue(Intake.toggleWiper());
+        Mercurial.gamepad2().touchpadFinger1X().conditionalBindState().greaterThan(0.05).bind().whileTrue(Intake.wiperToPos(Mercurial.gamepad2().touchpadFinger1X()));
 
 
         // NOTE: Outtake
         // Outtake Elbow
         Mercurial.gamepad2().cross().onTrue(Claw.toggleElbow());
-//        Mercurial.gamepad2().circle().onTrue(new Lambda());
         // Outtake Wrist
-        Mercurial.gamepad2().rightStickY().conditionalBindState().greaterThan(0.05).bind().whileTrue(Claw.gamepadWristMove(0.5));
-        Mercurial.gamepad2().rightStickY().conditionalBindState().lessThan(-0.05).bind().whileTrue(Claw.gamepadWristMove(-0.5));
+        Mercurial.gamepad2().rightStickY().conditionalBindState().greaterThan(0.05).bind().whileTrue(Claw.gamepadWristMove(Mercurial.gamepad2().rightStickY()));
+        Mercurial.gamepad2().rightStickY().conditionalBindState().lessThan(-0.05).bind().whileTrue(Claw.gamepadWristMove(Mercurial.gamepad2().rightStickY()));
+        // Outtake Claw
+        Mercurial.gamepad2().circle().onTrue(Claw.toggleClaw());
+        // Outtake Slides
+        Mercurial.gamepad2().leftStickY().conditionalBindState().greaterThan(0.05).bind().whileTrue(Outtake.gamepadSlides(Mercurial.gamepad2().leftStickY()));
+        Mercurial.gamepad2().leftStickY().conditionalBindState().lessThan(-0.05).bind().whileTrue(Outtake.gamepadSlides(Mercurial.gamepad2().leftStickY()));
+
+
     }
 
     @Override

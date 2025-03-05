@@ -21,19 +21,24 @@ import java.lang.annotation.Target;
 import dev.frozenmilk.dairy.core.FeatureRegistrar;
 import dev.frozenmilk.dairy.core.dependency.Dependency;
 import dev.frozenmilk.dairy.core.dependency.annotation.SingleAnnotation;
+import dev.frozenmilk.dairy.core.util.supplier.numeric.EnhancedDoubleSupplier;
 import dev.frozenmilk.dairy.core.wrapper.Wrapper;
+import dev.frozenmilk.mercurial.bindings.BoundDoubleSupplier;
 import dev.frozenmilk.mercurial.commands.Lambda;
 import dev.frozenmilk.mercurial.commands.groups.Sequential;
 import dev.frozenmilk.mercurial.commands.util.Wait;
 import dev.frozenmilk.mercurial.subsystems.Subsystem;
+import dev.frozenmilk.util.cell.RefCell;
 import kotlin.annotation.MustBeDocumented;
 
 @Config
 public class Claw implements Subsystem {
     public static final Claw INSTANCE = new Claw();
-    public static double elbowPosition = 0, wristPosition = 0;
+    public static RefCell<Double> elbowPosition = new RefCell<Double>(ControlConstants.outtakePivotIn);
 
     public static Servo clawServo, lElbow, rElbow, wrist; // declare the claw servos
+    public static RefCell<Double> wristPosition = new RefCell<Double>(ControlConstants.outtakePivotIn);
+    public static RefCell<Double> clawPosition = new RefCell<Double>(ControlConstants.clawClosed);
 
     // TODO: adjust to fit
     /// changes how long servo actions should wait until reporting they are complete
@@ -61,6 +66,11 @@ public class Claw implements Subsystem {
     @Override
     public void preUserInitHook(@NonNull Wrapper opMode) {
         HardwareMap hardwareMap = opMode.getOpMode().hardwareMap;
+        if (hardwareMap == null) {
+            hardwareMap = FeatureRegistrar.getActiveOpMode().hardwareMap;
+            FeatureRegistrar.getActiveOpMode().telemetry.addLine("HardwareMap null for Claw; getting from feature registrar");
+            FeatureRegistrar.getActiveOpMode().telemetry.update();
+        }
 
         clawServo = hardwareMap.get(Servo.class, "claw");
         lElbow = hardwareMap.get(Servo.class, "outServoL");
@@ -79,38 +89,54 @@ public class Claw implements Subsystem {
         ));
     }
     public static Lambda toggleClaw(){
-        if(clawServo.getPosition() == ControlConstants.clawClosed){
-            return openClaw();
-        }
-        else{
-            return closeClaw();
-        }
+        return new Lambda("toggle-claw")
+                .setExecute(() -> {
+                    double target;
+                    if (clawPosition.get() == ControlConstants.clawOpen) {
+                        target = ControlConstants.clawClosed;
+                    } else {
+                        target = ControlConstants.clawOpen;
+                    }
+                    clawPosition.accept(target);
+                    clawServo.setPosition(target);
+                })
+                .setRequirements(clawServo)
+                ;
     }
     public static Lambda openClaw() {
-        return Lambda.from(new Sequential(
-                new Lambda("open-claw")
-                .setInit(() -> clawServo.setPosition(0))
+        return new Lambda("open-claw")
+                .setInit(() -> {
+                    clawServo.setPosition(ControlConstants.clawOpen);
+                    clawPosition.accept(ControlConstants.clawOpen);
+                })
                 .addRequirements(clawServo)
-                ,
-                new Wait(SERVO_DELAY)
-        ));
+                ;
     }
     public static Lambda closeClaw() {
-        return Lambda.from(new Sequential(
-            new Lambda("close-claw")
-                .setInit(() -> clawServo.setPosition(0.5))
+        return new Lambda("close-claw")
+                .setInit(() -> {
+                    clawServo.setPosition(ControlConstants.clawClosed);
+                    clawPosition.accept(ControlConstants.clawClosed);
+                })
                 .addRequirements(clawServo)
-                ,
-                new Wait(SERVO_DELAY)
-        ));
+                ;
     }
 
     public static Lambda toggleElbow() {
-        if (elbowPosition == ControlConstants.outtakePivotOut) {
-            return elbowIn();
-        } else {
-            return elbowOut();
-        }
+        return new Lambda("toggle-outtake-elbow")
+                .setRequirements(rElbow, lElbow)
+                .setInit(() -> {
+                    double target;
+                    if (elbowPosition.get() == ControlConstants.outtakePivotOut) {
+                        target = ControlConstants.outtakePivotIn;
+                    } else {
+                        target = ControlConstants.outtakePivotOut;
+                    }
+                    elbowPosition.accept(target);
+                    lElbow.setPosition(target);
+                    rElbow.setPosition(target);
+                })
+                ;
     }
 
     public static Lambda elbowOut() {
@@ -141,17 +167,15 @@ public class Claw implements Subsystem {
     }
 
     public static Lambda elbowTo(double pos) {
-        elbowPosition = pos;
-        return Lambda.from(new Sequential(
-            new Lambda("elbow-to")
+        elbowPosition.accept(pos);
+        return new Lambda("elbow-to")
                 .setInit(() -> {
                     lElbow.setPosition(pos);
                     rElbow.setPosition(pos);
                 })
                 .addRequirements(rElbow, lElbow)
-                ,
-                new Wait(SERVO_DELAY)
-        ));
+                .setFinish(() -> Math.abs(lElbow.getPosition()) <= 0.1)
+                ;
     }
     public static Lambda wristBack(){
         return wristTo(ControlConstants.outtakeWristBack);
@@ -175,10 +199,10 @@ public class Claw implements Subsystem {
 //        ));
     }
     public static Lambda incrementWrist(double amt){
-        return wristTo(wristPosition + amt);
+        return wristTo(wristPosition.get() + amt);
     }
     public static Lambda wristTo(double pos){
-        wristPosition = pos;
+        wristPosition.accept(pos);
                 return new Lambda("wrist-to")
                         .setInit(()->{
                             wrist.setPosition(pos);
@@ -191,16 +215,17 @@ public class Claw implements Subsystem {
                         .addRequirements(wrist);
     }
 
-    public static Lambda gamepadWristMove(double modifier) {
+    public static Lambda gamepadWristMove(BoundDoubleSupplier modifier) {
         return new Lambda("gamepad-wrist-move")
                 .setExecute(() -> {
-                    double target = Range.clip(wristPosition + ControlConstants.outtakeWristSensitivity * modifier, ControlConstants.outtakeWristBack, ControlConstants.outtakeWristForward);
-                    wristPosition = target;
-                    FeatureRegistrar.getActiveOpMode().telemetry.addData("outtake target", target);
-                    FeatureRegistrar.getActiveOpMode().telemetry.update();
-
-                    wrist.setPosition(target);
+                    Telemetry tel = FeatureRegistrar.getActiveOpMode().telemetry;
+                    tel.addData("Wiper target pos", modifier.state());
+                    tel.update();
+                    double target = Range.clip(wristPosition.get() + ControlConstants.outtakeWristSensitivity * modifier.state(), ControlConstants.outtakeWristBack, ControlConstants.outtakeWristForward);
+                    wristPosition.accept(target);
+                    wrist.setPosition(wristPosition.get());
                 })
+                .setFinish(() -> Math.abs(modifier.state()) <= 0.05)
                 .addRequirements(wrist)
                 .setInterruptible(true)
                 ;

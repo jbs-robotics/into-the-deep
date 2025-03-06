@@ -38,34 +38,33 @@ public class MilkyTeleOp extends OpMode {
         Mercurial.gamepad2().rightBumper().whileTrue(Intake.pushSlidesOut());
         Mercurial.gamepad2().leftBumper().whileTrue(Intake.pushSlidesIn());
         // Intake Pivot
-        Mercurial.gamepad2().dpadLeft().onTrue(Intake.toggleElbow());
+        Mercurial.gamepad2().triangle().onTrue(Intake.toggleElbow());
         // Intake Spinning
-        Mercurial.gamepad2().dpadUp().onTrue(Intake.sideSpinOut()).onFalse(Intake.sideSpinOff());
-        Mercurial.gamepad2().dpadDown().onTrue(Intake.sideSpinIn()).onFalse(Intake.sideSpinOff());
+        Mercurial.gamepad2().square().onTrue(Intake.sideSpinOut()).onFalse(Intake.sideSpinOff());
+        Mercurial.gamepad2().cross().onTrue(Intake.sideSpinIn()).onFalse(Intake.sideSpinOff());
         // Windshield Wiper
         Mercurial.gamepad2().touchpad().onTrue(Intake.toggleWiper());
 
 
         // NOTE: Outtake
         // Outtake Elbow
-        Mercurial.gamepad2().cross().onTrue(Claw.toggleElbow());
+        Mercurial.gamepad2().dpadDown().onTrue(Claw.toggleElbow());
         // Outtake Wrist
-        Mercurial.gamepad2().rightStickY().conditionalBindState().greaterThan(0.05).bind().whileTrue(Claw.gamepadWristMove(Mercurial.gamepad2().rightStickY()));
-        Mercurial.gamepad2().rightStickY().conditionalBindState().lessThan(-0.05).bind().whileTrue(Claw.gamepadWristMove(Mercurial.gamepad2().rightStickY()));
+        Mercurial.gamepad2().leftStickY().conditionalBindState().greaterThan(0.05).bind().whileTrue(Claw.gamepadWristMove(Mercurial.gamepad2().rightStickY()));
+        Mercurial.gamepad2().leftStickY().conditionalBindState().lessThan(-0.05).bind().whileTrue(Claw.gamepadWristMove(Mercurial.gamepad2().rightStickY()));
         // Outtake Claw
-        Mercurial.gamepad2().circle().onTrue(Claw.toggleClaw());
+        Mercurial.gamepad2().dpadRight().onTrue(Claw.toggleClaw());
         // Outtake Slides
-        Mercurial.gamepad2().leftStickY().conditionalBindState().greaterThan(0.05).bind().whileTrue(Outtake.gamepadSlides(Mercurial.gamepad2().leftStickY()));
-        Mercurial.gamepad2().leftStickY().conditionalBindState().lessThan(-0.05).bind().whileTrue(Outtake.gamepadSlides(Mercurial.gamepad2().leftStickY()));
+        Mercurial.gamepad2().rightStickY().conditionalBindState().greaterThan(0.05).bind().whileTrue(Outtake.gamepadSlides(Mercurial.gamepad2().leftStickY()));
+        Mercurial.gamepad2().rightStickY().conditionalBindState().lessThan(-0.05).bind().whileTrue(Outtake.gamepadSlides(Mercurial.gamepad2().leftStickY()));
 
         // NOTE: Routines
         // Get ready to score high chamber
         Mercurial.gamepad2().rightTrigger().conditionalBindState().greaterThan(0.05).bind().whileTrue(readyScoreHighChamber());
         // Transfer
-        Mercurial.gamepad2().square().onTrue(transferSample());
+        Mercurial.gamepad2().dpadLeft().onTrue(transferSample());
         // Get ready to grab spec
-        Mercurial.gamepad2().triangle().onTrue(getReadyToGrabSpec());
-
+        Mercurial.gamepad2().circle().onTrue(getReadyToGrabSpec());
     }
 
     @Override

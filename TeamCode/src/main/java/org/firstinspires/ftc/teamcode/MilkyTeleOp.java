@@ -4,16 +4,21 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.driveClasses.ControlConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Claw;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.subsystems.TeleopChassis;
 
 import dev.frozenmilk.dairy.core.FeatureRegistrar;
+import dev.frozenmilk.dairy.core.util.controller.calculation.pid.DoubleComponent;
 import dev.frozenmilk.mercurial.Mercurial;
 import dev.frozenmilk.mercurial.bindings.BoundGamepad;
+import dev.frozenmilk.mercurial.commands.Command;
 import dev.frozenmilk.mercurial.commands.Lambda;
+import dev.frozenmilk.mercurial.commands.groups.Parallel;
 import dev.frozenmilk.mercurial.commands.groups.Sequential;
+import dev.frozenmilk.mercurial.commands.util.Wait;
 
 @TeleOp(name = "Milky TeleOp", group = "Linear OpMode")
 @Mercurial.Attach
@@ -53,6 +58,13 @@ public class MilkyTeleOp extends OpMode {
         Mercurial.gamepad2().leftStickY().conditionalBindState().greaterThan(0.05).bind().whileTrue(Outtake.gamepadSlides(Mercurial.gamepad2().leftStickY()));
         Mercurial.gamepad2().leftStickY().conditionalBindState().lessThan(-0.05).bind().whileTrue(Outtake.gamepadSlides(Mercurial.gamepad2().leftStickY()));
 
+        // NOTE: Routines
+        // Get ready to score high chamber
+        Mercurial.gamepad2().rightTrigger().conditionalBindState().greaterThan(0.05).bind().whileTrue(readyScoreHighChamber());
+        // Transfer
+        Mercurial.gamepad2().square().onTrue(transferSample());
+        // Get ready to grab spec
+        Mercurial.gamepad2().triangle().onTrue(getReadyToGrabSpec());
 
     }
 
@@ -61,5 +73,43 @@ public class MilkyTeleOp extends OpMode {
 //        telemetry.addData("Intake Elbow", Intake.elbowPosition);
 //        telemetry.addData("IOuttake Wrist", Claw.elbowPosition);
 //        telemetry.update();
+    }
+
+
+    public Command readyScoreHighChamber() {
+        return new Parallel(
+                Claw.closeClaw(),
+                Outtake.slideTo(ControlConstants.highChamberSlidePos),
+                Claw.elbowOut(),
+                Claw.wristBack()
+        );
+    }
+
+    public Command getReadyToGrabSpec() {
+        return new Parallel(
+                Claw.openClaw(),
+                Intake.slideIn(),
+                Intake.elbowIn(),
+                Outtake.slideTo(ControlConstants.minOuttakeSlidePos),
+                Claw.elbowTo(ControlConstants.outtakePivotIn),
+                Claw.wristTo(ControlConstants.pickupOuttakeWrist)
+        );
+    }
+
+    public Command transferSample() {
+        return new Sequential(
+                new Parallel(
+                        Intake.elbowTo(ControlConstants.transferIntakePivotPos),
+                        Intake.slideTo(ControlConstants.transferIntakeSlidePos),
+                        Claw.elbowTo(ControlConstants.transferOuttakePivotPos),
+                        Claw.wristTo(ControlConstants.transferOuttakeWristPos),
+                        Outtake.slideTo(ControlConstants.transferOuttakeSlidePos),
+                        Claw.openClaw()
+                ),
+                new Wait(0.8),
+                Claw.closeClaw(),
+                new Wait(0.2),
+                Outtake.incrementSlides(-200)
+        );
     }
 }

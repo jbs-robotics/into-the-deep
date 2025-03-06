@@ -34,11 +34,11 @@ import kotlin.annotation.MustBeDocumented;
 @Config
 public class Claw implements Subsystem {
     public static final Claw INSTANCE = new Claw();
-    public static RefCell<Double> elbowPosition = new RefCell<Double>(ControlConstants.outtakePivotIn);
+    public static RefCell<Double> elbowPosition;
 
     public static Servo clawServo, lElbow, rElbow, wrist; // declare the claw servos
-    public static RefCell<Double> wristPosition = new RefCell<Double>(ControlConstants.outtakePivotIn);
-    public static RefCell<Double> clawPosition = new RefCell<Double>(ControlConstants.clawClosed);
+    public static RefCell<Double> wristPosition;
+    public static RefCell<Double> clawPosition;
 
     // TODO: adjust to fit
     /// changes how long servo actions should wait until reporting they are complete
@@ -73,12 +73,19 @@ public class Claw implements Subsystem {
         }
 
         clawServo = hardwareMap.get(Servo.class, "claw");
-//        clawServo.setPosition(clawPosition.get());
+        clawPosition = new RefCell<Double>(ControlConstants.clawClosed);
+        clawServo.setPosition(clawPosition.get());
 
         lElbow = hardwareMap.get(Servo.class, "outServoL");
         rElbow = hardwareMap.get(Servo.class, "outServoR");
-//        lElbow.setDirection(Servo.Direction.REVERSE);
+        lElbow.setDirection(Servo.Direction.REVERSE);
+        elbowPosition = new RefCell<Double>(ControlConstants.outtakePivotIn);
+        lElbow.setPosition(elbowPosition.get());
+        rElbow.setPosition(elbowPosition.get());
+
         wrist = hardwareMap.get(Servo.class, "clawWrist");
+        wristPosition = new RefCell<Double>(ControlConstants.outtakeWristForward);
+        wrist.setPosition(wristPosition.get());
     }
 
     @Override

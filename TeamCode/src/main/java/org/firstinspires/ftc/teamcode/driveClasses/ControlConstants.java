@@ -40,9 +40,9 @@ public class ControlConstants {
 
     // Transfer Constants
     public static double transferIntakePivotPos = 0;
-    public static double transferIntakeSlidePos = 0.61;
-    public static double transferOuttakePivotPos = 0.95;
-    public static double transferOuttakeWristPos = 0.99;
+    public static double transferIntakeSlidePos = intakeSlideIn;
+    public static double transferOuttakePivotPos = 0;
+    public static double transferOuttakeWristPos = 0.15;
     public static int transferOuttakeSlidePos = -150;
 
 

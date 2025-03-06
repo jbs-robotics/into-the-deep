@@ -55,8 +55,8 @@ public class Intake implements Subsystem {
     /// changes how long servo actions should wait until reporting they are complete
     public static Telemetry telemetry;
     public static final double SERVO_DELAY = 0.4;
-    public static RefCell<Double> elbowPosition = new RefCell<Double>(ControlConstants.intakePivotIn);
-    public static RefCell<Double> wiperPosition = new RefCell<Double>(ControlConstants.wiperIn);
+    public static RefCell<Double> elbowPosition;
+    public static RefCell<Double> wiperPosition;
 
     public static double slidePosition = ControlConstants.intakeSlideIn;
     public static final double SLIDE_TOLERANCE = 0.005;
@@ -92,16 +92,22 @@ public class Intake implements Subsystem {
 
         slideLeft = hardwareMap.get(Servo.class, "ISL");
         slideRight = hardwareMap.get(Servo.class, "ISR");
-
         slideLeft.setDirection(Servo.Direction.FORWARD);
         slideRight.setDirection(Servo.Direction.REVERSE);
+        slideLeft.setPosition(slidePosition);
+        slideRight.setPosition(slidePosition);
 
         lElbow = hardwareMap.get(Servo.class, "inL");
         rElbow = hardwareMap.get(Servo.class, "inR");
         lElbow.setDirection(Servo.Direction.REVERSE);
+        elbowPosition = new RefCell<Double>(ControlConstants.intakePivotIn);
+        lElbow.setPosition(elbowPosition.get());
+        rElbow.setPosition(elbowPosition.get());
+
         sideSpinL = hardwareMap.get(CRServo.class, "sideSpinL");
         sideSpinR = hardwareMap.get(CRServo.class, "sideSpinR");
         wiper = hardwareMap.get(Servo.class, "wiper");
+        wiperPosition = new RefCell<Double>(ControlConstants.wiperIn);
         wiper.setPosition(wiperPosition.get());
     }
 

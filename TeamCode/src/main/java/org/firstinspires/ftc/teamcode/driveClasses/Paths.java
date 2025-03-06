@@ -14,7 +14,7 @@ public class Paths {
 
     public static Pose specimenStartPose = new Pose(9, 63, Math.toRadians(180));
 //    public static final PosePoint specimenStartPose = new PosePoint(9, 63);
-    public static Pose pickupPose = new Pose(7, 35, Math.toRadians(180));
+    public static Pose pickupPose = new Pose(8, 35, Math.toRadians(180));
     public static Pose specScorePose = new Pose(39, 78, Math.toRadians(180));
     public static Point specToPlowControl1 = new Point(17, 55)    ;
     public static Pose specToPlowControl2 = new Pose(36, 27, Math.toRadians(180));
@@ -35,9 +35,9 @@ public class Paths {
     public static Point specScorePickup1Control2 = new Point(10, 79.4598);
     public static Point specScorePickup1Control1 = new Point(35, 10);
     public static Point specToSpitControl1 = new Point(21, 68);
-    public static Point specSpit1Pose = new Point(30, 34);
-    public static Point specSpit2Pose = new Point(29, 23);
-    public static Point specSpit3Pose = new Point(34, 20);
+    public static Point specSpit1Pose = new Point(32, 32); // TODO: Test this
+    public static Point specSpit2Pose = new Point(29, 24);
+    public static Point specSpit3Pose = new Point(33, 18);
 
 
 }

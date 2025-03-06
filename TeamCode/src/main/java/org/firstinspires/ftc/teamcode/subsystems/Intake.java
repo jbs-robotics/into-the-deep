@@ -272,6 +272,7 @@ public class Intake implements Subsystem {
                     slidePosition = target;
                     slideLeft.setPosition(target);
                     slideRight.setPosition(target);
+                    FeatureRegistrar.getActiveOpMode().telemetry.addData("sens: ", sens);
                     FeatureRegistrar.getActiveOpMode().telemetry.addData("slide pos", slidePosition);
                 })
                 .setFinish(() -> slidePosition <= amt || slidePosition <= ControlConstants.intakeSlideOut)

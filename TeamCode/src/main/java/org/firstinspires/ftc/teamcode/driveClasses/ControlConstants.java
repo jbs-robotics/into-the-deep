@@ -48,7 +48,7 @@ public class ControlConstants {
 
     public static double pickupOuttakeWrist = 0.3627;
 
-    public static double autoIntakeSlideSens = 0.002;
+    public static final double autoIntakeSlideSens = 0.002;
 
 
 }

@@ -73,8 +73,8 @@ public class Claw implements Subsystem {
         }
 
         clawServo = hardwareMap.get(Servo.class, "claw");
+//        clawServo.setPosition(clawPosition.get());
 
-        clawServo.setPosition(clawPosition.get());
         lElbow = hardwareMap.get(Servo.class, "outServoL");
         rElbow = hardwareMap.get(Servo.class, "outServoR");
 //        lElbow.setDirection(Servo.Direction.REVERSE);

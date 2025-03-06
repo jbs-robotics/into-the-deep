@@ -203,7 +203,7 @@ public class CATeleOp extends OpMode {
         outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         inR.setDirection(Servo.Direction.REVERSE);
-        outServoL.setDirection(Servo.Direction.REVERSE);
+//        outServoL.setDirection(Servo.Direction.REVERSE);
         outServoR.setDirection(Servo.Direction.FORWARD);
         outtakeSlideRight.setDirection(DcMotor.Direction.REVERSE);
         outtakeSlideLeft.setDirection(DcMotor.Direction.REVERSE);

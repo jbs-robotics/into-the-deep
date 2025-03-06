@@ -39,7 +39,6 @@ public class MilkyTeleOp extends OpMode {
         Mercurial.gamepad2().dpadDown().onTrue(Intake.sideSpinIn()).onFalse(Intake.sideSpinOff());
         // Windshield Wiper
         Mercurial.gamepad2().touchpad().onTrue(Intake.toggleWiper());
-        Mercurial.gamepad2().touchpadFinger1X().conditionalBindState().greaterThan(0.05).bind().whileTrue(Intake.wiperToPos(Mercurial.gamepad2().touchpadFinger1X()));
 
 
         // NOTE: Outtake

@@ -265,6 +265,18 @@ public class Intake implements Subsystem {
                 .setFinish(() -> slidePosition <= ControlConstants.intakeSlideOut || slidePosition >= ControlConstants.intakeSlideIn)
                 .setInterruptible(true);
     }
+    public static Lambda pushSlidesOut(double sens, double amt) {
+        return new Lambda("push-intake-slides-out")
+                .setExecute(() -> {
+                    double target = Range.clip(slidePosition - sens, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
+                    slidePosition = target;
+                    slideLeft.setPosition(target);
+                    slideRight.setPosition(target);
+                    FeatureRegistrar.getActiveOpMode().telemetry.addData("slide pos", slidePosition);
+                })
+                .setFinish(() -> slidePosition <= amt || slidePosition <= ControlConstants.intakeSlideOut)
+                .setInterruptible(true);
+    }
 
 
     public static Lambda elbowOut() {

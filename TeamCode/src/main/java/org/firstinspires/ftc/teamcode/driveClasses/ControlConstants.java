@@ -25,17 +25,17 @@ public class ControlConstants {
     // outtake constants
     public static double outtakeSlideSensitivity = 20;
     public static double outtakePivotSensitivity = 0.004;
-    public static double outtakePivotIn = 0.896;
+    public static double outtakePivotIn = 0.9;
     public static double outtakePivotOut = 0;
     public static double outtakeWristSensitivity = 0.006;
-    public static double outtakeWristForward = 1;
-    public static double outtakeWristBack = 0;
+    public static double outtakeWristForward = 0;
+    public static double outtakeWristBack = 1;
     public static double clawOpen = 0.95;
     public static double clawClosed = 0.525;
 
     public static int maxOuttakeSlidePos = -2500;
-    public static int minOuttakeSlidePos = -10;
-    public static int highChamberSlidePos = -688;
+    public static int minOuttakeSlidePos = 0;
+    public static int highChamberSlidePos = -950;
     public static int highBasketSlidePos = -2500;
 
     // Transfer Constants
@@ -46,9 +46,9 @@ public class ControlConstants {
     public static int transferOuttakeSlidePos = -150;
 
 
-    public static double pickupOuttakeWrist = 0.64;
+    public static double pickupOuttakeWrist = 0.3627;
 
-    public static double autoIntakeSlideSens = 0.004;
+    public static double autoIntakeSlideSens = 0.002;
 
 
 }

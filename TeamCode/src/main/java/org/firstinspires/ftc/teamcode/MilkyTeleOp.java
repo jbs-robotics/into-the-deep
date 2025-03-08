@@ -50,21 +50,24 @@ public class MilkyTeleOp extends OpMode {
         // Outtake Elbow
         Mercurial.gamepad2().dpadDown().onTrue(Claw.toggleElbow());
         // Outtake Wrist
-        Mercurial.gamepad2().leftStickY().conditionalBindState().greaterThan(0.05).bind().whileTrue(Claw.gamepadWristMove(Mercurial.gamepad2().rightStickY()));
-        Mercurial.gamepad2().leftStickY().conditionalBindState().lessThan(-0.05).bind().whileTrue(Claw.gamepadWristMove(Mercurial.gamepad2().rightStickY()));
+        Mercurial.gamepad2().leftStickY().conditionalBindState().greaterThan(0.05).bind().whileTrue(Claw.gamepadWristMove(Mercurial.gamepad2().leftStickY()));
+        Mercurial.gamepad2().leftStickY().conditionalBindState().lessThan(-0.05).bind().whileTrue(Claw.gamepadWristMove(Mercurial.gamepad2().leftStickY()));
         // Outtake Claw
         Mercurial.gamepad2().dpadRight().onTrue(Claw.toggleClaw());
         // Outtake Slides
-        Mercurial.gamepad2().rightStickY().conditionalBindState().greaterThan(0.05).bind().whileTrue(Outtake.gamepadSlides(Mercurial.gamepad2().leftStickY()));
-        Mercurial.gamepad2().rightStickY().conditionalBindState().lessThan(-0.05).bind().whileTrue(Outtake.gamepadSlides(Mercurial.gamepad2().leftStickY()));
+        Mercurial.gamepad2().rightStickY().conditionalBindState().greaterThan(0.05).bind().whileTrue(Outtake.gamepadSlides(Mercurial.gamepad2().rightStickY()));
+        Mercurial.gamepad2().rightStickY().conditionalBindState().lessThan(-0.05).bind().whileTrue(Outtake.gamepadSlides(Mercurial.gamepad2().rightStickY()));
 
         // NOTE: Routines
         // Get ready to score high chamber
-        Mercurial.gamepad2().rightTrigger().conditionalBindState().greaterThan(0.05).bind().whileTrue(readyScoreHighChamber());
+        Mercurial.gamepad2().rightTrigger().conditionalBindState().greaterThan(0.05).bind().onTrue(readyScoreHighChamber());
+        // Get ready to score high basket
+        Mercurial.gamepad2().leftTrigger().conditionalBindState().greaterThan(0.05).bind().onTrue(readyScoreHighBasket());
         // Transfer
         Mercurial.gamepad2().dpadLeft().onTrue(transferSample());
         // Get ready to grab spec
         Mercurial.gamepad2().circle().onTrue(getReadyToGrabSpec());
+
     }
 
     @Override
@@ -79,6 +82,15 @@ public class MilkyTeleOp extends OpMode {
         return new Parallel(
                 Claw.closeClaw(),
                 Outtake.slideTo(ControlConstants.highChamberSlidePos),
+                Claw.elbowOut(),
+                Claw.wristBack()
+        );
+    }
+
+    public Command readyScoreHighBasket() {
+        return new Parallel(
+                Claw.closeClaw(),
+                Outtake.slideTo(ControlConstants.highBasketSlidePos),
                 Claw.elbowOut(),
                 Claw.wristBack()
         );

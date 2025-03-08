@@ -12,7 +12,7 @@ public class ControlConstants {
 
 
     // intake constants
-    public static double intakeSlideSensitivity = 0.01;
+    public static double intakeSlideSensitivity = 0.0047;
     public static double intakePivotSensitivity = 0.025;
     public static double intakePivotOut = 0.99;
     public static double intakePivotIn = 0;
@@ -41,9 +41,9 @@ public class ControlConstants {
     // Transfer Constants
     public static double transferIntakePivotPos = 0;
     public static double transferIntakeSlidePos = intakeSlideIn;
-    public static double transferOuttakePivotPos = 0;
+    public static double transferOuttakePivotPos = 0.9;
     public static double transferOuttakeWristPos = 0.15;
-    public static int transferOuttakeSlidePos = -150;
+    public static int transferOuttakeSlidePos = minOuttakeSlidePos;
 
 
     public static double pickupOuttakeWrist = 0.3627;

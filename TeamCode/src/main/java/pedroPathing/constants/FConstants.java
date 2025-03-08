@@ -12,7 +12,7 @@ public class FConstants {
         // Turn on voltage compensation
         FollowerConstants.useVoltageCompensationInAuto = true;
         FollowerConstants.useVoltageCompensationInTeleOp = true;
-        FollowerConstants.nominalVoltage = 12; // TODO: Change this when tuning
+        FollowerConstants.nominalVoltage = 13; // TODO: Change this when tuning
         FollowerConstants.cacheInvalidateSeconds = 0.5;
 
 

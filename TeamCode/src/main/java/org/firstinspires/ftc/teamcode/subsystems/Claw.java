@@ -78,13 +78,13 @@ public class Claw implements Subsystem {
 
         lElbow = hardwareMap.get(Servo.class, "outServoL");
         rElbow = hardwareMap.get(Servo.class, "outServoR");
-        lElbow.setDirection(Servo.Direction.REVERSE);
+//        lElbow.setDirection(Servo.Direction.REVERSE);
         elbowPosition = new RefCell<Double>(ControlConstants.outtakePivotIn);
         lElbow.setPosition(elbowPosition.get());
         rElbow.setPosition(elbowPosition.get());
 
         wrist = hardwareMap.get(Servo.class, "clawWrist");
-        wristPosition = new RefCell<Double>(ControlConstants.outtakeWristForward);
+        wristPosition = new RefCell<Double>(ControlConstants.pickupOuttakeWrist);
         wrist.setPosition(wristPosition.get());
     }
 

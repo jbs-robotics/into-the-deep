@@ -56,9 +56,7 @@ public class Intake implements Subsystem {
     public static Telemetry telemetry;
     public static final double SERVO_DELAY = 0.4;
     public static RefCell<Double> elbowPosition;
-    public static RefCell<Double> wiperPosition;
-
-    public static double slidePosition = ControlConstants.intakeSlideIn;
+    public static RefCell<Double> wiperPosition, slidePosition;
     public static final double SLIDE_TOLERANCE = 0.005;
 
     private Intake() {
@@ -87,20 +85,20 @@ public class Intake implements Subsystem {
     @Override
     public void preUserInitHook(@NonNull Wrapper opMode) {
         Telemetry telemetry = opMode.getOpMode().telemetry;
-
+        slidePosition = new RefCell<>(ControlConstants.intakeSlideIn);
         HardwareMap hardwareMap = opMode.getOpMode().hardwareMap;
 
         slideLeft = hardwareMap.get(Servo.class, "ISL");
         slideRight = hardwareMap.get(Servo.class, "ISR");
         slideLeft.setDirection(Servo.Direction.FORWARD);
         slideRight.setDirection(Servo.Direction.REVERSE);
-        slideLeft.setPosition(slidePosition);
-        slideRight.setPosition(slidePosition);
+        slideLeft.setPosition(slidePosition.get());
+        slideRight.setPosition(slidePosition.get());
 
         lElbow = hardwareMap.get(Servo.class, "inL");
         rElbow = hardwareMap.get(Servo.class, "inR");
         lElbow.setDirection(Servo.Direction.REVERSE);
-        elbowPosition = new RefCell<Double>(ControlConstants.intakePivotIn);
+        elbowPosition = new RefCell<Double>(ControlConstants.intakePivotOut);
         lElbow.setPosition(elbowPosition.get());
         rElbow.setPosition(elbowPosition.get());
 
@@ -179,6 +177,7 @@ public class Intake implements Subsystem {
                     return Math.abs(target - slideLeft.getPosition()) < SLIDE_TOLERANCE;
                 })
                 .addRequirements(slideLeft, slideRight)
+                .setInterruptible(true)
                 ;
     }
 
@@ -239,8 +238,8 @@ public class Intake implements Subsystem {
     public static Lambda pushSlidesIn() {
         return new Lambda("push-intake-slides-in")
                 .setExecute(() -> {
-                    double target = Range.clip(slidePosition + ControlConstants.intakeSlideSensitivity, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
-                    slidePosition = target;
+                    double target = Range.clip(slidePosition.get() + ControlConstants.intakeSlideSensitivity, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
+                    slidePosition.accept(target);
                     slideLeft.setPosition(target);
                     slideRight.setPosition(target);
                 })
@@ -251,37 +250,37 @@ public class Intake implements Subsystem {
     public static Lambda pushSlidesOut() {
         return new Lambda("push-intake-slides-out")
                 .setExecute(() -> {
-                    double target = Range.clip(slidePosition - ControlConstants.intakeSlideSensitivity, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
-                    slidePosition = target;
+                    double target = Range.clip(slidePosition.get() - ControlConstants.intakeSlideSensitivity, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
+                    slidePosition.accept(target);
                     slideLeft.setPosition(target);
                     slideRight.setPosition(target);
                 })
-                .setFinish(() -> slidePosition <= ControlConstants.intakeSlideOut || slidePosition >= ControlConstants.intakeSlideIn)
+                .setFinish(() -> slidePosition.get() <= ControlConstants.intakeSlideOut || slidePosition.get() >= ControlConstants.intakeSlideIn)
                 .setInterruptible(true);
     }
     public static Lambda pushSlidesOut(double sens) {
         return new Lambda("push-intake-slides-out")
                 .setExecute(() -> {
-                    double target = Range.clip(slidePosition - sens, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
-                    slidePosition = target;
+                    double target = Range.clip(slidePosition.get() - sens, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
+                    slidePosition.accept(target);
                     slideLeft.setPosition(target);
                     slideRight.setPosition(target);
-                    FeatureRegistrar.getActiveOpMode().telemetry.addData("slide pos", slidePosition);
+                    FeatureRegistrar.getActiveOpMode().telemetry.addData("slide pos", slidePosition.get());
                 })
-                .setFinish(() -> slidePosition <= ControlConstants.intakeSlideOut || slidePosition >= ControlConstants.intakeSlideIn)
+                .setFinish(() -> slidePosition.get() <= ControlConstants.intakeSlideOut || slidePosition.get() >= ControlConstants.intakeSlideIn)
                 .setInterruptible(true);
     }
     public static Lambda pushSlidesOut(double sens, double amt) {
         return new Lambda("push-intake-slides-out")
                 .setExecute(() -> {
-                    double target = Range.clip(slidePosition - sens, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
-                    slidePosition = target;
+                    double target = Range.clip(slidePosition.get() - sens, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
+                    slidePosition.accept(target);
                     slideLeft.setPosition(target);
                     slideRight.setPosition(target);
                     FeatureRegistrar.getActiveOpMode().telemetry.addData("sens: ", sens);
-                    FeatureRegistrar.getActiveOpMode().telemetry.addData("slide pos", slidePosition);
+                    FeatureRegistrar.getActiveOpMode().telemetry.addData("slide pos", slidePosition.get());
                 })
-                .setFinish(() -> slidePosition <= amt || slidePosition <= ControlConstants.intakeSlideOut)
+                .setFinish(() -> slidePosition.get() <= amt || slidePosition.get() <= ControlConstants.intakeSlideOut)
                 .setInterruptible(true);
     }
 

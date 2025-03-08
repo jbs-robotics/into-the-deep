@@ -16,7 +16,7 @@ public class ControlConstants {
     public static double intakePivotSensitivity = 0.025;
     public static double intakePivotOut = 0.99;
     public static double intakePivotIn = 0;
-    public static double intakeSlideIn = 0.64;
+    public static double intakeSlideIn = 0.645;
     public static double intakeSlideOut = 0.19;
     public static double wiperIn = 1;
     public static double wiperOut = 0;

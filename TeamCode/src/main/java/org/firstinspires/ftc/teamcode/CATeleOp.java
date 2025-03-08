@@ -203,8 +203,9 @@ public class CATeleOp extends OpMode {
         outtakeSlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         inR.setDirection(Servo.Direction.REVERSE);
-//        outServoL.setDirection(Servo.Direction.REVERSE);
-        outServoR.setDirection(Servo.Direction.FORWARD);
+        outServoL.setDirection(Servo.Direction.REVERSE);
+        outServoR.setDirection(Servo.Direction.REVERSE);
+//        outServoR.setDirection(Servo.Direction.FORWARD);
         outtakeSlideRight.setDirection(DcMotor.Direction.REVERSE);
         outtakeSlideLeft.setDirection(DcMotor.Direction.REVERSE);
 
@@ -245,7 +246,7 @@ public class CATeleOp extends OpMode {
         if (manualOverride.state) {
             intakePivot += Range.clip(gamepad2.right_stick_y, -ControlConstants.intakePivotSensitivity, ControlConstants.intakePivotSensitivity);
         } else {
-            if (intakeAvailable.state && gamepad2.dpad_left) {
+            if (intakeAvailable.state && gamepad2.triangle) {
                 if (intakePivot != ControlConstants.intakePivotOut) {
                     intakePivot = ControlConstants.intakePivotOut; // set intake out
                 } else {
@@ -286,11 +287,11 @@ public class CATeleOp extends OpMode {
         // Outtake Elbow Control
         if (manualOverride.state) {
             clawElbowPos += (gamepad2.x) ? ControlConstants.outtakePivotSensitivity : 0;
-            clawElbowPos += (gamepad2.b) ? -ControlConstants.outtakePivotSensitivity : 0;
+            clawElbowPos += (gamepad2.circle) ? -ControlConstants.outtakePivotSensitivity : 0;
             if (clawElbowPos > 1) clawElbowPos = 1;
             if (clawElbowPos < 0) clawElbowPos = 0.;
         } else {
-            if (clawArmAvailable.state && gamepad2.cross) {
+            if (clawArmAvailable.state && gamepad2.dpad_down) {
                 if (clawElbowPos == 0) {
                     clawElbowPos = ControlConstants.outtakePivotIn; // put claw arm in
                 } else {
@@ -304,13 +305,13 @@ public class CATeleOp extends OpMode {
 
         // Outtake Wrist Control
         clawWristPos += -gamepad2.left_stick_y * ControlConstants.outtakeWristSensitivity;
-        if(gamepad2.dpad_right){
+        if(gamepad2.circle){
             clawWristPos = ControlConstants.pickupOuttakeWrist;
             outtakeSlidePos = ControlConstants.minOuttakeSlidePos;
         }
         clawWristPos = Range.clip(clawWristPos, ControlConstants.outtakeWristBack, ControlConstants.outtakeWristForward);
         // Outtake Claw Control
-        if (clawAvailable.state && gamepad2.b) {
+        if (clawAvailable.state && gamepad2.dpad_right) {
             if (clawPos == ControlConstants.clawOpen) {
                 clawPos = ControlConstants.clawClosed;
             } else {
@@ -321,8 +322,8 @@ public class CATeleOp extends OpMode {
             GenericToggleThread thread = new GenericToggleThread(clawAvailable);
             thread.start();
         }
-        if(gamepad2.dpad_down) Intake.sideSpinIn().schedule();
-        else if(gamepad2.dpad_up) Intake.sideSpinOut().schedule();
+        if(gamepad2.cross) Intake.sideSpinIn().schedule();
+        else if(gamepad2.square) Intake.sideSpinOut().schedule();
         else Intake.sideSpinOff().schedule();
         // Update Motors/Servos
         if (!transferring.state) {
@@ -397,7 +398,7 @@ public class CATeleOp extends OpMode {
             }
         }
 
-        if (!manualOverride.state && gamepad2.square) {
+        if (!manualOverride.state && gamepad2.dpad_left) {
 //            transferring.state = true;
 //            transfer();
 //            transferring.state = false;

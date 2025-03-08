@@ -209,11 +209,11 @@ public class Claw implements Subsystem {
         return new Lambda("gamepad-wrist-move")
                 .setExecute(() -> {
                     Telemetry tel = FeatureRegistrar.getActiveOpMode().telemetry;
-                    tel.addData("Wiper target pos", modifier.state());
+                    tel.addData("Wrist modifier pos", modifier.state());
                     tel.update();
-                    double target = Range.clip(wristPosition.get() + ControlConstants.outtakeWristSensitivity * modifier.state(), ControlConstants.outtakeWristBack, ControlConstants.outtakeWristForward);
+                    double target = Range.clip(wristPosition.get() + ControlConstants.outtakeWristSensitivity * modifier.state(), ControlConstants.outtakeWristForward, ControlConstants.outtakeWristBack);
                     wristPosition.accept(target);
-                    wrist.setPosition(wristPosition.get());
+                    wrist.setPosition(target);
                 })
                 .setFinish(() -> Math.abs(modifier.state()) <= 0.05)
                 .addRequirements(wrist)

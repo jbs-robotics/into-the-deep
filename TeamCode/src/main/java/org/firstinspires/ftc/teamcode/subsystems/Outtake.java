@@ -46,7 +46,7 @@ public class Outtake implements Subsystem {
 
     public static TouchSensor outLimit;
     public static final int SLIDE_TOLERANCE = 50;
-    public static RefCell<Integer> slidePos = new RefCell<Integer>(ControlConstants.minOuttakeSlidePos);
+    public static RefCell<Integer> slidePos;
 
     private Outtake() {}
 
@@ -85,8 +85,9 @@ public class Outtake implements Subsystem {
         slideRight.setDirection(DcMotorSimple.Direction.REVERSE);
         slideLeft.setPower(1);
         slideRight.setPower(1);
-        slideLeft.setTargetPosition(ControlConstants.minOuttakeSlidePos);
-        slideRight.setTargetPosition(ControlConstants.minOuttakeSlidePos);
+        slidePos = new RefCell<Integer>(ControlConstants.minOuttakeSlidePos);
+        slideLeft.setTargetPosition(slidePos.get());
+        slideRight.setTargetPosition(slidePos.get());
         setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //        servo = hardwareMap.get(Servo.class, "outServo");
     }
@@ -160,8 +161,9 @@ public class Outtake implements Subsystem {
     public static Lambda slideTo(int encoderPos) {
         return new Lambda("slide-to")
                 .setInit(() -> {
-                    slideLeft.setTargetPosition(encoderPos);
-                    slideRight.setTargetPosition(encoderPos);
+                    slidePos.accept(Range.clip(encoderPos, ControlConstants.maxOuttakeSlidePos, ControlConstants.minOuttakeSlidePos));
+                    slideLeft.setTargetPosition(slidePos.get());
+                    slideRight.setTargetPosition(slidePos.get());
                     slideLeft.setPower(1);
                     slideRight.setPower(1);
                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -181,10 +183,8 @@ public class Outtake implements Subsystem {
                 ;
 
     }
-    public static Lambda incrementSlides(double amt){
-        slidePos.accept(slidePos.get() + (int)amt);
-        slidePos.accept(Range.clip(slidePos.get(), ControlConstants.maxOuttakeSlidePos, ControlConstants.minOuttakeSlidePos));
-        return slideTo(slidePos.get());
+    public static Lambda incrementSlides(int amt){
+        return slideTo(slidePos.get() + amt);
     }
 
     public static Lambda gamepadSlides(BoundDoubleSupplier modifier) {
@@ -212,15 +212,16 @@ public class Outtake implements Subsystem {
                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 })
                 .setFinish(() -> Math.abs(modifier.state()) <= 0.05)
+//                .setFinish(() -> false)
                 ;
     }
 
     public static Lambda slideOut() {
-        return slideTo(-4000);
+        return slideTo(ControlConstants.maxOuttakeSlidePos);
     }
 
     public static Lambda slideIn() {
-        return slideTo(-10);
+        return slideTo(ControlConstants.minOuttakeSlidePos);
     }
 
 }

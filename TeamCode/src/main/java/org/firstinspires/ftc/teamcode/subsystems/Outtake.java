@@ -161,9 +161,10 @@ public class Outtake implements Subsystem {
     public static Lambda slideTo(int encoderPos) {
         return new Lambda("slide-to")
                 .setInit(() -> {
-                    slidePos.accept(Range.clip(encoderPos, ControlConstants.maxOuttakeSlidePos, ControlConstants.minOuttakeSlidePos));
-                    slideLeft.setTargetPosition(slidePos.get());
-                    slideRight.setTargetPosition(slidePos.get());
+                    int target = Range.clip(encoderPos, ControlConstants.maxOuttakeSlidePos, ControlConstants.minOuttakeSlidePos);
+                    slidePos.accept(target);
+                    slideLeft.setTargetPosition(target);
+                    slideRight.setTargetPosition(target);
                     slideLeft.setPower(1);
                     slideRight.setPower(1);
                     setMode(DcMotor.RunMode.RUN_TO_POSITION);

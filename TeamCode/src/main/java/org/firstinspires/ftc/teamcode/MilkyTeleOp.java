@@ -114,13 +114,14 @@ public class MilkyTeleOp extends OpMode {
                         Intake.slideTo(ControlConstants.transferIntakeSlidePos),
                         Claw.elbowTo(ControlConstants.transferOuttakePivotPos),
                         Claw.wristTo(ControlConstants.transferOuttakeWristPos),
-                        Outtake.slideTo(ControlConstants.transferOuttakeSlidePos),
+                        Outtake.slideTo(ControlConstants.transferOuttakeSlidePos-600).setFinish(() ->  true),
                         Claw.openClaw()
                 ),
-                new Wait(0.8),
+                new Wait(0.4),
+                Outtake.slideTo(ControlConstants.transferOuttakeSlidePos),
                 Claw.closeClaw(),
                 new Wait(0.2),
-                Outtake.incrementSlides(-200)
+                Outtake.incrementSlides(-400)
         );
     }
 }

@@ -38,6 +38,7 @@ import com.pedropathing.localization.Pose;
 import com.pedropathing.pathgen.BezierLine;
 import com.pedropathing.pathgen.PathChain;
 import com.pedropathing.pathgen.Point;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -90,7 +91,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 
 @TeleOp(name="Pedro TeleOp", group="Linear OpMode")
-//@Disabled
+@Disabled
 // Attach Mercurial and all subsystems
 @Mercurial.Attach
 @Claw.Attach

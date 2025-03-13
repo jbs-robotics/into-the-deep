@@ -28,8 +28,8 @@ public class Paths {
     public static Point specToPlow2Control2 = new Point(58, 15);
     public static Point specPlow2Control1 = new Point(14, 15);
     public static Point specToPlow3Control1 = new Point(60, 18);
-    public static Point specToPlow3Control2 = new Point(58, 11);
-    public static Point specPlow3Control1 = new Point(14, 11);
+    public static Point specToPlow3Control2 = new Point(58, 10);
+    public static Point specPlow3Control1 = new Point(14, 10);
     public static Point specGrabPickup1Pose = new Point(25, 11);
     
     public static Point specScorePickup1Control2 = new Point(10, 79.4598);

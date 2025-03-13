@@ -85,11 +85,11 @@ public class Intake implements Subsystem {
     @Override
     public void preUserInitHook(@NonNull Wrapper opMode) {
         Telemetry telemetry = opMode.getOpMode().telemetry;
-        slidePosition = new RefCell<>(ControlConstants.intakeSlideIn);
         HardwareMap hardwareMap = opMode.getOpMode().hardwareMap;
 
         slideLeft = hardwareMap.get(Servo.class, "ISL");
         slideRight = hardwareMap.get(Servo.class, "ISR");
+        slidePosition = new RefCell<>(ControlConstants.intakeSlideIn);
         slideLeft.setDirection(Servo.Direction.FORWARD);
         slideRight.setDirection(Servo.Direction.REVERSE);
         slideLeft.setPosition(slidePosition.get());
@@ -168,6 +168,7 @@ public class Intake implements Subsystem {
     public static Lambda slideTo(double target) {
         return new Lambda("intake-slide-to")
                 .setInit(() -> {
+                    slidePosition.accept(target);
                     slideLeft.setPosition(target);
                     slideRight.setPosition(target);
                 })
@@ -270,17 +271,17 @@ public class Intake implements Subsystem {
                 .setFinish(() -> slidePosition.get() <= ControlConstants.intakeSlideOut || slidePosition.get() >= ControlConstants.intakeSlideIn)
                 .setInterruptible(true);
     }
-    public static Lambda pushSlidesOut(double sens, double amt) {
+    public static Lambda pushSlidesOut(double sens, double end) {
         return new Lambda("push-intake-slides-out")
                 .setExecute(() -> {
-                    double target = Range.clip(slidePosition.get() - sens, ControlConstants.intakeSlideOut, ControlConstants.intakeSlideIn);
+                    double target = Range.clip(slidePosition.get() - sens, end, ControlConstants.intakeSlideIn);
                     slidePosition.accept(target);
                     slideLeft.setPosition(target);
                     slideRight.setPosition(target);
                     FeatureRegistrar.getActiveOpMode().telemetry.addData("sens: ", sens);
                     FeatureRegistrar.getActiveOpMode().telemetry.addData("slide pos", slidePosition.get());
                 })
-                .setFinish(() -> slidePosition.get() <= amt || slidePosition.get() <= ControlConstants.intakeSlideOut)
+                .setFinish(() -> slidePosition.get() <= end || slidePosition.get() <= ControlConstants.intakeSlideOut || ControlConstants.intakeSlideIn <= slidePosition.get())
                 .setInterruptible(true);
     }
 

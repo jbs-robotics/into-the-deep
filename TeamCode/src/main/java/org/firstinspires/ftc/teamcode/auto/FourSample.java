@@ -19,6 +19,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.MilkyTeleOp;
 import org.firstinspires.ftc.teamcode.driveClasses.ControlConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Chassis;
 import org.firstinspires.ftc.teamcode.subsystems.Claw;
@@ -26,8 +27,10 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 
 import dev.frozenmilk.mercurial.Mercurial;
+import dev.frozenmilk.mercurial.commands.Command;
 import dev.frozenmilk.mercurial.commands.Lambda;
 import dev.frozenmilk.mercurial.commands.groups.Parallel;
+import dev.frozenmilk.mercurial.commands.groups.Race;
 import dev.frozenmilk.mercurial.commands.groups.Sequential;
 import dev.frozenmilk.mercurial.commands.util.Wait;
 import pedroPathing.constants.FConstants;
@@ -35,7 +38,7 @@ import pedroPathing.constants.LConstants;
 
 @Config
 //@Disabled
-@Autonomous(name = "4 Sample (Untested)", group = "Autonomous")
+@Autonomous(name = "4 Sample", group = "Autonomous")
 // Attach Mercurial and all subsystems
 @Mercurial.Attach
 @Chassis.Attach
@@ -58,8 +61,8 @@ public class FourSample extends OpMode {
      * Lets assume the Robot is facing the human player and we want to score in the bucket */
 
     // Target Points
-    private final Pose startPose = new Pose(9, 81, Math.toRadians(0));
-    private final Pose scorePose = new Pose(15, 128, Math.toRadians(-45));
+    private final Pose startPose = new Pose(9, 105, Math.toRadians(0));
+    private final Pose scorePose = new Pose(16, 127, Math.toRadians(-45));
 
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
@@ -87,51 +90,54 @@ public class FourSample extends OpMode {
                 .build();
 
         grabPickup1 = follower.pathBuilder()
-                .addPath(new BezierLine(
+                .addPath(new BezierCurve(
                         new Point(scorePose),
-                        new Point(28, 125)
+                        new Point(23, 121),
+                        new Point(32, 121)
                 ))
-                .setTangentHeadingInterpolation()
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .setZeroPowerAccelerationMultiplier(2.5)
                 .build();
 
         // Score Pickup PathChains
         scorePickup1 = follower.pathBuilder()
                 .addPath(new BezierLine(
-                        new Point(28, 125),
+                        new Point(32, 121),
                         new Point(scorePose)))
-                .setLinearHeadingInterpolation(Math.toRadians(-15), scorePose.getHeading())
+                .setLinearHeadingInterpolation(Math.toRadians(0), scorePose.getHeading())
                 .build();
 
         grabPickup2 = follower.pathBuilder()
                 .addPath(new BezierLine(
                         new Point(scorePose),
-                        new Point(30, 130)))
-                .setTangentHeadingInterpolation()
+                        new Point(28, 132)))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .setZeroPowerAccelerationMultiplier(2.5)
                 .build();
 
         scorePickup2 = follower.pathBuilder()
                 .addPath(new BezierLine(
-                        new Point(30, 130),
+                        new Point(28, 132),
                         new Point(scorePose)))
-                .setLinearHeadingInterpolation(Math.toRadians(-27), scorePose.getHeading())
+                .setLinearHeadingInterpolation(Math.toRadians(0), scorePose.getHeading())
                 .build();
 
         grabPickup3 = follower.pathBuilder()
-                .addPath(new BezierCurve(
+                .addPath(new BezierLine(
                         new Point(scorePose),
-                        new Point(21, 121),
-                        new Point(30, 130)
+                        new Point(30, 131)
                 ))
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(37))
                 .build();
         scorePickup3 = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                        new Point(30, 130),
-                        new Point(21, 121),
+                .addPath(new BezierLine(
+                        new Point(30, 131),
+//                        new Point(21, 121),
                         new Point(scorePose)
                 ))
-                .setTangentHeadingInterpolation()
-                .setReversed(true)
+                .setLinearHeadingInterpolation(Math.toRadians(45), scorePose.getHeading() + Math.toRadians(5))
+                .setZeroPowerAccelerationMultiplier(2.5)
+//                .setReversed(true)
                 .build();
 
         park = new Path(new BezierCurve(
@@ -199,132 +205,120 @@ public class FourSample extends OpMode {
     public void start() {
         opmodeTimer.resetTimer();
         setPathState(0);
-        new Parallel(
-                new Lambda("checkSlides").setInit(() -> {
-                }).setExecute(() -> {
-                    if (Outtake.outLimit.isPressed() && (Outtake.slideLeft.getTargetPosition() > Outtake.slideLeft.getCurrentPosition())) {
-                        Outtake.resetEncoders();
-                        Outtake.slideTo(-300);
-                        telemetryA.addLine("Encoders reset");
-                    }
-                    telemetryA.update();
-                }).setFinish(() -> {
-                    return finished;
-                }),
+        new Sequential(
+
+                // Start Movement (case 0)
                 new Sequential(
-
-                        // Start Movement (case 0)
-                        new Sequential(
-                                new Parallel(
-                                        Claw.closeClaw(),
-                                        Outtake.slideTo(ControlConstants.highBasketSlidePos),
-                                        Claw.elbowOut(),
-                                        Chassis.followPath(scorePreload, true)
-                                )
-                        ),
-
-                        // Score Preload (case 1)
-                        new Sequential(
-                                new Parallel(
-                                        Chassis.followPath(grabPickup1, 1),
-                                        new Parallel(
-                                                Intake.pushSlidesOut(ControlConstants.autoIntakeSlideSens),
-                                                Intake.sideSpinIn()
-                                        ),
-                                        new Wait(0.5),
-                                        //Transfer here
-                                        new Sequential(
-                                                Intake.slideIn(),
-                                                Intake.elbowTo(ControlConstants.transferIntakePivotPos),
-                                                Claw.elbowTo(ControlConstants.transferOuttakePivotPos),
-                                                Claw.wristTo(ControlConstants.transferOuttakeWristPos),
-                                                Outtake.slideTo(ControlConstants.transferOuttakeSlidePos),
-                                                Outtake.slideTo(ControlConstants.transferOuttakeSlidePos),
-                                                Claw.closeClaw()
-                                        )
-                                )
-                        ),
-                        // Grab specimen 2
-                        new Sequential(
-                                /* Grab the Specimen Here */
-                                new Parallel(
-                                        Chassis.followPath(scorePickup1, 1),
-                                        new Parallel(
-                                                Outtake.slideTo(ControlConstants.highBasketSlidePos),
-                                                Claw.elbowOut()
-                                        )
-                                )
-                        ),
-
-                        // Score specimen 2 and move to pickup (case 5)
-                        new Sequential(
-                                Outtake.outtakeSample(),
-                                new Parallel(
-                                        Chassis.followPath(grabPickup2, 1),
-                                        new Sequential(
-                                                new Wait(0.5),
-                                                Outtake.slideTo(-200)
-                                        )
-                                )
-                        ),
-
-                        // Grab specimen 3 (case 6)
-                        new Sequential(
-                                new Wait(0.4),
-                                Claw.closeClaw(),
-                                Intake.sideSpinOff(),
-                                new Parallel(
-                                        Chassis.followPath(scorePickup2, true),
-                                        Outtake.slideTo(-1070),
-                                        Claw.elbowOut()
-                                )
-                        ),
-
-                        // Score specimen 3 and move to pickup (case 5)
-                        new Sequential(
-                                Outtake.outtakeSample(),
-                                new Parallel(
-                                        Chassis.followPath(grabPickup3, 1),
-                                        new Sequential(
-                                                new Wait(0.5),
-                                                Outtake.slideTo(-200)
-                                        )
-                                )
-                        ),
-
-                        // Grab specimen 4 (case 6)
-                        new Sequential(
-                                new Wait(0.4),
-                                Claw.closeClaw(),
-                                Intake.sideSpinOff(),
-                                new Parallel(
-                                        Chassis.followPath(scorePickup3, 1),
-                                        Outtake.slideTo(-1070),
-                                        Claw.elbowOut()
-                                )
-                        ),
-
-                        // Score specimen 4 (case 7)
-                        new Sequential(
-                                Outtake.outtakeSample(),
-                                new Parallel(
-//                                    Claw.elbowTo(0.86), // pulls outtake to a salute
-                                        Claw.elbowIn(), // pulls outtake down
-                                        Chassis.followPath(park, true),
-                                        new Sequential(
-                                                new Wait(0.5),
-                                                Outtake.slideTo(-300)
-                                        )
-                                ),
-                                new Lambda("finish").setInit(() -> {
-                                    finished = true;
-                                })
-
-
+                        new Parallel(
+                                Outtake.slideOut(),
+                                Claw.elbowOut(),
+                                Claw.wristBack(),
+                                Chassis.followPath(scorePreload, true)
                         )
+                ),
+
+                // Score Preload (case 1)
+                new Sequential(
+                        Claw.openClaw(),
+                        new Parallel(
+                                Claw.elbowIn(),
+                                Intake.elbowOut(),
+                                Intake.sideSpinIn(),
+                                Chassis.followPath(grabPickup1, true)
+                        ),
+                        Intake.pushSlidesOut(ControlConstants.autoIntakeSlideSens, (ControlConstants.intakeSlideIn - ControlConstants.intakeSlideOut) / 2.0),
+                        Intake.sideSpinOff(),
+                        transfer(),
+                        Outtake.slideTo(ControlConstants.highBasketSlidePos),
+                        Claw.elbowOut(),
+                        Claw.wristBack()
+                ),
+                // Grab specimen 2
+                new Sequential(
+                        /* Grab the Specimen Here */
+                        Chassis.followPath(scorePickup1, true),
+                        Claw.openClaw(),
+                        new Wait(0.3),
+                        Claw.elbowIn(),
+                        new Wait(0.3),
+                        Outtake.slideIn()
+                ),
+
+                // Score specimen 2 and move to pickup (case 5)
+                new Sequential(
+                        new Parallel(
+                                Chassis.followPath(grabPickup2, true),
+                                Intake.elbowOut(),
+                                Intake.sideSpinIn()
+                        ),
+                        Intake.pushSlidesOut(ControlConstants.autoIntakeSlideSens, (ControlConstants.intakeSlideIn - ControlConstants.intakeSlideOut) / 2.0)
+                ),
+                // Grab specimen 3 (case 6)
+                new Sequential(
+                        Intake.sideSpinOff(),
+                        new Wait(0.3),
+                        transfer(),
+                        Outtake.slideTo(ControlConstants.highBasketSlidePos),
+                        new Parallel(
+                                Chassis.followPath(scorePickup2, true),
+                                Claw.elbowOut(),
+                                Claw.wristBack(),
+                                Intake.elbowOut(),
+                                Intake.sideSpinIn()
+                        )
+                ),
+
+                // Score specimen 3 and move to pickup (case 5)
+                new Sequential(
+                        Claw.openClaw(),
+                        new Wait(0.3),
+                        Claw.elbowIn(),
+                        Outtake.slideIn(),
+                        Chassis.followPath(grabPickup3, true),
+//                        Intake.pushSlidesOut(ControlConstants.autoIntakeSlideSens),
+                        Intake.pushSlidesOut(ControlConstants.autoIntakeSlideSens, (ControlConstants.intakeSlideIn - ControlConstants.intakeSlideOut) / 2.0),
+                        new Wait(0.3),
+                        Intake.sideSpinOff(),
+//                        new Race(
+//                                new Wait(0.5),
+                        transfer()
+//                        )
+                ),
+
+                // Grab specimen 4 (case 6)
+                new Sequential(
+//                        Intake.elbowOut(),
+                        Outtake.slideTo(ControlConstants.highBasketSlidePos),
+                        new Parallel(
+                                Chassis.followPath(scorePickup3, true),
+                                Claw.elbowOut(),
+                                Claw.wristBack()
+                        ),
+                        Chassis.holdPoint(scorePose),
+                        new Wait(0.3),
+                        Claw.openClaw(),
+                        Claw.elbowIn()
+                ),
+
+                // Score specimen 4 (case 7)
+                new Sequential(
+                        new Parallel(
+                                Chassis.followPath(park, true),
+                                new Sequential(
+                                        new Wait(0.5),
+                                        Outtake.slideTo(-300),
+                                        Claw.elbowOut(),
+                                        Claw.wristBack()
+                                )
+                        ),
+                        new Lambda("finish").setInit(() -> {
+                            finished = true;
+                        })
+
+
                 )
-        )
-                .schedule();
+
+        ).schedule();
 
 
     }
@@ -338,16 +332,21 @@ public class FourSample extends OpMode {
         checkSlides.interrupt();
     }
 
-    public Sequential transfer() {
+    public Command transfer() {
         return new Sequential(
-                Intake.slideIn(),
                 new Parallel(
-                        Claw.elbowIn(),
+                        Intake.elbowTo(ControlConstants.transferIntakePivotPos),
+                        Intake.slideTo(ControlConstants.transferIntakeSlidePos),
+                        Claw.elbowTo(ControlConstants.transferOuttakePivotPos),
+                        Claw.wristTo(ControlConstants.transferOuttakeWristPos),
+                        Outtake.slideTo(ControlConstants.transferOuttakeSlidePos - 600).setFinish(() -> true),
                         Claw.openClaw()
                 ),
-                Intake.sideSpinOut(),
+                new Wait(0.7),
+                Outtake.slideTo(ControlConstants.transferOuttakeSlidePos),
+                Claw.closeClaw(),
                 new Wait(0.3),
-                Claw.closeClaw()
+                Outtake.incrementSlides(-400)
         );
     }
 

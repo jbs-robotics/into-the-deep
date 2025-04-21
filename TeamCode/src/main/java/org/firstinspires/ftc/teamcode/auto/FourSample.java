@@ -226,7 +226,7 @@ public class FourSample extends OpMode {
                                 Intake.sideSpinIn(),
                                 Chassis.followPath(grabPickup1, true)
                         ),
-                        Intake.pushSlidesOut(ControlConstants.autoIntakeSlideSens, (ControlConstants.intakeSlideIn - ControlConstants.intakeSlideOut) / 2.0),
+                        Intake.pushSlidesOut(ControlConstants.autoIntakeSlideSens, (ControlConstants.intakeSlideIn - ControlConstants.intakeSlideOut) / 3.0),
                         Intake.sideSpinOff(),
                         transfer(),
                         Outtake.slideTo(ControlConstants.highBasketSlidePos),
@@ -276,7 +276,7 @@ public class FourSample extends OpMode {
                         Outtake.slideIn(),
                         Chassis.followPath(grabPickup3, true),
 //                        Intake.pushSlidesOut(ControlConstants.autoIntakeSlideSens),
-                        Intake.pushSlidesOut(ControlConstants.autoIntakeSlideSens, (ControlConstants.intakeSlideIn - ControlConstants.intakeSlideOut) / 2.0),
+                        Intake.pushSlidesOut(ControlConstants.autoIntakeSlideSens, (ControlConstants.intakeSlideIn - ControlConstants.intakeSlideOut) / 3.0),
                         new Wait(0.3),
                         Intake.sideSpinOff(),
 //                        new Race(

@@ -99,6 +99,7 @@ public class Intake implements Subsystem {
         rElbow = hardwareMap.get(Servo.class, "inR");
         lElbow.setDirection(Servo.Direction.REVERSE);
         elbowPosition = new RefCell<Double>(ControlConstants.intakePivotOut);
+        elbowPosition.accept(ControlConstants.intakePivotOut);
         lElbow.setPosition(elbowPosition.get());
         rElbow.setPosition(elbowPosition.get());
 

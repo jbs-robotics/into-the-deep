@@ -12,9 +12,9 @@ public class ControlConstants {
 
 
     // intake constants
-    public static double intakeSlideSensitivity = 0.0047;
+    public static double intakeSlideSensitivity = 0.003;
     public static double intakePivotSensitivity = 0.025;
-    public static double intakePivotOut = 0.99;
+    public static double intakePivotOut = 0.85;
     public static double intakePivotIn = 0;
     public static double intakeSlideIn = 0.67;
     public static double intakeSlideOut = 0.19;

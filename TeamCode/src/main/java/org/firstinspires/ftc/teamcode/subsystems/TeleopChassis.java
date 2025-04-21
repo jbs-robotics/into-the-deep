@@ -59,6 +59,10 @@ public class TeleopChassis extends SDKSubsystem {
 
     @Override
     public void preUserInitHook(@NonNull Wrapper opMode) {
+        leftFront.get().setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftBack.get().setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightFront.get().setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightBack.get().setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftFront.get().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBack.get().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.get().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

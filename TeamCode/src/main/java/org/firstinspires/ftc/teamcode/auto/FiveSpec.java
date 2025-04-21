@@ -98,8 +98,7 @@ public class FiveSpec extends OpMode {
         toPlow = follower.pathBuilder()
                 // First spike Mark
                 .addPath(new BezierCurve(
-                        new Point(scorePose),
-
+                        new Point(Paths.specScorePose.getX(), Paths.specScorePose.getY()+2),
                         Paths.specToPlowControl1,
                         new Point(Paths.specToPlowControl2),
                         new Point(Paths.specToPlowControl3),
@@ -185,16 +184,9 @@ public class FiveSpec extends OpMode {
                 .build();
         // Score Pickup PathChains
         scorePickup1 = follower.pathBuilder()
-//                .addPath(new BezierLine(
-//                        new Point(Paths.pickupPose),
-//                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 2))))
-//                .setConstantHeadingInterpolation(Math.toRadians(180))
-
                 .addPath(new BezierLine(
                         new Point(new Pose(Paths.specScorePose.getX() - 10, Paths.specScorePose.getY() - 4)),
                         new Point(new Pose(Paths.specScorePose.getX() + 1, Paths.specScorePose.getY() - 4))))
-//                .setTangentHeadingInterpolation()
-//                .setReversed(true)
                 .setConstantHeadingInterpolation(Paths.specScorePose.getHeading())
 
                 .setZeroPowerAccelerationMultiplier(7)
@@ -208,15 +200,6 @@ public class FiveSpec extends OpMode {
                         new Point(Paths.pickupPose.getX() - 1, Paths.pickupPose.getY())
                 ))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
-//
-//                .addPath(new BezierCurve(
-//                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 2)),
-//                        new Point(9, 77.5),
-//                        new Point(40, 35),
-//                        new Point(Paths.pickupPose)
-//                ))
-//                .setTangentHeadingInterpolation()
-
                 .setZeroPowerAccelerationMultiplier(3)
 //                .setPathEndTimeoutConstraint(100)
                 .build();
@@ -227,15 +210,6 @@ public class FiveSpec extends OpMode {
                         new Point(Paths.pickupPose.getX() - 0, Paths.pickupPose.getY()),
                         new Point(Paths.specScorePose.getX(), Paths.specScorePose.getY() - 4)))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
-//
-//                .addPath(new BezierCurve(
-//                        new Point(Paths.pickupPose),
-//                        new Point(40, 35),
-//                        new Point(9, 74.5),
-//                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 4))))
-//                .setTangentHeadingInterpolation()
-//                .setReversed(true)
-
                 .setZeroPowerAccelerationMultiplier(7)
                 .setPathEndTimeoutConstraint(50)
                 .build();
@@ -245,17 +219,7 @@ public class FiveSpec extends OpMode {
                         new Point(scorePose.getX(), scorePose.getY() - 4),
                         new Point(Paths.pickupPose.getX() - 1, Paths.pickupPose.getY())))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
-
-//                .addPath(new BezierCurve(
-//                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 4)),
-//                        new Point(9, 74.5),
-//                        new Point(40, 35),
-//                        new Point(Paths.pickupPose)
-//                ))
-//                .setTangentHeadingInterpolation()
-
                 .setZeroPowerAccelerationMultiplier(3)
-//                .setPathEndTimeoutConstraint(100)
                 .build();
 
 
@@ -264,15 +228,6 @@ public class FiveSpec extends OpMode {
                         new Point(Paths.pickupPose.getX() - 1, Paths.pickupPose.getY()),
                         new Point(new Pose(Paths.specScorePose.getX() - 1, Paths.specScorePose.getY() - 6))))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
-//
-//                .addPath(new BezierCurve(
-//                        new Point(Paths.pickupPose),
-//                        new Point(40, 35),
-//                        new Point(9, 72.5),
-//                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 6))))
-//                .setTangentHeadingInterpolation()
-//                .setReversed(true)
-
                 .setZeroPowerAccelerationMultiplier(7)
                 .setPathEndTimeoutConstraint(50)
                 .build();
@@ -282,15 +237,6 @@ public class FiveSpec extends OpMode {
                         new Point(Paths.specScorePose.getX() - 1, Paths.specScorePose.getY() - 6),
                         new Point(Paths.pickupPose.getX() - 2, Paths.pickupPose.getY())))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
-//
-//                .addPath(new BezierCurve(
-//                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 6)),
-//                        new Point(9, 72.5),
-//                        new Point(40, 35),
-//                        new Point(Paths.pickupPose)
-//                ))
-//                .setTangentHeadingInterpolation()
-
                 .setZeroPowerAccelerationMultiplier(3)
                 .setPathEndTimeoutConstraint(300)
                 .build();
@@ -298,16 +244,12 @@ public class FiveSpec extends OpMode {
         scorePickup4 = follower.pathBuilder()
                 .addPath(new BezierLine(
                         new Point(Paths.pickupPose.getX() - 2, Paths.pickupPose.getY() + 2),
+                        new Point(new Pose(Paths.specScorePose.getX() - 4, Paths.specScorePose.getY() - 10))))
+                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .addPath(new BezierLine(
+                        new Point(new Pose(Paths.specScorePose.getX() - 4, Paths.specScorePose.getY() - 10)),
                         new Point(new Pose(Paths.specScorePose.getX(), Paths.specScorePose.getY() - 8))))
                 .setConstantHeadingInterpolation(Math.toRadians(180))
-
-//                .addPath(new BezierCurve(
-//                        new Point(Paths.pickupPose),
-//                        new Point(40, 35),
-//                        new Point(9, 70.5),
-//                        new Point(new Pose(scorePose.getX(), scorePose.getY() - 8))))
-//                .setTangentHeadingInterpolation()
-//                .setReversed(true)
 
                 .setZeroPowerAccelerationMultiplier(7)
                 .setPathEndTimeoutConstraint(100)
@@ -431,11 +373,14 @@ public class FiveSpec extends OpMode {
                                 Claw.wristTo(ControlConstants.pickupOuttakeWrist),
                                 Claw.closeClaw(),
                                 new Wait(0.1),
-                                new Parallel(
+                                new Race(
+                                    new Wait(2),
+                                    new Parallel(
                                         Chassis.followPath(scorePickup1, 1),
                                         Claw.elbowOut(),
                                         Outtake.slideTo(ControlConstants.highChamberSlidePos),
                                         Claw.wristBack()
+                                    )
                                 )
                         ),
 
